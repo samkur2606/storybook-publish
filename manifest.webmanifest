@@ -1,0 +1,19 @@
+{
+  "name": "Mein Bücherregal",
+  "short_name": "Bücherregal",
+  "description": "Kinderbücher online entdecken und offline lesen",
+  "lang": "de",
+  "start_url": "./Mein_Buecherregal_V17.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#17131c",
+  "theme_color": "#21182b",
+  "icons": [
+    {
+      "src": "./icons/book.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
