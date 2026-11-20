@@ -1,8 +1,8 @@
 # Mein Bücherregal — Published PWA
 
-This **public repository contains only the static application files** used for the permanently hosted bookshelf PWA. Source development happens in the private `samkur2606/storybook-library` repository. The books, catalog, and original release ZIPs remain in the separate private `samkur2606/storybook-books` repository.
+This **public repository contains only the static application files** used for the permanently hosted bookshelf PWA. Source development happens in the private `samkur2606/storybook-app` repository. The books, catalog, and original release ZIPs remain in the separate private `samkur2606/storybook-books` repository.
 
-**App website:** https://samkur2606.github.io/storybook-app/
+**App website:** https://samkur2606.github.io/storybook-publish/
 
 The app's visible interface and the books are in German. GitHub documentation and deployment commits are in English.
 
