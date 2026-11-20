@@ -1,6 +1,6 @@
 <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#21182b"><title>Mein Bücherregal V17</title><link rel="manifest" href="./manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><style>
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,sans-serif;background:#17131c;color:#fff}button{cursor:pointer;font:inherit}header{padding:28px 20px 12px;max-width:900px;margin:auto}h1{font-family:Georgia,serif;font-size:30px;margin:0 0 6px}p{color:#c6bfc9;line-height:1.5}main{max-width:900px;margin:auto;padding:12px 20px 100px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 24px}.btn{border:1px solid #75667e;border-radius:14px;background:#31253b;color:white;padding:12px 16px}.btn.primary{background:#a16eb3;border-color:#a16eb3;color:#140b1c;font-weight:700}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:18px}.book{border:1px solid #53455a;background:#251d2c;border-radius:18px;padding:10px;text-align:left;overflow:hidden}.book img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:11px}.book strong{display:block;padding:9px 2px 2px;color:#fff}.book small{color:#bcb1c3}
-/* Kompakte, einheitliche Seiten- und Lesedauer-Metadaten im Bücherregal. */
+/* Compact, consistent page-count and reading-time metadata. */
 .book-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:5px 2px 1px;color:#d1c2da;font-size:12px;text-align:left}
 .book-meta-item{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;line-height:1.4}
 .book-meta-item svg{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.empty{padding:35px;border:1px dashed #75667e;border-radius:16px;color:#ccc}#reader{display:none;position:fixed;inset:0;z-index:10;background:#140f18}#reader.open{display:block}.viewport{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}.sheet{position:relative;min-height:100%;display:flex;justify-content:center;align-items:flex-start}.sheet img{display:block;width:100%;height:auto;max-width:900px;user-select:none;-webkit-user-drag:none}.toolbar{position:fixed;z-index:12;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center;padding:8px 12px;border-radius:40px;background:#1b1326dd;backdrop-filter:blur(12px);white-space:nowrap}.toolbar button,.exit{background:#35273e;color:white;border:1px solid #6c5974;border-radius:50%;width:44px;height:44px;font-size:21px}.toolbar button:disabled{opacity:.35}.exit{position:fixed;z-index:13;top:calc(12px + env(safe-area-inset-top));left:12px}#reader.hide-controls .toolbar,#reader.hide-controls .exit{display:none}.reader-title{position:fixed;top:calc(12px + env(safe-area-inset-top));left:68px;z-index:12;padding:10px 15px;border-radius:30px;background:#1b1326c9;font-size:13px;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}#reader.hide-controls .reader-title{display:none}.hint{font-size:13px}.menu{display:none;margin-top:12px;gap:8px;flex-wrap:wrap}.menu.show{display:flex}
@@ -30,12 +30,11 @@
 #cancelDownload{margin-top:14px;border:0;background:transparent;color:#d7c8df;padding:10px;width:100%}
 .menu button{display:inline-flex;align-items:center;justify-content:center}
 .menu button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-input[type=file]{display:none}
 
 .book-holder{position:relative;min-width:0}.book-holder .book{display:block;width:100%;height:100%;cursor:pointer}.book-options{position:absolute;top:17px;right:17px;width:37px;height:37px;border:1px solid #ffffff66;border-radius:50%;background:#1b1326e8;color:#fff;font-size:25px;line-height:1;display:grid;place-items:center;z-index:2;box-shadow:0 2px 10px #0008}.book-options:focus-visible{outline:3px solid #d8b1e7}.book-actions{position:absolute;top:59px;right:12px;z-index:3;background:#31253b;border:1px solid #75667e;border-radius:12px;padding:5px;box-shadow:0 8px 25px #000a}.book-actions[hidden]{display:none}.book-actions button{background:transparent;border:0;color:#ffd5d5;padding:11px 13px;white-space:nowrap;font-size:14px}.book-actions button:active{background:#ffffff16}#deleteDialog{border:1px solid #705c7b;border-radius:20px;background:#24192e;color:white;padding:23px;width:min(390px,calc(100vw - 32px));box-shadow:0 20px 65px #0009}#deleteDialog::backdrop{background:#000b}#deleteDialog h2{font-size:21px;margin:0 0 12px}#deleteDialog p{font-size:14px;margin:0 0 12px}#deleteDialog .delete-notice{background:#372942;border-radius:12px;padding:13px;color:#e8dbe9;font-size:14px;line-height:1.5}#deleteDialog .delete-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}#deleteDialog button{border-radius:11px;padding:11px 14px;border:1px solid #806e89;background:#35283e;color:#fff}#deleteDialog #confirmDelete{background:#b44758;border-color:#b44758;font-weight:650}#deleteDialog button:disabled{opacity:.5}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .search-area{margin:0 0 20px}.search-wrap{display:flex;align-items:center;gap:10px;background:#2a2032;border:1px solid #65546f;border-radius:15px;padding:0 14px;min-height:49px}.search-wrap:focus-within{border-color:#b48ac5;box-shadow:0 0 0 2px #b48ac533}.search-wrap svg{flex:none;color:#c9b5d2}.search-wrap input{width:100%;background:transparent;color:#fff;border:0;outline:0;font:inherit;font-size:16px;padding:13px 0}.search-wrap input::placeholder{color:#a99bb0}.clear-search{border:0;background:transparent;color:#cbbbd4;font-size:24px;padding:4px 2px;line-height:1}.search-meta{font-size:12px;color:#a99bb0;padding:8px 3px 0;min-height:25px}.search-empty{grid-column:1/-1;padding:28px 16px;border:1px dashed #75667e;border-radius:16px;text-align:center;color:#ddd}.search-empty strong{display:block;margin-bottom:6px}.search-empty small{color:#bcb1c3}.book[hidden]{display:none!important}
-header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#settingsBtn{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;border:1px solid #ffffff38;background:#ffffff13;color:white}#settingsDialog,#resetDialog{border:1px solid #705c7b;border-radius:20px;background:#24192e;color:white;padding:23px;width:min(390px,calc(100vw - 32px));box-shadow:0 20px 65px #0009}#settingsDialog::backdrop,#resetDialog::backdrop{background:#000b}#settingsDialog h2,#resetDialog h2{margin:0 0 12px;font-size:21px}#settingsDialog p,#resetDialog p{font-size:14px;color:#e8dbe9} .settings-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap}.settings-actions button{border-radius:11px;padding:11px 14px;border:1px solid #806e89;background:#35283e;color:white}.settings-actions .danger{background:#b44758;border-color:#b44758}.settings-actions button:disabled{opacity:.5}#resetStatus{min-height:20px;font-size:13px;color:#eac7f4}#loadBooks{display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:14px;border:1px solid #ffffff38;background:#ffffff13;color:#fff;cursor:pointer}#loadBooks:active{background:#ffffff30}.empty{line-height:1.5}.empty p{font-size:14px;opacity:.8;max-width:290px;margin:10px auto 0}#file{display:none}
+header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#settingsBtn{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;border:1px solid #ffffff38;background:#ffffff13;color:white}#settingsDialog{border:1px solid #705c7b;border-radius:20px;background:#24192e;color:white;padding:23px;width:min(390px,calc(100vw - 32px));box-shadow:0 20px 65px #0009}#settingsDialog::backdrop{background:#000b}#settingsDialog h2{margin:0 0 12px;font-size:21px}#settingsDialog p{font-size:14px;color:#e8dbe9}.empty{line-height:1.5}.empty p{font-size:14px;opacity:.8;max-width:290px;margin:10px auto 0}
 
 /* V17: entire page always fits in available viewport; no vertical image scrolling */
 #reader{height:100dvh;overflow:hidden}
@@ -47,12 +46,12 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
 #reader:fullscreen.hide-controls .reader-title,#reader:-webkit-full-screen.hide-controls .reader-title{display:none!important}
 #reader:fullscreen .viewport,#reader:-webkit-full-screen .viewport{padding:0!important}
 #reader .toolbar{max-width:calc(100vw - 20px)}
-/* Vorschau: SVG der Doppelseiten-Schaltfläche pixelgenau zentrieren */
+/* Center the two-page view icon precisely. */
 #reader #spread{display:inline-flex;align-items:center;justify-content:center;padding:0}
 #reader #spread svg{display:block;width:22px;height:22px;flex:none}
 @media (orientation:portrait),(max-width:700px){#reader .sheet.spread img{max-width:100%}}
 
-/* ZIP-Import: sichtbarer Status mit animiertem Ladeindikator. */
+/* Online book downloads: progress overlay and loading indicator. */
 #importOverlay[hidden]{display:none!important}
 #importOverlay{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:20px;background:#100c17c9;backdrop-filter:blur(5px)}
 .import-panel{width:min(370px,100%);padding:26px 24px 22px;background:#2b2035;border:1px solid #776383;border-radius:22px;box-shadow:0 18px 70px #0009;color:#fff}
@@ -71,11 +70,46 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
 #importPercent{color:#f0d4ff;font-weight:700;font-variant-numeric:tabular-nums}
 @media(prefers-reduced-motion:reduce){.import-spinner{animation:none}#importProgress::-webkit-progress-value{transition:none}}
 
+/* GitHub account settings: touch-friendly controls and readable states. */
+#settingsDialog{width:min(450px,calc(100vw - 32px));max-height:min(88dvh,760px);overflow-y:auto;padding:24px;color:#fff}
+#settingsDialog .settings-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:24px}
+#settingsDialog .settings-eyebrow{color:#c3a2d2;font-size:10px;letter-spacing:.16em;font-weight:750}
+#settingsDialog h2{font-size:24px;margin:4px 0 0}
+#settingsDialog .settings-close{flex:none;width:38px;height:38px;border-radius:12px;border:1px solid #6a5677;background:#382a43;color:#f6eafa;font-size:27px;line-height:1}
+#githubSettings{border:1px solid #594568;border-radius:18px;padding:19px;background:#2d2137}
+.github-settings-title{display:flex;align-items:center;gap:12px}
+.github-settings-icon{width:43px;height:43px;flex:none;display:grid;place-items:center;border-radius:13px;background:#503a60;font-size:21px}
+#githubSettings h3{font-size:17px;line-height:1.35;margin:0 0 3px}
+#settingsDialog .github-settings-subtitle{font-size:12px;line-height:1.4;color:#c9b6d3;margin:0}
+.github-connection{display:flex;align-items:center;gap:9px;margin:19px 0 22px;padding:11px 13px;border:1px solid #695774;border-radius:12px;background:#251a2e;color:#d5c6dc;font-size:13px}
+.github-connection-dot{width:8px;height:8px;flex:none;border-radius:50%;background:#ae9eb7}
+.github-connection[data-connected="true"]{border-color:#5a856c;color:#caefdb}
+.github-connection[data-connected="true"] .github-connection-dot{background:#7bddaa}
+.github-token-label{display:block;color:#f5eafa;font-size:14px;font-weight:650;margin-bottom:9px}
+.github-token-field{display:flex;align-items:stretch;width:100%;overflow:hidden;border:1px solid #826e90;border-radius:13px;background:#201627}
+.github-token-field:focus-within{border-color:#d6a9e8;box-shadow:0 0 0 3px #ba83d333}
+.github-token-field input{min-width:0;flex:1;width:100%;border:0;outline:0;background:transparent;color:white;font:inherit;font-size:15px;padding:14px 12px}
+.github-token-field input::placeholder{color:#a998b4}
+.github-token-field button{flex:none;background:transparent;color:#e4c4f2;border:0;border-left:1px solid #61506d;padding:0 13px;font-size:12px;font-weight:650}
+#settingsDialog .github-token-hint{margin:10px 0 0;font-size:12px;line-height:1.55;color:#bdafc6}
+#settingsDialog .github-token-hint strong{color:#e4d3eb;font-weight:650}
+#githubFeedback{font-size:12px;line-height:1.5;min-height:0;margin:14px 0;color:#dfd0e8;overflow-wrap:anywhere}
+#githubFeedback:empty{display:none}
+#githubFeedback[data-state="error"]{color:#ffb5bd}
+#githubFeedback[data-state="success"]{color:#a4e8c4}
+.github-buttons{display:flex;flex-direction:column;gap:10px;margin-top:17px}
+.github-buttons button{min-height:46px;border-radius:12px;padding:11px 14px;font-size:14px;font-weight:650}
+.github-buttons .github-save{background:#d5a8eb;color:#27152e;border:1px solid #e5bef4}
+.github-buttons .github-remove{background:transparent;border:1px solid #73617c;color:#d9c9e0}
+.github-buttons button:disabled{opacity:.6;cursor:wait}
+.github-buttons button[hidden]{display:none}
+@media(max-width:400px){#settingsDialog{padding:18px}#githubSettings{padding:15px}}
+
 /* Online catalog uses the same book cards; loaded books stay in the existing local shelf. */
 #onlineLibrary{margin-top:32px}#onlineLibrary[hidden]{display:none}#onlineLibrary h2{font-family:Georgia,serif;font-size:23px}#onlineHint{font-size:14px}.online-book small{display:block;padding:5px 2px;color:#d1c2da}
 </style></head><body>
-<header><h1>📚 Mein Bücherregal</h1><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button><button id="loadBooks" aria-label="ZIP-Bücher auswählen" title="ZIP-Bücher laden"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10H3z"/><path d="M12 11v6m-3-3h6"/></svg></button></div></header>
-<main><input type="file" id="file" accept=".zip,application/zip" multiple><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div></main>
+<header><h1>📚 Mein Bücherregal</h1><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
+<main><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div></main>
 <section id="reader"><div class="viewport" id="viewport"><div class="sheet" id="sheet"></div></div><button class="exit" id="close" aria-label="Zur Bibliothek">×</button><div class="reader-title" id="readerTitle"></div><div class="toolbar"><button id="prev" aria-label="Vorherige Seite">‹</button><span id="count">1 / 3</span><button id="next" aria-label="Nächste Seite">›</button><button id="more" aria-label="Weitere Optionen">⋯</button></div><div class="toolbar menu" id="menu" style="bottom:calc(80px + env(safe-area-inset-bottom))"><button id="downloadBook" aria-label="Buch herunterladen" title="Buch herunterladen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></svg></button><button id="spread" title="Doppelseitenansicht (Tablet quer)" aria-label="Doppelseitenansicht umschalten"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="7" height="14" rx="1.4"/><rect x="13.5" y="5" width="7" height="14" rx="1.4"/></svg></button><button id="full" title="Vollbild">⛶</button><button id="hide" title="Bedienung ausblenden">◉</button></div></section>
 <div id="importOverlay" hidden>
   <div class="import-panel" role="dialog" aria-modal="true" aria-labelledby="importTitle" aria-describedby="importStatus">
@@ -86,15 +120,43 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
     <div class="import-foot"><span>Bitte Fenster geöffnet lassen</span><span id="importPercent">0 %</span></div>
   </div>
 </div>
-<dialog id="settingsDialog" aria-labelledby="settingsHeading"><h2 id="settingsHeading">Einstellungen</h2><p>Hier kannst du nur die Bücher-Datenbank dieser App zurücksetzen.</p><div class="settings-actions"><button id="closeSettings">Schließen</button><button class="danger" id="openReset">Bücher-Datenbank zurücksetzen</button></div></dialog>
-<dialog id="resetDialog" aria-labelledby="resetHeading"><h2 id="resetHeading">Bücher-Datenbank zurücksetzen?</h2><p>Alle in der IndexedDB dieser App gespeicherten Bücher werden gelöscht. Die ursprünglichen ZIP-Dateien auf deinem Android-Gerät bleiben erhalten und müssen bei Bedarf manuell über die Dateien-App gelöscht werden.</p><p><strong>Dieser Schritt kann nicht rückgängig gemacht werden.</strong></p><p id="resetStatus" role="status" aria-live="polite"></p><div class="settings-actions"><button id="cancelReset">Abbrechen</button><button class="danger" id="confirmReset">Datenbank löschen</button></div></dialog>
-<dialog id="deleteDialog" aria-labelledby="deleteHeading"><h2 id="deleteHeading">Buch löschen?</h2><p id="deleteBookLabel"></p><div class="delete-notice">Das Buch wird nur aus der Browser-Datenbank gelöscht.<br><br><strong>Die ursprüngliche ZIP-Datei bleibt auf deinem Android-Gerät gespeichert und muss bei Bedarf manuell über die Dateien-App gelöscht werden.</strong></div><div class="delete-buttons"><button id="cancelDelete">Abbrechen</button><button id="confirmDelete">Buch löschen</button></div></dialog>
+<dialog id="settingsDialog" aria-labelledby="settingsHeading">
+  <div class="settings-header">
+    <div>
+      <span class="settings-eyebrow">MEIN BÜCHERREGAL</span>
+      <h2 id="settingsHeading">Einstellungen</h2>
+    </div>
+    <button type="button" class="settings-close" id="closeSettings" aria-label="Einstellungen schließen">×</button>
+  </div>
+  <section id="githubSettings" aria-labelledby="githubSettingsHeading">
+    <div class="github-settings-title">
+      <span class="github-settings-icon" aria-hidden="true">🔐</span>
+      <div><h3 id="githubSettingsHeading">GitHub-Zugang</h3><p class="github-settings-subtitle">Deine privaten Bücher sicher verbinden</p></div>
+    </div>
+    <div class="github-connection" id="githubConnection" role="status">
+      <span class="github-connection-dot" aria-hidden="true"></span>
+      <span id="githubConnectionLabel">Noch kein Zugang eingerichtet</span>
+    </div>
+    <label class="github-token-label" for="githubToken">Persönlicher Lesetoken</label>
+    <div class="github-token-field">
+      <input id="githubToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…" aria-describedby="githubTokenHint" />
+      <button id="githubToggleVisibility" type="button" aria-label="Token anzeigen" aria-pressed="false">Anzeigen</button>
+    </div>
+    <p class="github-token-hint" id="githubTokenHint">Nur Leserechte für <strong>storybook-books</strong> erforderlich. Der Token bleibt unverschlüsselt auf diesem Gerät gespeichert.</p>
+    <p id="githubFeedback" role="status" aria-live="polite"></p>
+    <div class="github-buttons">
+      <button id="githubSave" class="github-save" type="button">Zugang prüfen &amp; speichern</button>
+      <button id="githubRemove" class="github-remove" type="button">Gespeicherten Zugang entfernen</button>
+    </div>
+  </section>
+</dialog>
+<dialog id="deleteDialog" aria-labelledby="deleteHeading"><h2 id="deleteHeading">Buch löschen?</h2><p id="deleteBookLabel"></p><div class="delete-notice">Das Buch wird nur aus der Browser-Datenbank gelöscht.<br><br><strong>Du kannst das Buch später erneut aus dem Online-Katalog herunterladen.</strong></div><div class="delete-buttons"><button id="cancelDelete">Abbrechen</button><button id="confirmDelete">Buch löschen</button></div></dialog>
 <dialog id="downloadDialog" aria-labelledby="downloadHeading"><h2 id="downloadHeading">Buch herunterladen</h2><p>In welchem Format möchtest du dieses Märchen speichern?</p><div class="download-choices"><button id="chooseHtml"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 13-2 2 2 2m6-4 2 2-2 2"/></svg><span><strong>HTML</strong><br><small>Direkt im Browser lesen</small></span></button><button id="chooseZip"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 3v2m0 2v2m0 2v2m-2 2h4v4h-4z"/></svg><span><strong>ZIP</strong><br><small>In eine Bilderbuch-App importieren</small></span></button></div><button id="cancelDownload">Abbrechen</button></dialog>
 <script>const $=id=>document.getElementById(id);let books=[],active=null,page=0,spreadMode=false;
 function valid(b){return b&&typeof b.title==='string'&&Array.isArray(b.pages)&&b.pages.length>0&&b.pages.every(s=>typeof s==='string'&&s.startsWith('data:image/'))}
 // Vorlesedauer aus book.json; keine unzuverlässige Berechnung aus der Seitenzahl.
 function readingMinutes(b){const n=b?.readingMinutes;return typeof n==='number'&&Number.isFinite(n)&&n>0&&n<=240?Math.ceil(n):null}
-function render(){let e=$('books');e.innerHTML='';const q=$('search').value.trim().toLocaleLowerCase('de');$('clearSearch').hidden=!q;if(!books.length){$('searchMeta').textContent='';e.innerHTML=(sessionToken&&onlineCatalog.length)?'':'<div class="empty"><strong>Noch keine Bücher geladen</strong><p>Tippe oben rechts auf das Ordnersymbol und wähle deine ZIP-Bücher aus.</p></div>';return}let filtered=books.filter(b=>(b.title+' '+(b.subtitle||'')).toLocaleLowerCase('de').includes(q));$('searchMeta').textContent=q?`${filtered.length} von ${books.length} Büchern gefunden`:`${books.length} ${books.length===1?'Buch':'Bücher'} im Regal`;if(!filtered.length){let empty=document.createElement('div');empty.className='search-empty';let heading=document.createElement('strong');heading.textContent='Kein passendes Buch gefunden';let hint=document.createElement('small');hint.textContent='Versuche einen anderen Suchbegriff.';empty.append(heading,hint);e.append(empty);return}for(let b of filtered){let holder=document.createElement('div');holder.className='book-holder';let card=document.createElement('button');card.className='book';let cover=document.createElement('img');cover.src=b.cover||b.pages[0];cover.alt='Buchcover';let title=document.createElement('strong');title.textContent=b.title;let meta=document.createElement('span');meta.className='book-meta';let pg=document.createElement('span');pg.className='book-meta-item';pg.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.5C9 4.6 6 4.3 3 4.8v13c3-.5 6-.1 9 1.9 3-2 6-2.4 9-1.9v-13c-3-.5-6-.2-9 1.7zM12 6.5v13.2"/></svg>';pg.append(document.createTextNode(b.pages.length+' Seiten'));meta.append(pg);const minutes=readingMinutes(b);if(minutes!==null){let rt=document.createElement('span');rt.className='book-meta-item';rt.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>';rt.append(document.createTextNode(minutes+' Min.'));meta.append(rt)}card.append(cover,title,meta);card.onclick=()=>openBook(b.id);let options=document.createElement('button');options.className='book-options';options.textContent='⋮';options.setAttribute('aria-label','Optionen für '+b.title);options.setAttribute('aria-expanded','false');let actions=document.createElement('div');actions.className='book-actions';actions.hidden=true;let remove=document.createElement('button');remove.textContent='🗑 Buch löschen';remove.onclick=()=>{actions.hidden=true;options.setAttribute('aria-expanded','false');askDelete(b.id)};actions.append(remove);options.onclick=()=>{document.querySelectorAll('.book-actions').forEach(x=>{if(x!==actions)x.hidden=true});document.querySelectorAll('.book-options').forEach(x=>{if(x!==options)x.setAttribute('aria-expanded','false')});actions.hidden=!actions.hidden;options.setAttribute('aria-expanded',String(!actions.hidden))};holder.append(card,options,actions);e.append(holder)}}
+function render(){let e=$('books');e.innerHTML='';const q=$('search').value.trim().toLocaleLowerCase('de');$('clearSearch').hidden=!q;if(!books.length){$('searchMeta').textContent='';e.innerHTML=(sessionToken&&onlineCatalog.length)?'':'<div class="empty"><strong>Noch keine Bücher offline gespeichert</strong><p>Wähle unten ein Online-Buch aus, um es herunterzuladen und anschließend offline zu lesen.</p></div>';return}let filtered=books.filter(b=>(b.title+' '+(b.subtitle||'')).toLocaleLowerCase('de').includes(q));$('searchMeta').textContent=q?`${filtered.length} von ${books.length} Büchern gefunden`:`${books.length} ${books.length===1?'Buch':'Bücher'} im Regal`;if(!filtered.length){let empty=document.createElement('div');empty.className='search-empty';let heading=document.createElement('strong');heading.textContent='Kein passendes Buch gefunden';let hint=document.createElement('small');hint.textContent='Versuche einen anderen Suchbegriff.';empty.append(heading,hint);e.append(empty);return}for(let b of filtered){let holder=document.createElement('div');holder.className='book-holder';let card=document.createElement('button');card.className='book';let cover=document.createElement('img');cover.src=b.cover||b.pages[0];cover.alt='Buchcover';let title=document.createElement('strong');title.textContent=b.title;let meta=document.createElement('span');meta.className='book-meta';let pg=document.createElement('span');pg.className='book-meta-item';pg.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.5C9 4.6 6 4.3 3 4.8v13c3-.5 6-.1 9 1.9 3-2 6-2.4 9-1.9v-13c-3-.5-6-.2-9 1.7zM12 6.5v13.2"/></svg>';pg.append(document.createTextNode(b.pages.length+' Seiten'));meta.append(pg);const minutes=readingMinutes(b);if(minutes!==null){let rt=document.createElement('span');rt.className='book-meta-item';rt.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>';rt.append(document.createTextNode(minutes+' Min.'));meta.append(rt)}card.append(cover,title,meta);card.onclick=()=>openBook(b.id);let options=document.createElement('button');options.className='book-options';options.textContent='⋮';options.setAttribute('aria-label','Optionen für '+b.title);options.setAttribute('aria-expanded','false');let actions=document.createElement('div');actions.className='book-actions';actions.hidden=true;let remove=document.createElement('button');remove.textContent='🗑 Buch löschen';remove.onclick=()=>{actions.hidden=true;options.setAttribute('aria-expanded','false');askDelete(b.id)};actions.append(remove);options.onclick=()=>{document.querySelectorAll('.book-actions').forEach(x=>{if(x!==actions)x.hidden=true});document.querySelectorAll('.book-options').forEach(x=>{if(x!==options)x.setAttribute('aria-expanded','false')});actions.hidden=!actions.hidden;options.setAttribute('aria-expanded',String(!actions.hidden))};holder.append(card,options,actions);e.append(holder)}}
 $('search').addEventListener('input',render);
 $('clearSearch').addEventListener('click',()=>{$('search').value='';render();$('search').focus()});
 function add(b){if(!valid(b))throw Error('Das Buchpaket enthält keine gültigen Seiten.');b.id=b.id||b.title;const idx=books.findIndex(x=>x.id===b.id);if(idx>=0)books[idx]=b;else books.push(b);render();if(typeof renderOnlineCatalog==='function')renderOnlineCatalog()}
@@ -126,7 +188,6 @@ window.addEventListener('resize',()=>{if(active)showPage()});
 $('spread').onclick=()=>{spreadMode=!spreadMode;$('spread').setAttribute('aria-pressed',String(spreadMode));$('spread').style.background=spreadMode?'#705080':'';if(active)showPage()};
 let start=null;$('viewport').addEventListener('touchstart',e=>{start={x:e.changedTouches[0].clientX,y:e.changedTouches[0].clientY}},{passive:true});$('viewport').addEventListener('touchend',e=>{if(!start)return;let dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.4)change(dx<0?1:-1);start=null},{passive:true});
 $('prev').onclick=()=>change(-1);$('next').onclick=()=>change(1);$('close').onclick=closeBook;$('more').onclick=()=>$('menu').classList.toggle('show');$('hide').onclick=()=>{$('menu').classList.remove('show');$('reader').classList.add('hide-controls')};$('sheet').onclick=()=>{if($('reader').classList.contains('hide-controls'))$('reader').classList.remove('hide-controls')};$('full').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('reader').requestFullscreen()}catch(e){alert('Dieser Browser unterstützt Vollbild für lokale Dateien möglicherweise nicht.')}};
-$('loadBooks').onclick=()=>{if(!importingBooks)$('file').click()};
 // Die Buchdaten werden ausschließlich in der IndexedDB gespeichert, nicht im HTML-Quelltext.
 const DB_NAME='MeinMaerchenregal_Buecher', DB_VERSION=1, STORE='books';
 let dbPromise;
@@ -151,33 +212,8 @@ async function saveBook(book){
     tx.onabort=()=>reject(tx.error||Error('Speichern abgebrochen.'));
   });
 }
-// Zurücksetzen betrifft ausschließlich die IndexedDB mit dem festen App-Datenbanknamen.
 $('settingsBtn').onclick=()=>$('settingsDialog').showModal();
 $('closeSettings').onclick=()=>$('settingsDialog').close();
-$('openReset').onclick=()=>{$('settingsDialog').close();$('resetStatus').textContent='';$('resetDialog').showModal()};
-$('cancelReset').onclick=()=>$('resetDialog').close();
-$('confirmReset').onclick=async()=>{
-  const btn=$('confirmReset');btn.disabled=true;$('cancelReset').disabled=true;
-  $('resetStatus').textContent='Datenbank wird gelöscht …';
-  try{
-    // Offene Verbindungen schließen, damit deleteDatabase nicht blockiert wird.
-    if(dbPromise){try{const db=await dbPromise;db.close()}catch(e){console.warn('Datenbank war nicht geöffnet:',e)}}
-    dbPromise=null;
-    await new Promise((resolve,reject)=>{
-      if(!('indexedDB' in window)){reject(Error('IndexedDB ist nicht verfügbar.'));return}
-      const req=indexedDB.deleteDatabase(DB_NAME);
-      req.onsuccess=()=>resolve();
-      req.onerror=()=>reject(req.error||Error('Löschen nicht möglich.'));
-      req.onblocked=()=>reject(Error('Datenbank ist durch einen anderen Tab blockiert. Bitte andere Tabs schließen.'));
-    });
-    books=[];active=null;$('search').value='';render();
-    $('resetStatus').textContent='Datenbank wurde zurückgesetzt.';
-    $('confirmReset').textContent='Erledigt';
-    setTimeout(()=>{$('resetDialog').close();$('confirmReset').textContent='Datenbank löschen'},900);
-  }catch(err){
-    $('resetStatus').textContent='Zurücksetzen fehlgeschlagen: '+(err.message||String(err));
-  }finally{btn.disabled=false;$('cancelReset').disabled=false}
-};
 let pendingDeleteId=null;
 function askDelete(id){let b=books.find(x=>x.id===id);if(!b)return;pendingDeleteId=id;$('deleteBookLabel').textContent='Möchtest du „'+b.title+'“ wirklich aus deinem Bücherregal entfernen?';$('deleteDialog').showModal()}
 $('cancelDelete').onclick=()=>{$('deleteDialog').close();pendingDeleteId=null};
@@ -197,58 +233,11 @@ async function restoreBooks(){
   }catch(e){
     console.warn('IndexedDB nicht verfügbar:',e);
     render();
-    alert('Der Browser kann die Bücher derzeit nicht dauerhaft speichern. Import ist möglich, aber die Bücher könnten beim Schließen verloren gehen.\n'+e.message);
+    alert('Der Browser kann die Bücher derzeit nicht dauerhaft speichern. Online-Bücher können geladen werden, bleiben aber möglicherweise nicht offline verfügbar.\n'+e.message);
   }
 }
-// V18-Vorschau: Importanzeige mit echtem Seitenfortschritt statt scheinbar hängender UI.
+// The same ZIP parser is retained for private online book downloads.
 let importingBooks=false;
-const allowImportPaint=()=>new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));
-function updateImportDisplay(index,total,name,message,percent){
-  $('importCounter').textContent=`Buch ${index} von ${total}`;
-  $('importFile').textContent=name;
-  $('importStatus').textContent=message;
-  const value=Math.max(0,Math.min(100,Math.round(percent)));
-  $('importProgress').value=value;
-  $('importPercent').textContent=value+' %';
-}
-$('file').onchange=async e=>{
-  const selected=[...e.target.files];
-  if(!selected.length||importingBooks)return;
-  importingBooks=true;
-  $('loadBooks').disabled=true;
-  $('importOverlay').hidden=false;
-  let errors=[],success=0;
-  try{
-    for(let i=0;i<selected.length;i++){
-      const f=selected[i];
-      const update=(message,percent)=>updateImportDisplay(i+1,selected.length,f.name,message,percent);
-      update('ZIP-Datei wird gelesen …',2);
-      await allowImportPaint(); // Ladeanzeige vor der Verarbeitung tatsächlich zeichnen lassen.
-      try{
-        if(!f.name.toLowerCase().endsWith('.zip'))throw Error('Keine ZIP-Datei');
-        const buffer=await f.arrayBuffer();
-        update('Bilder werden vorbereitet …',10);
-        await allowImportPaint();
-        const b=await importZip(buffer,(done,total)=>{
-          update(`Bilder werden vorbereitet (${done} von ${total}) …`,10+78*done/total);
-        });
-        b.id=b.id||b.title;
-        update('Buch wird dauerhaft gespeichert …',92);
-        await allowImportPaint();
-        await saveBook(b); // Erst nach erfolgreicher Speicherung im Regal anzeigen.
-        add(b);success++;
-        update('Buch erfolgreich geladen',100);
-        await allowImportPaint();
-      }catch(err){errors.push(f.name+': '+(err.message||String(err)))}
-    }
-  }finally{
-    $('importOverlay').hidden=true;
-    $('loadBooks').disabled=false;
-    importingBooks=false;
-    e.target.value='';
-  }
-  if(errors.length)alert(success+' Bücher gespeichert. Fehler:\\n'+errors.join('\\n'));
-};
 function download(blob,name){let a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}
 function slug(s){return s.normalize('NFKD').replace(/[^a-zA-Z0-9_-]+/g,'_').slice(0,60)||'Bilderbuch'}
 function exportJson(){download(new Blob([JSON.stringify(active)],{type:'application/json'}),slug(active.title)+'.json')}
@@ -305,31 +294,33 @@ onlineSection.id = 'onlineLibrary';
 onlineSection.innerHTML = '<h2>Online-Bücher</h2><p id="onlineHint" role="status">GitHub-Zugang in den Einstellungen einrichten.</p><div id="onlineGrid" class="grid"></div>';
 document.querySelector('main').append(onlineSection);
 
-const githubSettings = document.createElement('section');
-githubSettings.id = 'githubSettings';
-githubSettings.innerHTML =
-  '<h3>Privates GitHub-Bücherregal</h3>' +
-  '<p>Einmalig Lesetoken eingeben. Er wird auf diesem Gerät gespeichert und bei jedem App-Start automatisch verwendet. Die Sternchen verbergen nur die Eingabe; der gespeicherte Token ist nicht verschlüsselt.</p>' +
-  '<label for="githubToken">GitHub Personal Access Token (nur Lesezugriff)</label>' +
-  '<input id="githubToken" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" />' +
-  '<div class="github-buttons"><button id="githubSave" type="button">Token prüfen und speichern</button>' +
-  '<button id="githubRemove" type="button">Token entfernen</button></div>' +
-  '<p id="githubFeedback" role="status"></p>';
-document.getElementById('settingsDialog').append(githubSettings);
 const credentialElements = {
-  token:document.getElementById('githubToken'),
-  status:document.getElementById('githubFeedback')
+  token:$('githubToken'),
+  status:$('githubFeedback'),
+  connection:$('githubConnection'),
+  connectionLabel:$('githubConnectionLabel'),
+  save:$('githubSave'),
+  remove:$('githubRemove'),
+  visibility:$('githubToggleVisibility')
 };
-function credentialStatus(text) { credentialElements.status.textContent = text; }
-function syncCredentialButtons() {
-  const saved = !!localStorage.getItem(CREDENTIAL_KEY);
-  document.getElementById('githubRemove').disabled = !saved;
-  if(saved && !credentialElements.token.value) {
-    credentialElements.token.placeholder = '•••••••••••• (gespeichert)';
-  } else if (!saved) {
-    credentialElements.token.placeholder = 'github_pat_…';
-  }
+function credentialStatus(message,type='neutral') {
+  credentialElements.status.textContent=message;
+  credentialElements.status.dataset.state=type;
 }
+function syncCredentialButtons() {
+  const saved=!!localStorage.getItem(CREDENTIAL_KEY);
+  credentialElements.remove.hidden=!saved;
+  credentialElements.connection.dataset.connected=String(saved);
+  credentialElements.connectionLabel.textContent=saved?'Zugang auf diesem Gerät gespeichert':'Noch kein Zugang eingerichtet';
+  credentialElements.token.placeholder=saved?'Neuen Token eingeben …':'github_pat_…';
+}
+credentialElements.visibility.onclick=()=>{
+  const visible=credentialElements.token.type==='password';
+  credentialElements.token.type=visible?'text':'password';
+  credentialElements.visibility.textContent=visible?'Verbergen':'Anzeigen';
+  credentialElements.visibility.setAttribute('aria-pressed',String(visible));
+  credentialElements.visibility.setAttribute('aria-label',visible?'Token verbergen':'Token anzeigen');
+};
 function bytesToBase64(bytes) {
   let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s);
 }
@@ -348,27 +339,38 @@ async function githubRequest(path,token,accept='application/vnd.github+json') {
 }
 async function validateCredential(token) {
   if(!/^(github_pat_|ghp_)[A-Za-z0-9_]+$/.test(token))throw Error('Ungültiges GitHub-Token-Format');
-  await githubRequest('',token);
+  await githubRequest('/contents/catalog.json?ref=main',token);
 }
-document.getElementById('githubSave').onclick=async()=>{
+credentialElements.save.onclick=async()=>{
   const token=credentialElements.token.value.trim();
+  if(!token){credentialStatus('Bitte zuerst einen neuen Token eingeben.','error');return}
+  credentialElements.save.disabled=true;
+  credentialElements.save.textContent='Zugang wird geprüft …';
   try{
-    credentialStatus('GitHub-Zugang wird geprüft …');
+    credentialStatus('Verbindung zu deinem privaten Bücherkatalog wird geprüft …');
     await validateCredential(token);
     localStorage.setItem(CREDENTIAL_KEY,token);
     sessionToken=token;
     credentialElements.token.value='';
+    credentialElements.token.type='password';
+    credentialElements.visibility.textContent='Anzeigen';
+    credentialElements.visibility.setAttribute('aria-pressed','false');
+    credentialElements.visibility.setAttribute('aria-label','Token anzeigen');
     syncCredentialButtons();
-    credentialStatus('Zugang gespeichert. Die Verbindung wird beim nächsten App-Start automatisch hergestellt.');
     await loadOnlineCatalog();
-  }catch(e){credentialStatus('Zugang konnte nicht gespeichert werden: '+e.message)}
+    credentialStatus('Zugang gespeichert. Deine Bücher werden angezeigt.','success');
+  }catch(e){credentialStatus('Verbindung fehlgeschlagen: '+e.message,'error')}
+  finally{
+    credentialElements.save.disabled=false;
+    credentialElements.save.textContent='Zugang prüfen & speichern';
+  }
 };
-document.getElementById('githubRemove').onclick=()=>{
+credentialElements.remove.onclick=()=>{
   localStorage.removeItem(CREDENTIAL_KEY);
   sessionToken=null;onlineCatalog=[];
   credentialElements.token.value='';
   syncCredentialButtons();
-  credentialStatus('Token von diesem Gerät entfernt. Bereits gespeicherte Bücher bleiben erhalten.');
+  credentialStatus('Zugang entfernt. Bereits geladene Bücher bleiben offline lesbar.','success');
   render();renderOnlineCatalog();
 };
 syncCredentialButtons();
