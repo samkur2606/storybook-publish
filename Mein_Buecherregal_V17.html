@@ -293,8 +293,8 @@ async function importZip(buffer,onProgress=()=>{}){
 addEventListener('popstate',()=>{if(active)closeBook()});document.addEventListener('keydown',e=>{if(!active)return;if(e.key==='ArrowRight')change(1);if(e.key==='ArrowLeft')change(-1);if(e.key==='Escape')closeBook()});
 
 
-// Private GitHub catalog: a PIN-encrypted token unlocks the current browser session.
-// No credentials in source files, URLs, service-worker caches or plain localStorage.
+// Private GitHub catalog: a locally stored read-only PAT reconnects automatically.
+// The password input only masks characters; localStorage is not encrypted.
 const PRIVATE_REPO = 'samkur2606/storybook-books';
 const PRIVATE_API = 'https://api.github.com/repos/' + PRIVATE_REPO;
 const CREDENTIAL_KEY = 'storybook.github.readonly.local.v2';
