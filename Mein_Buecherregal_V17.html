@@ -422,6 +422,25 @@ async function loadOnlineCatalog(){
     document.getElementById('onlineHint').textContent='Katalog nicht verfügbar: '+e.message;
   }
 }
+async function explainAssetDownloadFailure(assetId,token,initialError) {
+  // Diagnose an opaque GitHub redirect without exposing the token or asset URL.
+  if(!(initialError instanceof TypeError))return initialError;
+  try{
+    const response=await fetch(PRIVATE_API+'/releases/assets/'+assetId,{
+      headers:{Authorization:'Bearer '+token,Accept:'application/octet-stream','X-GitHub-Api-Version':'2022-11-28'},
+      cache:'no-store',
+      redirect:'manual'
+    });
+    if(response.type==='opaqueredirect'){
+      return Error('GitHub leitet die private ZIP-Datei auf einen anderen Server weiter. Der Browser blockiert dabei vermutlich den Zugriff (CORS). Für zuverlässiges Lesen brauchen wir einen geschützten Download-Vermittler.');
+    }
+    if(response.status===401||response.status===403)return Error('Keine Berechtigung für das Release-Asset (HTTP '+response.status+').');
+    if(response.status===404)return Error('Release-Asset nicht gefunden oder nicht freigegeben (HTTP 404).');
+    return Error('ZIP-Download wurde vom Browser blockiert. GitHub-Diagnose: HTTP '+response.status+', Antworttyp '+response.type+'. Netzwerk- oder CORS-Problem möglich.');
+  }catch(e){
+    return Error('ZIP-Download konnte nicht hergestellt werden. Auch die GitHub-Diagnose wurde vom Browser blockiert (Netzwerk/CORS).');
+  }
+}
 async function downloadOnlineBook(entry){
   if(importingBooks||!sessionToken)return;
   importingBooks=true;
@@ -430,9 +449,17 @@ async function downloadOnlineBook(entry){
   $('importProgress').value=0;$('importPercent').textContent='0 %';
   $('importStatus').textContent='ZIP wird von GitHub geladen …';
   try{
-    const response=await githubRequest('/releases/assets/'+entry.assetId,sessionToken,'application/octet-stream');
+    let response;
+    try {
+      response=await githubRequest('/releases/assets/'+entry.assetId,sessionToken,'application/octet-stream');
+    } catch(error) {
+      throw await explainAssetDownloadFailure(entry.assetId,sessionToken,error);
+    }
     const buffer=await response.arrayBuffer();
-    if(new DataView(buffer).getUint32(0,true)!==0x04034b50)throw Error('GitHub hat kein ZIP geliefert. Browser-Weiterleitung/CORS prüfen.');
+    if(buffer.byteLength<4||new DataView(buffer).getUint32(0,true)!==0x04034b50){
+      const format=(response.headers.get('content-type')||'unbekannt').split(';')[0];
+      throw Error('GitHub hat keine ZIP-Datei geliefert (Content-Type: '+format+').');
+    }
     const book=await importZip(buffer,(done,total)=>{
       const percent=Math.round(done/total*100);
       $('importProgress').value=percent;$('importPercent').textContent=percent+' %';
