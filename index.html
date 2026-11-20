@@ -123,6 +123,11 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
 main.library-loading #books,main.library-loading #onlineLibrary{display:none}
 /* Online catalog uses the same book cards; loaded books stay in the existing local shelf. */
 #onlineLibrary{margin-top:0}#books:not(:empty)+#onlineLibrary{margin-top:18px}#onlineLibrary[hidden]{display:none}#onlineHint{font-size:14px;margin:0 0 12px}#onlineHint:empty{display:none}.online-book small{display:block;padding:5px 2px;color:#d1c2da}
+/* One shared, alphabetically sorted grid for local and remote books. */
+#onlineLibrary{margin:0}#books:not(:empty)+#onlineLibrary{margin-top:0}
+.book-availability{display:inline-flex;align-items:center;gap:4px;color:#b9abc4;white-space:nowrap;font-size:11px}
+.book-availability.is-offline{color:#c1e7d0}
+.book-availability svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 </style></head><body>
 <header><h1>📚 Mein Bücherregal</h1><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
@@ -180,7 +185,86 @@ function valid(b){return b&&typeof b.title==='string'&&Array.isArray(b.pages)&&b
 // Vorlesedauer aus book.json; keine unzuverlässige Berechnung aus der Seitenzahl.
 function readingMinutes(b){const n=b?.readingMinutes;return typeof n==='number'&&Number.isFinite(n)&&n>0&&n<=240?Math.ceil(n):null}
 let startupReady=false;
-function render(){let e=$('books');e.innerHTML='';const q=$('search').value.trim().toLocaleLowerCase('de');$('clearSearch').hidden=!q;if(!books.length){$('searchMeta').textContent='';e.innerHTML=(!startupReady||sessionToken||onlineCatalog.length)?'':'<div class="empty"><strong>Noch keine Bücher verfügbar</strong><p>Richte deinen GitHub-Zugang in den Einstellungen ein, um Bücher zu entdecken.</p></div>';return}let filtered=books.filter(b=>(b.title+' '+(b.subtitle||'')).toLocaleLowerCase('de').includes(q));$('searchMeta').textContent=q?`${filtered.length} von ${books.length} Büchern gefunden`:`${books.length} ${books.length===1?'Buch':'Bücher'} im Regal`;if(!filtered.length){let empty=document.createElement('div');empty.className='search-empty';let heading=document.createElement('strong');heading.textContent='Kein passendes Buch gefunden';let hint=document.createElement('small');hint.textContent='Versuche einen anderen Suchbegriff.';empty.append(heading,hint);e.append(empty);return}for(let b of filtered){let holder=document.createElement('div');holder.className='book-holder';let card=document.createElement('button');card.className='book';let cover=document.createElement('img');cover.src=b.cover||b.pages[0];cover.alt='Buchcover';let title=document.createElement('strong');title.textContent=b.title;let meta=document.createElement('span');meta.className='book-meta';let pg=document.createElement('span');pg.className='book-meta-item';pg.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.5C9 4.6 6 4.3 3 4.8v13c3-.5 6-.1 9 1.9 3-2 6-2.4 9-1.9v-13c-3-.5-6-.2-9 1.7zM12 6.5v13.2"/></svg>';pg.append(document.createTextNode(b.pages.length+' Seiten'));meta.append(pg);const minutes=readingMinutes(b);if(minutes!==null){let rt=document.createElement('span');rt.className='book-meta-item';rt.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>';rt.append(document.createTextNode(minutes+' Min.'));meta.append(rt)}card.append(cover,title,meta);card.onclick=()=>openBook(b.id);let options=document.createElement('button');options.className='book-options';options.textContent='⋮';options.setAttribute('aria-label','Optionen für '+b.title);options.setAttribute('aria-expanded','false');let actions=document.createElement('div');actions.className='book-actions';actions.hidden=true;let remove=document.createElement('button');remove.textContent='🗑 Buch löschen';remove.onclick=()=>{actions.hidden=true;options.setAttribute('aria-expanded','false');askDelete(b.id)};actions.append(remove);options.onclick=()=>{document.querySelectorAll('.book-actions').forEach(x=>{if(x!==actions)x.hidden=true});document.querySelectorAll('.book-options').forEach(x=>{if(x!==options)x.setAttribute('aria-expanded','false')});actions.hidden=!actions.hidden;options.setAttribute('aria-expanded',String(!actions.hidden))};holder.append(card,options,actions);e.append(holder)}}
+const titleSorter=new Intl.Collator('de',{sensitivity:'base',numeric:true});
+function render(){
+  const grid=$('books');
+  grid.replaceChildren();
+  const query=$('search').value.trim().toLocaleLowerCase('de');
+  $('clearSearch').hidden=!query;
+  // Merge local books and online catalog into one stable alphabetic shelf.
+  const entries=new Map();
+  for(const book of onlineCatalog)entries.set(book.id,{book,offline:false});
+  for(const book of books)entries.set(book.id,{book,offline:true});
+  const ordered=[...entries.values()].sort((a,b)=>
+    titleSorter.compare(a.book.title,b.book.title)||String(a.book.id).localeCompare(String(b.book.id)));
+  const visible=ordered.filter(item=>
+    (item.book.title+' '+(item.book.subtitle||'')).toLocaleLowerCase('de').includes(query));
+  const onlineReady=onlineCatalog.length>0;
+  $('searchMeta').textContent=query
+    ?visible.length+' von '+ordered.length+' Büchern gefunden'
+    :ordered.length?(ordered.length===1?'1 Buch im Regal':ordered.length+' Bücher im Regal'):'';
+  if(startupReady&&ordered.length)$('shelfSkeleton').hidden=true;
+  if(!ordered.length){
+    if(startupReady&&!sessionToken){
+      grid.innerHTML='<div class="empty"><strong>Noch keine Bücher verfügbar</strong><p>Richte deinen GitHub-Zugang in den Einstellungen ein, um Bücher zu entdecken.</p></div>';
+    }
+    return;
+  }
+  if(!visible.length){
+    const empty=document.createElement('div');empty.className='search-empty';
+    const heading=document.createElement('strong');heading.textContent='Kein passendes Buch gefunden';
+    const hint=document.createElement('small');hint.textContent='Versuche einen anderen Suchbegriff.';
+    empty.append(heading,hint);grid.append(empty);return;
+  }
+  for(const item of visible){
+    const b=item.book;
+    const holder=document.createElement('div');holder.className='book-holder';
+    const card=document.createElement('button');card.className='book';card.type='button';
+    card.setAttribute('aria-label',b.title+(item.offline?', auf diesem Gerät gespeichert':', online – zum Laden antippen'));
+    const cover=document.createElement('img');
+    cover.src=item.offline?(b.cover||b.pages[0]):b.coverDataUri;
+    cover.alt='Buchcover: '+b.title;cover.loading='lazy';
+    const title=document.createElement('strong');title.textContent=b.title;
+    const meta=document.createElement('span');meta.className='book-meta';
+    const pages=document.createElement('span');pages.className='book-meta-item';
+    pages.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.5C9 4.6 6 4.3 3 4.8v13c3-.5 6-.1 9 1.9 3-2 6-2.4 9-1.9v-13c-3-.5-6-.2-9 1.7zM12 6.5v13.2"/></svg>';
+    pages.append(document.createTextNode((item.offline?b.pages.length:b.pageCount)+' Seiten'));
+    meta.append(pages);
+    const minutes=readingMinutes(b);
+    if(minutes!==null){
+      const rt=document.createElement('span');rt.className='book-meta-item';
+      rt.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>';
+      rt.append(document.createTextNode(minutes+' Min.'));meta.append(rt);
+    }
+    const availability=document.createElement('span');
+    availability.className='book-availability'+(item.offline?' is-offline':'');
+    availability.title=item.offline?'Auf diesem Gerät gespeichert':'Noch nicht heruntergeladen';
+    availability.innerHTML=item.offline
+      ?'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="m9 12 2 2 4-4"/></svg>'
+      :'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 18v3h14v-3"/></svg>';
+    availability.append(document.createTextNode(item.offline?'Offline':'Online'));
+    meta.append(availability);
+    card.append(cover,title,meta);
+    card.onclick=()=>item.offline?openBook(b.id):downloadOnlineBook(b);
+    holder.append(card);
+    if(item.offline){
+      const options=document.createElement('button');options.className='book-options';
+      options.textContent='⋮';options.setAttribute('aria-label','Optionen für '+b.title);
+      options.setAttribute('aria-expanded','false');
+      const actions=document.createElement('div');actions.className='book-actions';actions.hidden=true;
+      const remove=document.createElement('button');remove.textContent='🗑 Buch löschen';
+      remove.onclick=()=>{actions.hidden=true;options.setAttribute('aria-expanded','false');askDelete(b.id)};
+      actions.append(remove);
+      options.onclick=()=>{
+        document.querySelectorAll('.book-actions').forEach(x=>{if(x!==actions)x.hidden=true});
+        document.querySelectorAll('.book-options').forEach(x=>{if(x!==options)x.setAttribute('aria-expanded','false')});
+        actions.hidden=!actions.hidden;options.setAttribute('aria-expanded',String(!actions.hidden));
+      };
+      holder.append(options,actions);
+    }
+    grid.append(holder);
+  }
+}
 $('search').addEventListener('input',render);
 $('clearSearch').addEventListener('click',()=>{$('search').value='';render();$('search').focus()});
 function add(b){if(!valid(b))throw Error('Das Buchpaket enthält keine gültigen Seiten.');b.id=b.id||b.title;const idx=books.findIndex(x=>x.id===b.id);if(idx>=0)books[idx]=b;else books.push(b);render();if(typeof renderOnlineCatalog==='function')renderOnlineCatalog()}
@@ -317,7 +401,7 @@ let sessionToken = null;
 let onlineCatalog = [];
 const onlineSection = document.createElement('section');
 onlineSection.id = 'onlineLibrary';
-onlineSection.innerHTML = '<p id="onlineHint" role="status">GitHub-Zugang in den Einstellungen einrichten.</p><div id="onlineGrid" class="grid"></div>';
+onlineSection.innerHTML = '<p id="onlineHint" role="status"></p>';
 document.querySelector('main').append(onlineSection);
 
 const credentialElements = {
@@ -405,27 +489,14 @@ credentialElements.remove.onclick=()=>{
 syncCredentialButtons();
 sessionToken=localStorage.getItem(CREDENTIAL_KEY)||null;
 
-function renderOnlineCatalog() {
-  const grid=document.getElementById('onlineGrid'),hint=document.getElementById('onlineHint');
-  grid.replaceChildren();
+function renderOnlineCatalog(){
+  const hint=$('onlineHint');
   if(!sessionToken){
-    onlineSection.hidden=false;
-    hint.textContent='In Einstellungen → GitHub-Zugang einmalig einen Lesetoken hinterlegen.';
-    return;
+    hint.textContent=books.length?'':'In Einstellungen → GitHub-Zugang einmalig einen Lesetoken hinterlegen.';
+  }else if(onlineCatalog.length){
+    hint.textContent='';
   }
-  const q=$('search').value.trim().toLocaleLowerCase('de');
-  const visible=onlineCatalog.filter(b=>!books.some(local=>local.id===b.id) &&
-    (b.title+' '+(b.subtitle||'')).toLocaleLowerCase('de').includes(q));
-  hint.textContent=visible.length ? '' : 'Keine weiteren Online-Bücher gefunden.';
-  for(const b of visible){
-    const card=document.createElement('button');card.className='book online-book';card.type='button';
-    const cover=document.createElement('img');cover.src=b.coverDataUri;cover.alt='Cover: '+b.title;cover.loading='lazy';
-    const title=document.createElement('strong');title.textContent=b.title;
-    const meta=document.createElement('small');
-    meta.textContent=b.pageCount+' Seiten'+(b.readingMinutes?' · '+b.readingMinutes+' Min.':'')+' · Online';
-    card.append(cover,title,meta);
-    card.onclick=()=>downloadOnlineBook(b);grid.append(card);
-  }
+  render();
 }
 async function loadOnlineCatalog(){
   if(!sessionToken){renderOnlineCatalog();return}
