@@ -433,9 +433,12 @@ async function loadOnlineCatalog(){
     if(payload.encoding!=='base64'||typeof payload.content!=='string')throw Error('Unbekanntes GitHub-Dateiformat');
     const bytes=base64ToBytes(payload.content.replace(/\s/g,''));
     const catalog=JSON.parse(new TextDecoder().decode(bytes));
-    if(catalog.schemaVersion!==2||!Array.isArray(catalog.books))throw Error('Unbekannte Katalogversion');
+    if(catalog.schemaVersion!==3||!Array.isArray(catalog.books))throw Error('Unbekannte Katalogversion');
     onlineCatalog=catalog.books.filter(b=>b&&typeof b.id==='string'&&typeof b.title==='string'&&
-      Number.isSafeInteger(b.assetId)&&b.assetId>0&&Number.isSafeInteger(b.pageCount)&&b.pageCount>0&&
+      Number.isSafeInteger(b.zipSize)&&b.zipSize>0&&b.zipSize<=100*1024*1024&&
+      /^[a-f0-9]{64}$/.test(b.zipSha256)&&Array.isArray(b.blobChunks)&&b.blobChunks.length>0&&
+      b.blobChunks.every(sha=>typeof sha==='string'&&/^[a-f0-9]{40}$/.test(sha))&&
+      Number.isSafeInteger(b.pageCount)&&b.pageCount>0&&
       typeof b.coverDataUri==='string'&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(b.coverDataUri));
     render();renderOnlineCatalog();
   }catch(e){
@@ -443,46 +446,45 @@ async function loadOnlineCatalog(){
     document.getElementById('onlineHint').textContent='Katalog nicht verfügbar: '+e.message;
   }
 }
-async function explainAssetDownloadFailure(assetId,token,initialError) {
-  // Diagnose an opaque GitHub redirect without exposing the token or asset URL.
-  if(!(initialError instanceof TypeError))return initialError;
-  try{
-    const response=await fetch(PRIVATE_API+'/releases/assets/'+assetId,{
-      headers:{Authorization:'Bearer '+token,Accept:'application/octet-stream','X-GitHub-Api-Version':'2022-11-28'},
-      cache:'no-store',
-      redirect:'manual'
-    });
-    if(response.type==='opaqueredirect'){
-      return Error('GitHub leitet die private ZIP-Datei auf einen anderen Server weiter. Der Browser blockiert dabei vermutlich den Zugriff (CORS). Für zuverlässiges Lesen brauchen wir einen geschützten Download-Vermittler.');
-    }
-    if(response.status===401||response.status===403)return Error('Keine Berechtigung für das Release-Asset (HTTP '+response.status+').');
-    if(response.status===404)return Error('Release-Asset nicht gefunden oder nicht freigegeben (HTTP 404).');
-    return Error('ZIP-Download wurde vom Browser blockiert. GitHub-Diagnose: HTTP '+response.status+', Antworttyp '+response.type+'. Netzwerk- oder CORS-Problem möglich.');
-  }catch(e){
-    return Error('ZIP-Download konnte nicht hergestellt werden. Auch die GitHub-Diagnose wurde vom Browser blockiert (Netzwerk/CORS).');
+async function downloadGitBlobs(entry){
+  // Fetch only GitHub API JSON responses: no private Release redirect or third-party proxy.
+  const zip=new Uint8Array(entry.zipSize);
+  let offset=0;
+  for(let i=0;i<entry.blobChunks.length;i++){
+    const sha=entry.blobChunks[i];
+    const response=await githubRequest('/git/blobs/'+sha,sessionToken);
+    const blob=await response.json();
+    if(blob.sha!==sha||blob.encoding!=='base64'||typeof blob.content!=='string')
+      throw Error('GitHub hat einen ungültigen Buchbaustein geliefert.');
+    const chunk=base64ToBytes(blob.content.replace(/\\s/g,''));
+    if(!chunk.length||chunk.byteLength>2*1024*1024||offset+chunk.byteLength>zip.byteLength)
+      throw Error('Die heruntergeladenen Buchdaten haben eine ungültige Größe.');
+    zip.set(chunk,offset);
+    offset+=chunk.byteLength;
+    const percent=Math.round(70*(i+1)/entry.blobChunks.length);
+    $('importProgress').value=percent;$('importPercent').textContent=percent+' %';
+    $('importStatus').textContent='Buchdaten '+(i+1)+' von '+entry.blobChunks.length+' werden geladen …';
+    await allowImportPaint();
   }
+  if(offset!==zip.byteLength)throw Error('Der Buchdownload ist unvollständig.');
+  $('importStatus').textContent='Buchdaten werden geprüft …';
+  const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',zip))).map(b=>b.toString(16).padStart(2,'0')).join('');
+  if(hash!==entry.zipSha256)throw Error('Die Integritätsprüfung des Buchdownloads ist fehlgeschlagen.');
+  return zip.buffer;
 }
 async function downloadOnlineBook(entry){
   if(importingBooks||!sessionToken)return;
   importingBooks=true;
   $('importOverlay').hidden=false;
-  $('importFile').textContent=entry.title;$('importCounter').textContent='GitHub-Release';
+  $('importFile').textContent=entry.title;$('importCounter').textContent='Privater GitHub-Download';
   $('importProgress').value=0;$('importPercent').textContent='0 %';
-  $('importStatus').textContent='ZIP wird von GitHub geladen …';
+  $('importStatus').textContent='Buchdaten werden von GitHub geladen …';
   try{
-    let response;
-    try {
-      response=await githubRequest('/releases/assets/'+entry.assetId,sessionToken,'application/octet-stream');
-    } catch(error) {
-      throw await explainAssetDownloadFailure(entry.assetId,sessionToken,error);
-    }
-    const buffer=await response.arrayBuffer();
-    if(buffer.byteLength<4||new DataView(buffer).getUint32(0,true)!==0x04034b50){
-      const format=(response.headers.get('content-type')||'unbekannt').split(';')[0];
-      throw Error('GitHub hat keine ZIP-Datei geliefert (Content-Type: '+format+').');
-    }
+    const buffer=await downloadGitBlobs(entry);
+    if(buffer.byteLength<4||new DataView(buffer).getUint32(0,true)!==0x04034b50)
+      throw Error('Die geladenen Daten sind kein gültiges ZIP-Archiv.');
     const book=await importZip(buffer,(done,total)=>{
-      const percent=Math.round(done/total*100);
+      const percent=70+Math.round(done/total*30);
       $('importProgress').value=percent;$('importPercent').textContent=percent+' %';
       $('importStatus').textContent='Seite '+done+' von '+total+' wird vorbereitet …';
     });
