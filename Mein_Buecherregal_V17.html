@@ -125,7 +125,9 @@ main.library-loading #books,main.library-loading #onlineLibrary{display:none}
 #onlineLibrary{margin-top:0}#books:not(:empty)+#onlineLibrary{margin-top:18px}#onlineLibrary[hidden]{display:none}#onlineHint{font-size:14px;margin:0 0 12px}#onlineHint:empty{display:none}.online-book small{display:block;padding:5px 2px;color:#d1c2da}
 /* One shared, alphabetically sorted grid for local and remote books. */
 #onlineLibrary{margin:0}#books:not(:empty)+#onlineLibrary{margin-top:0}
-.book-availability{display:inline-flex;align-items:center;gap:4px;color:#c1e7d0;white-space:nowrap;font-size:11px}
+.book-cover-wrap{display:block;position:relative}
+.book-cover-wrap img{display:block}
+.book-availability{position:absolute;left:9px;bottom:12px;display:inline-flex;align-items:center;gap:5px;background:#211629e8;color:#d3f3df;border:1px solid #a3d9b879;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:600;line-height:1;white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px #0007}
 .book-availability svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 </style></head><body>
 <header><h1>📚 Mein Bücherregal</h1><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
@@ -223,6 +225,7 @@ function render(){
     const cover=document.createElement('img');
     cover.src=item.offline?(b.cover||b.pages[0]):b.coverDataUri;
     cover.alt='Buchcover: '+b.title;cover.loading='lazy';
+    const coverWrap=document.createElement('span');coverWrap.className='book-cover-wrap';coverWrap.append(cover);
     const title=document.createElement('strong');title.textContent=b.title;
     const meta=document.createElement('span');meta.className='book-meta';
     const pages=document.createElement('span');pages.className='book-meta-item';
@@ -241,9 +244,9 @@ function render(){
       availability.title='Auf diesem Gerät gespeichert';
       availability.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5 5-5"/></svg>';
       availability.append(document.createTextNode('Gespeichert'));
-      meta.append(availability);
+      coverWrap.append(availability);
     }
-    card.append(cover,title,meta);
+    card.append(coverWrap,title,meta);
     card.onclick=()=>item.offline?openBook(b.id):downloadOnlineBook(b);
     holder.append(card);
     if(item.offline){
