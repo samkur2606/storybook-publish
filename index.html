@@ -127,8 +127,8 @@ main.library-loading #books,main.library-loading #onlineLibrary{display:none}
 #onlineLibrary{margin:0}#books:not(:empty)+#onlineLibrary{margin-top:0}
 .book-cover-wrap{display:block;position:relative}
 .book-cover-wrap img{display:block}
-.book-availability{position:absolute;left:9px;bottom:12px;display:inline-flex;align-items:center;gap:5px;background:#211629e8;color:#d3f3df;border:1px solid #a3d9b879;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:600;line-height:1;white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px #0007}
-.book-availability svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.book-availability{position:absolute;right:10px;bottom:10px;width:23px;height:23px;display:flex;align-items:center;justify-content:center;background:#22182ce0;color:#d8f5e7;border:1px solid #b9efd273;border-radius:50%;pointer-events:none;box-shadow:0 1px 6px #0005}
+.book-availability svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 </style></head><body>
 <header><h1>📚 Mein Bücherregal</h1><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
@@ -242,8 +242,8 @@ function render(){
       const availability=document.createElement('span');
       availability.className='book-availability';
       availability.title='Auf diesem Gerät gespeichert';
-      availability.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5 5-5"/></svg>';
-      availability.append(document.createTextNode('Gespeichert'));
+      availability.setAttribute('aria-label','Auf diesem Gerät gespeichert');
+      availability.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 12 3 3 7-7"/></svg>';
       coverWrap.append(availability);
     }
     card.append(coverWrap,title,meta);
