@@ -125,8 +125,7 @@ main.library-loading #books,main.library-loading #onlineLibrary{display:none}
 #onlineLibrary{margin-top:0}#books:not(:empty)+#onlineLibrary{margin-top:18px}#onlineLibrary[hidden]{display:none}#onlineHint{font-size:14px;margin:0 0 12px}#onlineHint:empty{display:none}.online-book small{display:block;padding:5px 2px;color:#d1c2da}
 /* One shared, alphabetically sorted grid for local and remote books. */
 #onlineLibrary{margin:0}#books:not(:empty)+#onlineLibrary{margin-top:0}
-.book-availability{display:inline-flex;align-items:center;gap:4px;color:#b9abc4;white-space:nowrap;font-size:11px}
-.book-availability.is-offline{color:#c1e7d0}
+.book-availability{display:inline-flex;align-items:center;gap:4px;color:#c1e7d0;white-space:nowrap;font-size:11px}
 .book-availability svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 </style></head><body>
 <header><h1>📚 Mein Bücherregal</h1><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
@@ -236,14 +235,14 @@ function render(){
       rt.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>';
       rt.append(document.createTextNode(minutes+' Min.'));meta.append(rt);
     }
-    const availability=document.createElement('span');
-    availability.className='book-availability'+(item.offline?' is-offline':'');
-    availability.title=item.offline?'Auf diesem Gerät gespeichert':'Noch nicht heruntergeladen';
-    availability.innerHTML=item.offline
-      ?'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="m9 12 2 2 4-4"/></svg>'
-      :'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 18v3h14v-3"/></svg>';
-    availability.append(document.createTextNode(item.offline?'Offline':'Online'));
-    meta.append(availability);
+    if(item.offline){
+      const availability=document.createElement('span');
+      availability.className='book-availability';
+      availability.title='Auf diesem Gerät gespeichert';
+      availability.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5 5-5"/></svg>';
+      availability.append(document.createTextNode('Gespeichert'));
+      meta.append(availability);
+    }
     card.append(cover,title,meta);
     card.onclick=()=>item.offline?openBook(b.id):downloadOnlineBook(b);
     holder.append(card);
