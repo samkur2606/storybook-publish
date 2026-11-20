@@ -102,6 +102,7 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
 .github-buttons .github-save{background:#d5a8eb;color:#27152e;border:1px solid #e5bef4}
 .github-buttons .github-remove{background:transparent;border:1px solid #73617c;color:#d9c9e0}
 .github-buttons button:disabled{opacity:.6;cursor:wait}
+#githubTokenEntry[hidden]{display:none}
 .github-buttons button[hidden]{display:none}
 @media(max-width:400px){#settingsDialog{padding:18px}#githubSettings{padding:15px}}
 
@@ -137,12 +138,14 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
       <span class="github-connection-dot" aria-hidden="true"></span>
       <span id="githubConnectionLabel">Noch kein Zugang eingerichtet</span>
     </div>
-    <label class="github-token-label" for="githubToken">Persönlicher Lesetoken</label>
-    <div class="github-token-field">
-      <input id="githubToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…" aria-describedby="githubTokenHint" />
-      <button id="githubToggleVisibility" type="button" aria-label="Token anzeigen" aria-pressed="false">Anzeigen</button>
+    <div id="githubTokenEntry">
+      <label class="github-token-label" for="githubToken">Persönlicher Lesetoken</label>
+      <div class="github-token-field">
+        <input id="githubToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…" aria-describedby="githubTokenHint" />
+        <button id="githubToggleVisibility" type="button" aria-label="Token anzeigen" aria-pressed="false">Anzeigen</button>
+      </div>
+      <p class="github-token-hint" id="githubTokenHint">Nur Leserechte für <strong>storybook-books</strong> erforderlich. Der Token bleibt unverschlüsselt auf diesem Gerät gespeichert.</p>
     </div>
-    <p class="github-token-hint" id="githubTokenHint">Nur Leserechte für <strong>storybook-books</strong> erforderlich. Der Token bleibt unverschlüsselt auf diesem Gerät gespeichert.</p>
     <p id="githubFeedback" role="status" aria-live="polite"></p>
     <div class="github-buttons">
       <button id="githubSave" class="github-save" type="button">Zugang prüfen &amp; speichern</button>
@@ -296,6 +299,7 @@ document.querySelector('main').append(onlineSection);
 
 const credentialElements = {
   token:$('githubToken'),
+  entry:$('githubTokenEntry'),
   status:$('githubFeedback'),
   connection:$('githubConnection'),
   connectionLabel:$('githubConnectionLabel'),
@@ -309,10 +313,12 @@ function credentialStatus(message,type='neutral') {
 }
 function syncCredentialButtons() {
   const saved=!!localStorage.getItem(CREDENTIAL_KEY);
+  credentialElements.entry.hidden=saved;
+  credentialElements.save.hidden=saved;
   credentialElements.remove.hidden=!saved;
   credentialElements.connection.dataset.connected=String(saved);
   credentialElements.connectionLabel.textContent=saved?'Zugang auf diesem Gerät gespeichert':'Noch kein Zugang eingerichtet';
-  credentialElements.token.placeholder=saved?'Neuen Token eingeben …':'github_pat_…';
+  credentialElements.token.placeholder='github_pat_…';
 }
 credentialElements.visibility.onclick=()=>{
   const visible=credentialElements.token.type==='password';
