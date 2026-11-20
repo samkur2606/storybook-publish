@@ -1,25 +1,56 @@
-/* Cache only the application shell; book pages live in IndexedDB after loading. */
-const CACHE = 'storybook-app-shell-v1';
-const SHELL = ['./Mein_Buecherregal_V17.html','./manifest.webmanifest','./icons/book.svg'];
+/* App shell only: downloaded books remain separately in IndexedDB. */
+const CACHE = 'storybook-app-shell-v2';
+const SHELL = ['./index.html', './Mein_Buecherregal_V17.html', './manifest.webmanifest', './icons/book.svg'];
+const ROOT = new URL('./', self.registration.scope);
+const SHELL_PATHS = new Set(SHELL.map(path => new URL(path, ROOT).pathname));
+
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches.open(CACHE)
+      .then(cache => Promise.all(SHELL.map(async path => {
+        const url = new URL(path, ROOT);
+        const response = await fetch(new Request(url, {cache: 'reload'}));
+        if (!response.ok) throw Error('App shell HTTP ' + response.status);
+        await cache.put(url, response);
+      })))
+      .then(() => self.skipWaiting())
+  );
 });
+
 self.addEventListener('activate', event => {
-  event.waitUntil(Promise.all([
-    caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('storybook-app-shell-') && key !== CACHE).map(key => caches.delete(key)))),
-    self.clients.claim()
-  ]));
+  event.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(keys
+        .filter(key => key.startsWith('storybook-app-shell-') && key !== CACHE)
+        .map(key => caches.delete(key))))
+      .then(() => self.clients.claim())
+  );
 });
+
 self.addEventListener('fetch', event => {
   const request = event.request;
-  if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
+  if (request.method !== 'GET') return;
   const url = new URL(request.url);
-  if (!SHELL.some(path => url.pathname.endsWith(path.slice(1)))) return;
-  event.respondWith(fetch(request).then(response => {
-    if(response.ok) {
-      const copy = response.clone();
-      caches.open(CACHE).then(cache => cache.put(request,copy));
+  if (url.origin !== self.location.origin) return;
+  if (url.pathname !== ROOT.pathname && !SHELL_PATHS.has(url.pathname)) return;
+
+  event.respondWith((async () => {
+    try {
+      // Fetch the current shell without relying on stale browser HTTP caches.
+      const fresh = await fetch(new Request(request, {cache: 'no-store'}));
+      if (!fresh.ok) throw Error('App shell HTTP ' + fresh.status);
+      const cache = await caches.open(CACHE);
+      await cache.put(request, fresh.clone());
+      return fresh;
+    } catch (error) {
+      const cache = await caches.open(CACHE);
+      const fallback = await cache.match(request, {ignoreSearch: true});
+      if (fallback) return fallback;
+      if (url.pathname === ROOT.pathname) {
+        const index = await cache.match(new URL('./index.html', ROOT));
+        if (index) return index;
+      }
+      throw error;
     }
-    return response;
-  }).catch(() => caches.match(request)));
+  })());
 });
