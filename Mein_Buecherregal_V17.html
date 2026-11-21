@@ -246,6 +246,11 @@ body{background:#f8f2e7;background-attachment:initial}
   .search-wrap{min-height:46px;border-radius:13px}
 }
 @media(max-width:320px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Library cards are for opening books; infrequent deletion lives in reader options. */
+.book-holder .book{height:100%}
+#reader #deleteBook{color:#f1c9bc;border-color:#8c5b4b}
+#reader #deleteBook:focus-visible{outline:2px solid #eac8aa;outline-offset:2px}
 </style></head><body>
 <header><h1><img class="brand-icon" src="./icons/book.svg?v=cream-2" alt="" aria-hidden="true">Mein Bücherregal</h1><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
@@ -254,7 +259,7 @@ body{background:#f8f2e7;background-attachment:initial}
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
 </div></main>
-<section id="reader"><div class="viewport" id="viewport"><div class="sheet" id="sheet"></div></div><button class="exit" id="close" aria-label="Zur Bibliothek">×</button><div class="reader-title" id="readerTitle"></div><div class="toolbar"><button id="prev" aria-label="Vorherige Seite">‹</button><span id="count">1 / 3</span><button id="next" aria-label="Nächste Seite">›</button><button id="more" aria-label="Weitere Optionen">⋯</button></div><div class="toolbar menu" id="menu" style="bottom:calc(80px + env(safe-area-inset-bottom))"><button id="downloadBook" aria-label="Buch herunterladen" title="Buch herunterladen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></svg></button><button id="spread" title="Doppelseitenansicht (Tablet quer)" aria-label="Doppelseitenansicht umschalten"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="7" height="14" rx="1.4"/><rect x="13.5" y="5" width="7" height="14" rx="1.4"/></svg></button><button id="full" title="Vollbild">⛶</button><button id="hide" title="Bedienung ausblenden">◉</button></div></section>
+<section id="reader"><div class="viewport" id="viewport"><div class="sheet" id="sheet"></div></div><button class="exit" id="close" aria-label="Zur Bibliothek">×</button><div class="reader-title" id="readerTitle"></div><div class="toolbar"><button id="prev" aria-label="Vorherige Seite">‹</button><span id="count">1 / 3</span><button id="next" aria-label="Nächste Seite">›</button><button id="more" aria-label="Weitere Optionen">⋯</button></div><div class="toolbar menu" id="menu" style="bottom:calc(80px + env(safe-area-inset-bottom))"><button id="downloadBook" aria-label="Buch herunterladen" title="Buch herunterladen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></svg></button><button id="spread" title="Doppelseitenansicht (Tablet quer)" aria-label="Doppelseitenansicht umschalten"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="7" height="14" rx="1.4"/><rect x="13.5" y="5" width="7" height="14" rx="1.4"/></svg></button><button id="full" title="Vollbild">⛶</button><button id="hide" title="Bedienung ausblenden">◉</button><button id="deleteBook" title="Dieses Buch vom Gerät löschen" aria-label="Gespeichertes Buch löschen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 4h4M7 7l1 13h8l1-13M10 11v6m4-6v6"/></svg></button></div></section>
 <div id="importOverlay" hidden>
   <div class="import-panel" role="dialog" aria-modal="true" aria-labelledby="importTitle" aria-describedby="importStatus">
     <div class="import-heading"><span class="import-spinner" aria-hidden="true"></span><div><h2 id="importTitle">Buch wird geladen</h2><small id="importCounter">Buch 1 von 1</small></div></div>
@@ -366,28 +371,13 @@ function render(){
     card.append(coverWrap,title,meta);
     card.onclick=()=>item.offline?openBook(b.id):downloadOnlineBook(b);
     holder.append(card);
-    if(item.offline){
-      const options=document.createElement('button');options.className='book-options';
-      options.textContent='⋮';options.setAttribute('aria-label','Optionen für '+b.title);
-      options.setAttribute('aria-expanded','false');
-      const actions=document.createElement('div');actions.className='book-actions';actions.hidden=true;
-      const remove=document.createElement('button');remove.textContent='🗑 Buch löschen';
-      remove.onclick=()=>{actions.hidden=true;options.setAttribute('aria-expanded','false');askDelete(b.id)};
-      actions.append(remove);
-      options.onclick=()=>{
-        document.querySelectorAll('.book-actions').forEach(x=>{if(x!==actions)x.hidden=true});
-        document.querySelectorAll('.book-options').forEach(x=>{if(x!==options)x.setAttribute('aria-expanded','false')});
-        actions.hidden=!actions.hidden;options.setAttribute('aria-expanded',String(!actions.hidden));
-      };
-      holder.append(options,actions);
-    }
     grid.append(holder);
   }
 }
 $('search').addEventListener('input',render);
 $('clearSearch').addEventListener('click',()=>{$('search').value='';render();$('search').focus()});
 function add(b){if(!valid(b))throw Error('Das Buchpaket enthält keine gültigen Seiten.');b.id=b.id||b.title;const idx=books.findIndex(x=>x.id===b.id);if(idx>=0)books[idx]=b;else books.push(b);render();if(typeof renderOnlineCatalog==='function')renderOnlineCatalog()}
-function openBook(id){active=books.find(b=>b.id===id);if(!active)return;page=0;spreadMode=false;$('spread').setAttribute('aria-pressed','false');$('reader').classList.add('open');$('readerTitle').textContent=active.title;showPage();history.pushState({reader:true},'','#lesen')}
+function openBook(id){active=books.find(b=>b.id===id);if(!active)return;$('menu').classList.remove('show');page=0;spreadMode=false;$('spread').setAttribute('aria-pressed','false');$('reader').classList.add('open');$('readerTitle').textContent=active.title;showPage();history.pushState({reader:true},'','#lesen')}
 async function closeBook(){if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){console.warn('Vollbild konnte nicht beendet werden',e)}}active=null;$('reader').classList.remove('open');$('reader').classList.remove('hide-controls');$('menu').classList.remove('show');if(location.hash==='#lesen')history.replaceState(null,'',location.pathname+location.search)}
 function canSpread(){return spreadMode && window.innerWidth>=700 && window.innerWidth>window.innerHeight}
 function showPage(){
@@ -439,6 +429,7 @@ async function saveBook(book){
     tx.onabort=()=>reject(tx.error||Error('Speichern abgebrochen.'));
   });
 }
+$('deleteBook').onclick=()=>{if(active){$('menu').classList.remove('show');askDelete(active.id)}};
 $('settingsBtn').onclick=()=>$('settingsDialog').showModal();
 $('closeSettings').onclick=()=>$('settingsDialog').close();
 let pendingDeleteId=null;
@@ -446,7 +437,7 @@ function askDelete(id){let b=books.find(x=>x.id===id);if(!b)return;pendingDelete
 $('cancelDelete').onclick=()=>{$('deleteDialog').close();pendingDeleteId=null};
 $('deleteDialog').addEventListener('close',()=>{pendingDeleteId=null});
 async function deleteStoredBook(id){let db=await openDatabase();return new Promise((resolve,reject)=>{let tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||Error('Löschen fehlgeschlagen'));tx.onabort=()=>reject(tx.error||Error('Löschen abgebrochen'))})}
-$('confirmDelete').onclick=async()=>{const id=pendingDeleteId;if(!id)return;const btn=$('confirmDelete');btn.disabled=true;try{await deleteStoredBook(id);books=books.filter(b=>b.id!==id);$('deleteDialog').close();render()}catch(err){alert('Das Buch konnte nicht gelöscht werden: '+err.message)}finally{btn.disabled=false}};
+$('confirmDelete').onclick=async()=>{const id=pendingDeleteId;if(!id)return;const btn=$('confirmDelete');btn.disabled=true;try{await deleteStoredBook(id);if(active?.id===id)await closeBook();books=books.filter(b=>b.id!==id);$('deleteDialog').close();render();if(typeof renderOnlineCatalog==='function')renderOnlineCatalog()}catch(err){alert('Das Buch konnte nicht gelöscht werden: '+err.message)}finally{btn.disabled=false}};
 async function restoreBooks(){
   try{
     let db=await openDatabase();
