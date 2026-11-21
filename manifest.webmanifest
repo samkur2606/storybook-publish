@@ -6,11 +6,11 @@
   "start_url": "./Mein_Buecherregal_V17.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#17131c",
-  "theme_color": "#21182b",
+  "background_color": "#f8f2e7",
+  "theme_color": "#f8f2e7",
   "icons": [
     {
-      "src": "./icons/book.svg",
+      "src": "./icons/book.svg?v=cream-1",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
