@@ -1,8 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
 <title>Mein Bücherregal</title>
-<rect width="512" height="512" rx="112" fill="#F8EEDC"/>
-<circle cx="256" cy="256" r="206" fill="#58371F"/>
-<path d="M122 167c43-16 94-13 134 18 40-31 91-34 134-18v183c-43-16-94-13-134 18-40-31-91-34-134-18z" fill="#FFF6E7"/>
-<path d="M256 186v181M122 350c44-16 93-12 134 18 40-30 90-34 134-18" fill="none" stroke="#58371F" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M293 160h35v74l-17.5-13-17.5 13z" fill="#DBA75E"/>
+<rect width="512" height="512" fill="#F8EEDC"/>
+<path d="M94 157c58-25 111-13 162 20 51-33 104-45 162-20v208c-54-18-109-10-162 26-53-36-108-44-162-26z" fill="#63442F"/>
+<path d="M119 182c42-12 82-4 123 23v150c-44-21-86-28-123-18zM270 205c41-27 81-35 123-23v155c-37-10-79-3-123 18z" fill="#F8EEDC"/>
 </svg>
