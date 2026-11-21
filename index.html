@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#21182b"><title>Mein Bücherregal V17</title><link rel="manifest" href="./manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><style>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><title>Mein Bücherregal V17</title><link rel="manifest" href="./manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><style>
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,sans-serif;background:#17131c;color:#fff}button{cursor:pointer;font:inherit}header{padding:28px 20px 12px;max-width:900px;margin:auto}h1{font-family:Georgia,serif;font-size:30px;margin:0 0 6px}p{color:#c6bfc9;line-height:1.5}main{max-width:900px;margin:auto;padding:12px 20px 100px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 24px}.btn{border:1px solid #75667e;border-radius:14px;background:#31253b;color:white;padding:12px 16px}.btn.primary{background:#a16eb3;border-color:#a16eb3;color:#140b1c;font-weight:700}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:18px}.book{border:1px solid #53455a;background:#251d2c;border-radius:18px;padding:10px;text-align:left;overflow:hidden}.book img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:11px}.book strong{display:block;padding:9px 2px 2px;color:#fff}.book small{color:#bcb1c3}
 /* Compact, consistent page-count and reading-time metadata. */
 .book-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:5px 2px 1px;color:#d1c2da;font-size:12px;text-align:left}
@@ -129,8 +129,90 @@ main.library-loading #books,main.library-loading #onlineLibrary{display:none}
 .book-cover-wrap img{display:block}
 .book-availability{position:absolute;right:10px;bottom:10px;width:23px;height:23px;display:flex;align-items:center;justify-content:center;background:#22182ce0;color:#d8f5e7;border:1px solid #b9efd273;border-radius:50%;pointer-events:none;box-shadow:0 1px 6px #0005}
 .book-availability svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+.brand-icon{width:37px;height:37px;border-radius:10px;flex:none}
+header h1{display:flex;align-items:center;gap:11px}
+/* Warm cream & walnut bookshelf: daylight surfaces, restrained wood accents. */
+:root{color-scheme:light;--cream:#f8f2e7;--paper:#fffaf1;--walnut:#503824;--wood:#795436;--muted:#796b59;--edge:#decbb1;--gold:#c79653;--soft:#f0e2cb}
+html,body{background:var(--cream);color:var(--walnut)}
+body{background:linear-gradient(180deg,#efe2cf 0,#f8f2e7 210px,#fbf7ef 100%);background-attachment:fixed}
+header h1{color:#3d2a1c;letter-spacing:-.35px}
+p,.hint{color:#796b59}
+#settingsBtn{background:#fff8ed;border:1px solid #d8c4a5;color:#624529;box-shadow:0 2px 8px #79543612}
+#settingsBtn:focus-visible,.book:focus-visible,.btn:focus-visible,.search-wrap:focus-within{outline:2px solid #b17c3f;outline-offset:2px}
+.search-wrap{background:#fffaf2;border:1px solid #ddcbb5;box-shadow:0 2px 10px #7354330b}
+.search-wrap:focus-within{border-color:#b68b5c;box-shadow:0 0 0 3px #cda77735}
+.search-wrap svg,.clear-search{color:#896c4f}
+.search-wrap input{color:#4b321f}
+.search-wrap input::placeholder{color:#948573}
+.search-meta{color:#81705d}
+.grid{gap:18px}
+.book{background:#fffaf3;border:1px solid #e0d0ba;box-shadow:0 4px 15px #65472a12;transition:border-color .15s,box-shadow .15s}
+.book:active{border-color:#b98d5e;box-shadow:0 2px 8px #65472a18}
+.book strong{color:#493321}
+.book small,.search-empty small{color:#796b59}
+.book-meta,.online-book small{color:#776a5e}
+.book-options{background:#49301fdc;border-color:#f1dfbe80;color:#fff9ec;box-shadow:0 2px 8px #26160e55}
+.book-options:focus-visible{outline:3px solid #c9a16a}
+.book-actions{background:#fff9ef;border:1px solid #d9c3a8;box-shadow:0 9px 25px #4f372433}
+.book-actions button{color:#9c4434}
+.book-actions button:active{background:#efe2d1}
+.book-availability{background:#fef8e9ed;border:1px solid #9e7d55;color:#644629;box-shadow:0 1px 5px #26160e40}
+.skeleton-book{background:#fffaf3;border:1px solid #e0d0ba}
+.skeleton-cover,.skeleton-title,.skeleton-detail{background:#e7d7c1}
+.empty,.search-empty{border-color:#d7bea0;color:#614936;background:#fff8ec}
+.btn{background:#f4e6d2;border:1px solid #ceb28e;color:#5a402a}
+.btn.primary{background:#724c2d;border-color:#724c2d;color:#fff9ee}
+#onlineHint{color:#725b42}
+/* Dialogs and form controls share the warm paper treatment. */
+#settingsDialog,#downloadDialog,#deleteDialog{background:#fffaf0;border:1px solid #d9c1a4;color:#4b321f;box-shadow:0 20px 65px #3e2d2059}
+#settingsDialog::backdrop,#downloadDialog::backdrop,#deleteDialog::backdrop{background:#24190e91}
+#settingsDialog h2,#downloadDialog h2,#deleteDialog h2{color:#46301f}
+#settingsDialog p,#downloadDialog p,#deleteDialog p{color:#796a56}
+#settingsDialog .settings-eyebrow{color:#946b42}
+#settingsDialog .settings-close{background:#f0e2cd;color:#624329;border:1px solid #d4bc9e}
+#githubSettings{background:#f7efdf;border:1px solid #e0caaa}
+.github-settings-icon{background:#e8d3b8;color:#5b3b22}
+#settingsDialog .github-settings-subtitle,#settingsDialog .github-token-hint{color:#756552}
+.github-connection{background:#fffaf2;border:1px solid #dac4a8;color:#76604a}
+.github-connection-dot{background:#b5a48f}
+.github-connection[data-connected="true"]{border-color:#8dad85;color:#35623c;background:#f2f8eb}
+.github-connection[data-connected="true"] .github-connection-dot{background:#589668}
+.github-token-label{color:#503723}
+.github-token-field{background:#fffdf8;border:1px solid #d6bb9a}
+.github-token-field:focus-within{border-color:#ae8557;box-shadow:0 0 0 3px #bd976938}
+.github-token-field input{color:#45301f}
+.github-token-field input::placeholder{color:#96816b}
+.github-token-field button{color:#795433;border-left-color:#d6bb9a}
+#settingsDialog .github-token-hint strong{color:#543c27}
+#githubFeedback{color:#765940}
+#githubFeedback[data-state="error"]{color:#a33330}
+#githubFeedback[data-state="success"]{color:#33754a}
+.github-buttons .github-save{background:#765234;border-color:#765234;color:#fff8ed}
+.github-buttons .github-remove{background:#fff8ed;border:1px solid #d0b493;color:#77543a}
+.download-choices button{background:#f4e7d3;border:1px solid #d9c3a6;color:#4b321f}
+#cancelDownload{color:#765941}
+#deleteDialog .delete-notice{background:#f3e5d3;color:#664d38}
+#deleteDialog button{background:#f3e5d3;border-color:#d4b99a;color:#563c29}
+#deleteDialog #confirmDelete{background:#aa483d;color:#fff;border-color:#aa483d}
+#importOverlay{background:#3020119c}
+.import-panel{background:#fff9ee;border:1px solid #d9c2a4;color:#493322}
+.import-heading small{color:#836d57}
+.import-spinner{border-color:#e5d3bb;border-top-color:#896039}
+#importFile{color:#493322}
+#importStatus{color:#745e46}
+#importProgress,#importProgress::-webkit-progress-bar{background:#e6d7bf}
+#importProgress::-webkit-progress-value{background:#a47744}
+#importProgress::-moz-progress-bar{background:#a47744}
+.import-foot{color:#78634b}
+#importPercent{color:#704729}
+/* Keep the reader dark and distraction-free, while warming its controls. */
+#reader{background:#19140f;color:#fff9ed}
+.toolbar,.reader-title{background:#2c2017dc;color:#fff9ee}
+.toolbar button,.exit{background:#493527;color:#fff8eb;border-color:#856b4e}
+
 </style></head><body>
-<header><h1>📚 Mein Bücherregal</h1><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
+<header><h1><img class="brand-icon" src="./icons/book.svg?v=cream-1" alt="" aria-hidden="true">Mein Bücherregal</h1><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
