@@ -293,6 +293,45 @@ body{background:#f8f2e7;background-attachment:initial}
   #reader #menu button{flex-basis:38px;width:38px;height:38px}
 }
 
+
+/* Immersive reader: softer dark espresso rails and unobtrusive translucent controls. */
+#reader{background:#241a13;color:#f7eedf}
+#reader .toolbar,#reader .reader-title,#reader #menu{
+  background:rgba(60,43,30,.42);
+  color:#fff5e7;
+  border:1px solid rgba(250,238,215,.13);
+  box-shadow:0 3px 15px rgba(20,12,7,.12);
+  -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px)
+}
+#reader .toolbar{padding:5px 8px;gap:6px}
+#reader .toolbar button,#reader .exit{
+  flex:0 0 38px;width:38px;height:38px;
+  color:#fff1dc;background:rgba(80,58,39,.33);
+  border:1px solid rgba(255,243,218,.23);
+  font-size:19px;
+  box-shadow:none
+}
+#reader .toolbar button:disabled{opacity:.35}
+#reader .exit{
+  top:calc(16px + env(safe-area-inset-top));left:16px;
+  width:38px;height:38px;font-size:23px;font-family:Arial,sans-serif;
+  line-height:1
+}
+#reader .reader-title{
+  top:calc(16px + env(safe-area-inset-top));left:66px;
+  height:38px;display:flex;align-items:center;
+  font-size:13px;padding:0 12px;max-width:calc(100vw - 82px)
+}
+#reader #menu{background:rgba(60,43,30,.52);padding:7px 9px;gap:6px}
+#reader #menu button{flex:0 0 38px;width:38px;height:38px}
+#reader #menu #deleteBook{color:#ffded2;border-color:rgba(255,205,186,.27)}
+#reader:fullscreen .exit,#reader:-webkit-full-screen .exit{
+  top:30px;left:16px;width:38px;height:38px;font-size:23px
+}
+#reader:fullscreen .reader-title,#reader:-webkit-full-screen .reader-title{
+  top:30px;left:66px;height:38px;display:flex;align-items:center;
+  font-size:13px;color:#fff5e7;max-width:calc(100vw - 82px)
+}
 </style></head><body>
 <header><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
