@@ -1,6 +1,6 @@
 /* App shell only: downloaded books remain separately in IndexedDB. */
-const CACHE = 'storybook-app-shell-v2';
-const SHELL = ['./index.html', './Mein_Buecherregal_V17.html', './manifest.webmanifest', './icons/book.svg'];
+const CACHE = 'storybook-app-shell-v3';
+const SHELL = ['./index.html', './Mein_Buecherregal_V17.html', './manifest.webmanifest', './icons/book.svg?v=cream-1'];
 const ROOT = new URL('./', self.registration.scope);
 const SHELL_PATHS = new Set(SHELL.map(path => new URL(path, ROOT).pathname));
 
