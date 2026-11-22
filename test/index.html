@@ -476,6 +476,28 @@ function render(){
     const hint=document.createElement('small');hint.textContent='Versuche einen anderen Suchbegriff.';
     empty.append(heading,hint);grid.append(empty);return;
   }
+  if (APP_IS_TEST && !query && sessionToken && sharperTestCover) {
+    const alice = onlineCatalog.find(book => book.id === "alice-im-wunderland");
+    if (alice) {
+      for (const [label, src] of [['Alice · bisher', alice.coverDataUri], ['Alice · 360 × 640', sharperTestCover]]) {
+        const holder = document.createElement('div');
+        holder.className = 'book-holder';
+        const card = document.createElement('div');
+        card.className = 'book';
+        const coverWrap = document.createElement('span');
+        coverWrap.className = 'book-cover-wrap';
+        const cover = document.createElement('img');
+        cover.src = src;
+        cover.alt = label;
+        coverWrap.append(cover);
+        const title = document.createElement('strong');
+        title.textContent = label;
+        card.append(coverWrap, title);
+        holder.append(card);
+        grid.append(holder);
+      }
+    }
+  }
   for(const item of visible){
     const b=item.book;
     const holder=document.createElement('div');holder.className='book-holder';
@@ -647,6 +669,20 @@ const PRODUCTION_CREDENTIAL_KEY = 'storybook.github.readonly.local.v2';
 const CREDENTIAL_KEY = APP_IS_TEST?'storybook.github.readonly.test.v1':PRODUCTION_CREDENTIAL_KEY;
 let sessionToken = null;
 let onlineCatalog = [];
+let sharperTestCover = '';
+async function loadTestCoverComparison(token) {
+  try {
+    const response = await githubRequest('/git/blobs/5c3a17965bf6e79cd290110d887de32b7d1ddc84', token);
+    const blob = await response.json();
+    if (blob.sha !== '5c3a17965bf6e79cd290110d887de32b7d1ddc84' || blob.encoding !== 'base64') return;
+    const cover = new TextDecoder().decode(base64ToBytes(blob.content.replace(/\s/g, '')));
+    if (sessionToken !== token || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(cover)) return;
+    sharperTestCover = cover;
+    render();
+  } catch {
+    // A missing temporary preview must never interrupt the normal shelf.
+  }
+}
 const onlineSection = document.createElement('section');
 onlineSection.id = 'onlineLibrary';
 onlineSection.innerHTML = '<p id="onlineHint" role="status"></p>';
@@ -770,6 +806,7 @@ async function loadOnlineCatalog(){
       Number.isSafeInteger(b.pageCount)&&b.pageCount>0&&
       typeof b.coverDataUri==='string'&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(b.coverDataUri));
     render();renderOnlineCatalog();
+    if (APP_IS_TEST) void loadTestCoverComparison(sessionToken);
   }catch(e){
     onlineCatalog=[];renderOnlineCatalog();
     document.getElementById('onlineHint').textContent='Katalog nicht verfügbar: '+e.message;
