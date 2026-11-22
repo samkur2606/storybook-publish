@@ -414,6 +414,7 @@ body{background:#f8f2e7;background-attachment:initial}
     <p id="githubFeedback" role="status" aria-live="polite"></p>
     <div class="github-buttons">
       <button id="githubSave" class="github-save" type="button">Zugang prüfen &amp; speichern</button>
+      <button id="githubUseProduction" class="github-remove" type="button" hidden>Produktionszugang für Test übernehmen</button>
       <button id="githubRemove" class="github-remove" type="button">Gespeicherten Zugang entfernen</button>
     </div>
   </section>
@@ -462,7 +463,7 @@ function render(){
   if(startupReady&&ordered.length)$('shelfSkeleton').hidden=true;
   if(!ordered.length){
     if(startupReady&&!sessionToken){
-      grid.innerHTML='<div class="empty"><strong>Noch keine Bücher verfügbar</strong><p>Richte deinen GitHub-Zugang in den Einstellungen ein, um Bücher zu entdecken.</p></div>';
+      grid.innerHTML='<div class="search-empty"><strong>Noch keine Bücher verfügbar</strong><small>Richte deinen GitHub-Zugang in den Einstellungen ein, um Bücher zu entdecken.</small></div>';
     }
     return;
   }
@@ -639,7 +640,8 @@ addEventListener('popstate',()=>{if(active)closeBook()});document.addEventListen
 // The password input only masks characters; localStorage is not encrypted.
 const PRIVATE_REPO = 'samkur2606/storybook-books';
 const PRIVATE_API = 'https://api.github.com/repos/' + PRIVATE_REPO;
-const CREDENTIAL_KEY = APP_IS_TEST?'storybook.github.readonly.test.v1':'storybook.github.readonly.local.v2';
+const PRODUCTION_CREDENTIAL_KEY = 'storybook.github.readonly.local.v2';
+const CREDENTIAL_KEY = APP_IS_TEST?'storybook.github.readonly.test.v1':PRODUCTION_CREDENTIAL_KEY;
 let sessionToken = null;
 let onlineCatalog = [];
 const onlineSection = document.createElement('section');
@@ -654,6 +656,7 @@ const credentialElements = {
   connection:$('githubConnection'),
   connectionLabel:$('githubConnectionLabel'),
   save:$('githubSave'),
+  useProduction:$('githubUseProduction'),
   remove:$('githubRemove'),
   visibility:$('githubToggleVisibility')
 };
@@ -665,6 +668,7 @@ function syncCredentialButtons() {
   const saved=!!localStorage.getItem(CREDENTIAL_KEY);
   credentialElements.entry.hidden=saved;
   credentialElements.save.hidden=saved;
+  credentialElements.useProduction.hidden=saved||!APP_IS_TEST||!localStorage.getItem(PRODUCTION_CREDENTIAL_KEY);
   credentialElements.remove.hidden=!saved;
   credentialElements.connection.dataset.connected=String(saved);
   credentialElements.connectionLabel.textContent=saved?'Zugang auf diesem Gerät gespeichert':'Noch kein Zugang eingerichtet';
@@ -697,11 +701,12 @@ async function validateCredential(token) {
   if(!/^(github_pat_|ghp_)[A-Za-z0-9_]+$/.test(token))throw Error('Ungültiges GitHub-Token-Format');
   await githubRequest('/contents/catalog.json?ref=main',token);
 }
-credentialElements.save.onclick=async()=>{
-  const token=credentialElements.token.value.trim();
-  if(!token){credentialStatus('Bitte zuerst einen neuen Token eingeben.','error');return}
+async function saveCredential(token,button){
+  if(!token){credentialStatus('Kein verwendbarer GitHub-Zugang vorhanden.','error');return}
+  const buttonLabel=button.textContent;
   credentialElements.save.disabled=true;
-  credentialElements.save.textContent='Zugang wird geprüft …';
+  credentialElements.useProduction.disabled=true;
+  button.textContent='Zugang wird geprüft …';
   try{
     credentialStatus('Verbindung zu deinem privaten Bücherkatalog wird geprüft …');
     await validateCredential(token);
@@ -718,8 +723,13 @@ credentialElements.save.onclick=async()=>{
   }catch(e){credentialStatus('Verbindung fehlgeschlagen: '+e.message,'error')}
   finally{
     credentialElements.save.disabled=false;
-    credentialElements.save.textContent='Zugang prüfen & speichern';
+    credentialElements.useProduction.disabled=false;
+    button.textContent=buttonLabel;
   }
+}
+credentialElements.save.onclick=()=>saveCredential(credentialElements.token.value.trim(),credentialElements.save);
+credentialElements.useProduction.onclick=()=>{
+  if(APP_IS_TEST)saveCredential(localStorage.getItem(PRODUCTION_CREDENTIAL_KEY),credentialElements.useProduction);
 };
 credentialElements.remove.onclick=()=>{
   localStorage.removeItem(CREDENTIAL_KEY);
