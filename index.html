@@ -1,4 +1,17 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><title>Mein Bücherregal V17</title><link rel="manifest" href="./manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes"><style>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><title>Mein Bücherregal V17</title><link rel="manifest" href="./manifest.webmanifest"><script>
+/* Preserve the installed production entry while honoring the last selected mode. */
+(function(){
+  const key='storybook.app.mode.v1';
+  const isTest=/\/test\/(?:index\.html|Mein_Buecherregal_V17\.html)?$/.test(location.pathname);
+  const query=new URLSearchParams(location.search);
+  if(query.get('mode')==='production'){
+    localStorage.setItem(key,'production');
+    history.replaceState(null,'',location.pathname);
+  }else if(!isTest&&localStorage.getItem(key)==='test'){
+    location.replace(new URL('./test/',location.href).href);
+  }
+})();
+</script><meta name="apple-mobile-web-app-capable" content="yes"><style>
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,sans-serif;background:#17131c;color:#fff}button{cursor:pointer;font:inherit}header{padding:28px 20px 12px;max-width:900px;margin:auto}h1{font-family:Georgia,serif;font-size:30px;margin:0 0 6px}p{color:#c6bfc9;line-height:1.5}main{max-width:900px;margin:auto;padding:12px 20px 100px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 24px}.btn{border:1px solid #75667e;border-radius:14px;background:#31253b;color:white;padding:12px 16px}.btn.primary{background:#a16eb3;border-color:#a16eb3;color:#140b1c;font-weight:700}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:18px}.book{border:1px solid #53455a;background:#251d2c;border-radius:18px;padding:10px;text-align:left;overflow:hidden}.book img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:11px}.book strong{display:block;padding:9px 2px 2px;color:#fff}.book small{color:#bcb1c3}
 /* Compact, consistent page-count and reading-time metadata. */
 .book-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:5px 2px 1px;color:#d1c2da;font-size:12px;text-align:left}
@@ -137,6 +150,8 @@ header h1{display:flex;align-items:center;gap:11px}
 html,body{background:var(--cream);color:var(--walnut)}
 body{background:linear-gradient(180deg,#efe2cf 0,#f8f2e7 210px,#fbf7ef 100%);background-attachment:fixed}
 header h1{color:#3d2a1c;letter-spacing:-.35px}
+#testModeBadge{display:inline-block;margin-top:5px;padding:3px 9px;border:1px solid #c99d67;border-radius:999px;background:#f5e2c4;color:#62401f;font-size:12px;font-weight:700;line-height:1.3}
+#testModeBadge[hidden]{display:none}
 p,.hint{color:#796b59}
 #settingsBtn{background:#fff8ed;border:1px solid #d8c4a5;color:#624529;box-shadow:0 2px 8px #79543612}
 #settingsBtn:focus-visible,.book:focus-visible,.btn:focus-visible,.search-wrap:focus-within{outline:2px solid #b17c3f;outline-offset:2px}
@@ -332,8 +347,22 @@ body{background:#f8f2e7;background-attachment:initial}
   top:30px;left:66px;height:38px;display:flex;align-items:center;
   font-size:13px;color:#fff5e7;max-width:calc(100vw - 82px)
 }
+
+/* Owner-only production/test workflow: low-profile controls in Settings. */
+#appEnvironment{border:1px solid #dec9ae;border-radius:18px;padding:16px;margin:0 0 18px;background:#f7efdf}
+#appEnvironment .environment-title{display:flex;align-items:center;gap:10px}
+#appEnvironment .environment-title>span{display:grid;place-items:center;flex:none;width:35px;height:35px;border-radius:11px;background:#e8d3b8;color:#5b3b22;font-size:19px}
+#appEnvironment h3{font-size:15px;margin:0;color:#543820}
+#settingsDialog #appEnvironment p{color:#796a56;margin:4px 0 0;font-size:12px;line-height:1.45}
+#appEnvironment .environment-switch{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:14px;padding:4px;border:1px solid #d8c3a7;border-radius:13px;background:#ecdfcd}
+#appEnvironment .environment-switch button{padding:10px 6px;border:0;border-radius:9px;background:transparent;color:#65492e;font-size:13px;font-weight:650}
+#appEnvironment .environment-switch button[aria-pressed="true"]{background:#fffaf0;box-shadow:0 1px 5px #53391f20;color:#3b291a}
+#appEnvironment .environment-switch button:focus-visible{outline:2px solid #8b6038;outline-offset:2px}
+#settingsDialog #appEnvironment #modeDescription{font-size:12px;margin-top:11px}
+#settingsDialog #appEnvironment .environment-recovery{font-size:11px;margin-top:9px}
+#appEnvironment .environment-recovery a{color:#704c2b;text-decoration:underline;text-underline-offset:2px}
 </style></head><body>
-<header><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
+<header><div><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><span id="testModeBadge" hidden>Testmodus</span></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
@@ -358,6 +387,15 @@ body{background:#f8f2e7;background-attachment:initial}
     </div>
     <button type="button" class="settings-close" id="closeSettings" aria-label="Einstellungen schließen">×</button>
   </div>
+  <section id="appEnvironment" aria-labelledby="appEnvironmentHeading">
+    <div class="environment-title"><span aria-hidden="true">⚙</span><div><h3 id="appEnvironmentHeading">App-Modus</h3><p>Zwischen stabiler Version und Test wechseln</p></div></div>
+    <div class="environment-switch" role="group" aria-label="App-Modus auswählen">
+      <button type="button" id="modeProduction" aria-pressed="true">Produktion</button>
+      <button type="button" id="modeTest" aria-pressed="false">Testmodus</button>
+    </div>
+    <p id="modeDescription" role="status"></p>
+    <p class="environment-recovery">Falls die Testversion nicht startet: <a id="modeRecovery" href="./?mode=production">Produktion wiederherstellen</a>.</p>
+  </section>
   <section id="githubSettings" aria-labelledby="githubSettingsHeading">
     <div class="github-settings-title">
       <span class="github-settings-icon" aria-hidden="true">🔐</span>
@@ -378,6 +416,7 @@ body{background:#f8f2e7;background-attachment:initial}
     <p id="githubFeedback" role="status" aria-live="polite"></p>
     <div class="github-buttons">
       <button id="githubSave" class="github-save" type="button">Zugang prüfen &amp; speichern</button>
+      <button id="githubUseProduction" class="github-remove" type="button" hidden>Produktionszugang für Test übernehmen</button>
       <button id="githubRemove" class="github-remove" type="button">Gespeicherten Zugang entfernen</button>
     </div>
   </section>
@@ -385,6 +424,23 @@ body{background:#f8f2e7;background-attachment:initial}
 <dialog id="deleteDialog" aria-labelledby="deleteHeading"><h2 id="deleteHeading">Buch löschen?</h2><p id="deleteBookLabel"></p><div class="delete-notice">Das Buch wird nur aus der Browser-Datenbank gelöscht.<br><br><strong>Du kannst das Buch später erneut aus dem Online-Katalog herunterladen.</strong></div><div class="delete-buttons"><button id="cancelDelete">Abbrechen</button><button id="confirmDelete">Buch löschen</button></div></dialog>
 <dialog id="downloadDialog" aria-labelledby="downloadHeading"><h2 id="downloadHeading">Buch herunterladen</h2><p>In welchem Format möchtest du dieses Märchen speichern?</p><div class="download-choices"><button id="chooseHtml"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 13-2 2 2 2m6-4 2 2-2 2"/></svg><span><strong>HTML</strong><br><small>Direkt im Browser lesen</small></span></button><button id="chooseZip"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 3v2m0 2v2m0 2v2m-2 2h4v4h-4z"/></svg><span><strong>ZIP</strong><br><small>In eine Bilderbuch-App importieren</small></span></button></div><button id="cancelDownload">Abbrechen</button></dialog>
 <script>const $=id=>document.getElementById(id);let books=[],active=null,page=0,spreadMode=false;
+const APP_IS_TEST=/\/test\/(?:index\.html|Mein_Buecherregal_V17\.html)?$/.test(location.pathname);
+const APP_BASE=APP_IS_TEST?new URL('../',location.href):new URL('./',location.href);
+const APP_MODE_KEY='storybook.app.mode.v1';
+$('testModeBadge').hidden=!APP_IS_TEST;
+if(APP_IS_TEST)localStorage.setItem(APP_MODE_KEY,'test');
+function switchAppMode(mode){
+  if(mode!=='test'&&mode!=='production')return;
+  localStorage.setItem(APP_MODE_KEY,mode);
+  const target=new URL(mode==='test'?'./test/':'./?mode=production',APP_BASE);
+  location.assign(target.href);
+}
+$('modeProduction').setAttribute('aria-pressed',String(!APP_IS_TEST));
+$('modeTest').setAttribute('aria-pressed',String(APP_IS_TEST));
+$('modeDescription').textContent=APP_IS_TEST?'Testmodus aktiv: Du verwendest die aktuelle Testversion.':'Produktion aktiv: Du verwendest die freigegebene Version.';
+$('modeRecovery').href=new URL('./?mode=production',APP_BASE).href;
+$('modeProduction').onclick=()=>switchAppMode('production');
+$('modeTest').onclick=()=>switchAppMode('test');
 function valid(b){return b&&typeof b.title==='string'&&Array.isArray(b.pages)&&b.pages.length>0&&b.pages.every(s=>typeof s==='string'&&s.startsWith('data:image/'))}
 // Vorlesedauer aus book.json; keine unzuverlässige Berechnung aus der Seitenzahl.
 function readingMinutes(b){const n=b?.readingMinutes;return typeof n==='number'&&Number.isFinite(n)&&n>0&&n<=240?Math.ceil(n):null}
@@ -410,7 +466,7 @@ function render(){
   if(startupReady&&ordered.length)$('shelfSkeleton').hidden=true;
   if(!ordered.length){
     if(startupReady&&!sessionToken){
-      grid.innerHTML='<div class="empty"><strong>Noch keine Bücher verfügbar</strong><p>Richte deinen GitHub-Zugang in den Einstellungen ein, um Bücher zu entdecken.</p></div>';
+      grid.innerHTML='<div class="search-empty"><strong>Noch keine Bücher verfügbar</strong><small>Richte deinen GitHub-Zugang in den Einstellungen ein, um Bücher zu entdecken.</small></div>';
     }
     return;
   }
@@ -487,7 +543,7 @@ $('spread').onclick=()=>{spreadMode=!spreadMode;$('spread').setAttribute('aria-p
 let start=null;$('viewport').addEventListener('touchstart',e=>{start={x:e.changedTouches[0].clientX,y:e.changedTouches[0].clientY}},{passive:true});$('viewport').addEventListener('touchend',e=>{if(!start)return;let dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.4)change(dx<0?1:-1);start=null},{passive:true});
 $('prev').onclick=()=>change(-1);$('next').onclick=()=>change(1);$('close').onclick=closeBook;$('more').onclick=()=>$('menu').classList.toggle('show');$('hide').onclick=()=>{$('menu').classList.remove('show');$('reader').classList.add('hide-controls')};$('sheet').onclick=()=>{if($('reader').classList.contains('hide-controls'))$('reader').classList.remove('hide-controls')};$('full').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('reader').requestFullscreen()}catch(e){alert('Dieser Browser unterstützt Vollbild für lokale Dateien möglicherweise nicht.')}};
 // Die Buchdaten werden ausschließlich in der IndexedDB gespeichert, nicht im HTML-Quelltext.
-const DB_NAME='MeinMaerchenregal_Buecher', DB_VERSION=1, STORE='books';
+const DB_NAME=APP_IS_TEST?'MeinMaerchenregal_Buecher_Test':'MeinMaerchenregal_Buecher', DB_VERSION=1, STORE='books';
 let dbPromise;
 function openDatabase(){
   if(!('indexedDB' in window))return Promise.reject(Error('IndexedDB ist in diesem Browser nicht verfügbar.'));
@@ -587,7 +643,8 @@ addEventListener('popstate',()=>{if(active)closeBook()});document.addEventListen
 // The password input only masks characters; localStorage is not encrypted.
 const PRIVATE_REPO = 'samkur2606/storybook-books';
 const PRIVATE_API = 'https://api.github.com/repos/' + PRIVATE_REPO;
-const CREDENTIAL_KEY = 'storybook.github.readonly.local.v2';
+const PRODUCTION_CREDENTIAL_KEY = 'storybook.github.readonly.local.v2';
+const CREDENTIAL_KEY = APP_IS_TEST?'storybook.github.readonly.test.v1':PRODUCTION_CREDENTIAL_KEY;
 let sessionToken = null;
 let onlineCatalog = [];
 const onlineSection = document.createElement('section');
@@ -602,6 +659,7 @@ const credentialElements = {
   connection:$('githubConnection'),
   connectionLabel:$('githubConnectionLabel'),
   save:$('githubSave'),
+  useProduction:$('githubUseProduction'),
   remove:$('githubRemove'),
   visibility:$('githubToggleVisibility')
 };
@@ -613,6 +671,7 @@ function syncCredentialButtons() {
   const saved=!!localStorage.getItem(CREDENTIAL_KEY);
   credentialElements.entry.hidden=saved;
   credentialElements.save.hidden=saved;
+  credentialElements.useProduction.hidden=saved||!APP_IS_TEST||!localStorage.getItem(PRODUCTION_CREDENTIAL_KEY);
   credentialElements.remove.hidden=!saved;
   credentialElements.connection.dataset.connected=String(saved);
   credentialElements.connectionLabel.textContent=saved?'Zugang auf diesem Gerät gespeichert':'Noch kein Zugang eingerichtet';
@@ -645,11 +704,12 @@ async function validateCredential(token) {
   if(!/^(github_pat_|ghp_)[A-Za-z0-9_]+$/.test(token))throw Error('Ungültiges GitHub-Token-Format');
   await githubRequest('/contents/catalog.json?ref=main',token);
 }
-credentialElements.save.onclick=async()=>{
-  const token=credentialElements.token.value.trim();
-  if(!token){credentialStatus('Bitte zuerst einen neuen Token eingeben.','error');return}
+async function saveCredential(token,button){
+  if(!token){credentialStatus('Kein verwendbarer GitHub-Zugang vorhanden.','error');return}
+  const buttonLabel=button.textContent;
   credentialElements.save.disabled=true;
-  credentialElements.save.textContent='Zugang wird geprüft …';
+  credentialElements.useProduction.disabled=true;
+  button.textContent='Zugang wird geprüft …';
   try{
     credentialStatus('Verbindung zu deinem privaten Bücherkatalog wird geprüft …');
     await validateCredential(token);
@@ -666,8 +726,13 @@ credentialElements.save.onclick=async()=>{
   }catch(e){credentialStatus('Verbindung fehlgeschlagen: '+e.message,'error')}
   finally{
     credentialElements.save.disabled=false;
-    credentialElements.save.textContent='Zugang prüfen & speichern';
+    credentialElements.useProduction.disabled=false;
+    button.textContent=buttonLabel;
   }
+}
+credentialElements.save.onclick=()=>saveCredential(credentialElements.token.value.trim(),credentialElements.save);
+credentialElements.useProduction.onclick=()=>{
+  if(APP_IS_TEST)saveCredential(localStorage.getItem(PRODUCTION_CREDENTIAL_KEY),credentialElements.useProduction);
 };
 credentialElements.remove.onclick=()=>{
   localStorage.removeItem(CREDENTIAL_KEY);
