@@ -150,8 +150,11 @@ header h1{display:flex;align-items:center;gap:11px}
 html,body{background:var(--cream);color:var(--walnut)}
 body{background:linear-gradient(180deg,#efe2cf 0,#f8f2e7 210px,#fbf7ef 100%);background-attachment:fixed}
 header h1{color:#3d2a1c;letter-spacing:-.35px}
-#testModeBadge{display:inline-block;margin-top:5px;padding:3px 9px;border:1px solid #c99d67;border-radius:999px;background:#f5e2c4;color:#62401f;font-size:12px;font-weight:700;line-height:1.3}
-#testModeBadge[hidden]{display:none}
+header .header-title{min-width:0}
+#testModeBadges{display:flex;flex-wrap:wrap;align-items:flex-start;gap:5px 6px;margin-top:5px}
+#testModeBadges[hidden],#testCatalogBranch[hidden]{display:none}
+.test-badge{max-width:100%;padding:3px 9px;border:1px solid #c99d67;border-radius:999px;background:#f5e2c4;color:#62401f;font-size:12px;font-weight:700;line-height:1.3}
+#testCatalogBranch{min-width:0;overflow-wrap:anywhere;border-color:#d8c4a5;background:#fff8ed;color:#624529;font-weight:600}
 p,.hint{color:#796b59}
 #settingsBtn{background:#fff8ed;border:1px solid #d8c4a5;color:#624529;box-shadow:0 2px 8px #79543612}
 #settingsBtn:focus-visible,.book:focus-visible,.btn:focus-visible,.search-wrap:focus-within{outline:2px solid #b17c3f;outline-offset:2px}
@@ -162,7 +165,7 @@ p,.hint{color:#796b59}
 .search-wrap input::placeholder{color:#948573}
 .search-meta{color:#81705d}
 .grid{gap:18px}
-.book{background:#fffaf3;border:1px solid #e0d0ba;box-shadow:0 4px 15px #65472a12;transition:border-color .15s,box-shadow .15s}
+.book{background:#fffaf3;border:1px solid #e0d0ba;box-shadow:0 4px 15px #65472a12;-webkit-tap-highlight-color:transparent;transition:border-color .15s,box-shadow .15s}
 .book:active{border-color:#b98d5e;box-shadow:0 2px 8px #65472a18}
 .book strong{color:#493321}
 .book small,.search-empty small{color:#796b59}
@@ -361,8 +364,22 @@ body{background:#f8f2e7;background-attachment:initial}
 #settingsDialog #appEnvironment #modeDescription{font-size:12px;margin-top:11px}
 #settingsDialog #appEnvironment .environment-recovery{font-size:11px;margin-top:9px}
 #appEnvironment .environment-recovery a{color:#704c2b;text-decoration:underline;text-underline-offset:2px}
+#catalogSettings{border-top:1px solid #dec9ae;margin-top:14px;padding-top:14px}
+#catalogSettings label{display:block;font-size:13px;font-weight:700;color:#543820}
+#catalogSettings .catalog-select{position:relative;margin-top:6px;color:#704c2b}
+#catalogSettings .catalog-select::after{content:"";position:absolute;top:50%;inset-inline-end:18px;width:8px;height:8px;border:solid currentColor;border-width:0 2px 2px 0;transform:translateY(-70%) rotate(45deg);pointer-events:none}
+#catalogBranch{appearance:none;display:block;width:100%;min-height:44px;padding:6px 42px 6px 14px;border:1px solid #d4bc9e;border-radius:10px;background:#fffaf0;color:#4b321f;font:inherit;font-size:16px;text-overflow:ellipsis}
+@media(forced-colors:active){
+  #catalogSettings .catalog-select::after{display:none}
+  #catalogBranch{appearance:auto;padding-inline-end:14px}
+}
+#catalogSettings .catalog-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+#catalogSettings .catalog-buttons button{min-height:44px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#fffaf0;color:#543820;font:inherit;font-size:13px;font-weight:650}
+#catalogSettings :is(button,select):disabled{opacity:.58;cursor:default}
+#catalogSettings :is(button,select):focus-visible{outline:2px solid #8b6038;outline-offset:2px}
+#catalogCurrent{overflow-wrap:anywhere}
 </style></head><body>
-<header><div><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><span id="testModeBadge" hidden>Testmodus</span></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
+<header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
@@ -394,6 +411,20 @@ body{background:#f8f2e7;background-attachment:initial}
       <button type="button" id="modeTest" aria-pressed="false">Testmodus</button>
     </div>
     <p id="modeDescription" role="status"></p>
+    <div id="catalogSettings" hidden>
+      <label for="catalogBranch">Bücher-Branch</label>
+      <p id="catalogCurrent"></p>
+      <div class="catalog-select">
+        <select id="catalogBranch" aria-describedby="catalogCurrent catalogFeedback" disabled>
+          <option value="main">main (Standard)</option>
+        </select>
+      </div>
+      <div class="catalog-buttons">
+        <button id="catalogApply" type="button" disabled>Übernehmen</button>
+        <button id="catalogReset" type="button" disabled>Auf main zurücksetzen</button>
+      </div>
+      <p id="catalogFeedback" role="status"></p>
+    </div>
     <p class="environment-recovery">Falls die Testversion nicht startet: <a id="modeRecovery" href="./?mode=production">Produktion wiederherstellen</a>.</p>
   </section>
   <section id="githubSettings" aria-labelledby="githubSettingsHeading">
@@ -427,7 +458,6 @@ body{background:#f8f2e7;background-attachment:initial}
 const APP_IS_TEST=/\/test\/(?:index\.html|Mein_Buecherregal_V17\.html)?$/.test(location.pathname);
 const APP_BASE=APP_IS_TEST?new URL('../',location.href):new URL('./',location.href);
 const APP_MODE_KEY='storybook.app.mode.v1';
-$('testModeBadge').hidden=!APP_IS_TEST;
 if(APP_IS_TEST)localStorage.setItem(APP_MODE_KEY,'test');
 function switchAppMode(mode){
   if(mode!=='test'&&mode!=='production')return;
@@ -446,26 +476,46 @@ function valid(b){return b&&typeof b.title==='string'&&Array.isArray(b.pages)&&b
 function readingMinutes(b){const n=b?.readingMinutes;return typeof n==='number'&&Number.isFinite(n)&&n>0&&n<=240?Math.ceil(n):null}
 let startupReady=false;
 const titleSorter=new Intl.Collator('de',{sensitivity:'base',numeric:true});
+function visibleBookStatus(status){
+  return status===undefined||status==='released'||(APP_IS_TEST&&status==='preview');
+}
+function selectCatalogBooks(entries){
+  const selected=new Map();
+  for(const book of entries){
+    if(visibleBookStatus(book.status)&&(book.status==='preview'||!selected.has(book.id))){
+      selected.set(book.id,book);
+    }
+  }
+  return [...selected.values()];
+}
+function mergeShelfBooks(catalog,offlineBooks){
+  const entries=new Map(catalog.map(book=>[book.id,{book,offline:false}]));
+  for(const book of offlineBooks){
+    if(!visibleBookStatus(book.status))continue;
+    const online=entries.get(book.id)?.book;
+    // Test must be able to open a preview even if another version is stored offline.
+    if(online&&(online.status==='preview'||book.status==='preview')&&online.zipSha256!==book.catalogZipSha256)continue;
+    const displayed=online?{...book,status:online.status}:book;
+    entries.set(book.id,{book:displayed,offline:true});
+  }
+  return [...entries.values()];
+}
 function render(){
+  if(!startupReady)return;
   const grid=$('books');
   grid.replaceChildren();
   const query=$('search').value.trim().toLocaleLowerCase('de');
   $('clearSearch').hidden=!query;
   // Merge local books and online catalog into one stable alphabetic shelf.
-  const entries=new Map();
-  for(const book of onlineCatalog)entries.set(book.id,{book,offline:false});
-  for(const book of books)entries.set(book.id,{book,offline:true});
-  const ordered=[...entries.values()].sort((a,b)=>
+  const ordered=mergeShelfBooks(onlineCatalog,books).sort((a,b)=>
     titleSorter.compare(a.book.title,b.book.title)||String(a.book.id).localeCompare(String(b.book.id)));
   const visible=ordered.filter(item=>
     (item.book.title+' '+(item.book.subtitle||'')).toLocaleLowerCase('de').includes(query));
-  const onlineReady=onlineCatalog.length>0;
   $('searchMeta').textContent=query
     ?visible.length+' von '+ordered.length+' Büchern gefunden'
     :ordered.length?(ordered.length===1?'1 Buch im Regal':ordered.length+' Bücher im Regal'):'';
-  if(startupReady&&ordered.length)$('shelfSkeleton').hidden=true;
   if(!ordered.length){
-    if(startupReady&&!sessionToken){
+    if(!sessionToken){
       grid.innerHTML='<div class="search-empty"><strong>Noch keine Bücher verfügbar</strong><small>Richte deinen GitHub-Zugang in den Einstellungen ein, um Bücher zu entdecken.</small></div>';
     }
     return;
@@ -480,7 +530,7 @@ function render(){
     const b=item.book;
     const holder=document.createElement('div');holder.className='book-holder';
     const card=document.createElement('button');card.className='book';card.type='button';
-    card.setAttribute('aria-label',b.title+(item.offline?', auf diesem Gerät gespeichert':', online – zum Laden antippen'));
+    card.setAttribute('aria-label',b.title+(b.status==='preview'?', Vorabversion':'')+(item.offline?', auf diesem Gerät gespeichert':', online – zum Laden antippen'));
     const cover=document.createElement('img');
     cover.src=item.offline?(b.cover||b.pages[0]):b.coverDataUri;
     cover.alt='Buchcover: '+b.title;cover.loading='lazy';
@@ -491,6 +541,12 @@ function render(){
     pages.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.5C9 4.6 6 4.3 3 4.8v13c3-.5 6-.1 9 1.9 3-2 6-2.4 9-1.9v-13c-3-.5-6-.2-9 1.7zM12 6.5v13.2"/></svg>';
     pages.append(document.createTextNode((item.offline?b.pages.length:b.pageCount)+' Seiten'));
     meta.append(pages);
+    if(b.status==='preview'){
+      const status=document.createElement('span');
+      status.className='book-meta-item';
+      status.textContent='Vorabversion';
+      meta.append(status);
+    }
     const minutes=readingMinutes(b);
     if(minutes!==null){
       const rt=document.createElement('span');rt.className='book-meta-item';
@@ -567,7 +623,10 @@ async function saveBook(book){
   });
 }
 $('deleteBook').onclick=()=>{if(active){$('menu').classList.remove('show');askDelete(active.id)}};
-$('settingsBtn').onclick=()=>$('settingsDialog').showModal();
+$('settingsBtn').onclick=()=>{
+  $('settingsDialog').showModal();
+  if(APP_IS_TEST)loadCatalogBranches();
+};
 $('closeSettings').onclick=()=>$('settingsDialog').close();
 let pendingDeleteId=null;
 function askDelete(id){let b=books.find(x=>x.id===id);if(!b)return;pendingDeleteId=id;$('deleteBookLabel').textContent='Möchtest du „'+b.title+'“ wirklich aus deinem Bücherregal entfernen?';$('deleteDialog').showModal()}
@@ -643,6 +702,32 @@ addEventListener('popstate',()=>{if(active)closeBook()});document.addEventListen
 // The password input only masks characters; localStorage is not encrypted.
 const PRIVATE_REPO = 'samkur2606/storybook-books';
 const PRIVATE_API = 'https://api.github.com/repos/' + PRIVATE_REPO;
+const TEST_CATALOG_REF_KEY='storybook.github.catalog-ref.test.v1';
+function storeTestCatalogRef(ref){
+  if(ref==='main')localStorage.removeItem(TEST_CATALOG_REF_KEY);
+  else localStorage.setItem(TEST_CATALOG_REF_KEY,ref);
+}
+function activeCatalogRef(){
+  if(!APP_IS_TEST)return 'main';
+  const requested=new URLSearchParams(location.search).get('catalogRef');
+  if(requested==='main'||(requested?.startsWith('feature/')&&requested.length>'feature/'.length)){
+    storeTestCatalogRef(requested);
+    return requested;
+  }
+  return localStorage.getItem(TEST_CATALOG_REF_KEY)||'main';
+}
+const catalogRef=activeCatalogRef();
+if(APP_IS_TEST){
+  $('testModeBadges').hidden=false;
+  if(catalogRef!=='main'){
+    const branchLabel=$('testCatalogBranch');
+    branchLabel.textContent=catalogRef;
+    branchLabel.hidden=false;
+  }
+}
+function catalogPath(ref){
+  return '/contents/catalog.json?'+new URLSearchParams({ref});
+}
 const PRODUCTION_CREDENTIAL_KEY = 'storybook.github.readonly.local.v2';
 const CREDENTIAL_KEY = APP_IS_TEST?'storybook.github.readonly.test.v1':PRODUCTION_CREDENTIAL_KEY;
 let sessionToken = null;
@@ -690,10 +775,10 @@ function bytesToBase64(bytes) {
 function base64ToBytes(str) {
   return Uint8Array.from(atob(str),c=>c.charCodeAt(0));
 }
-async function githubRequest(path,token,accept='application/vnd.github+json') {
+async function githubRequest(path,token,signal) {
   const response=await fetch(PRIVATE_API+path,{
-    headers:{Authorization:'Bearer '+token,Accept:accept,'X-GitHub-Api-Version':'2022-11-28'},
-    cache:'no-store',redirect:'follow'
+    headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},
+    cache:'no-store',redirect:'follow',signal
   });
   if(response.status===401||response.status===403)throw Error('GitHub-Zugang abgelaufen oder nicht berechtigt');
   if(response.status===404)throw Error('Ressource nicht gefunden: Repository-Berechtigung prüfen');
@@ -702,7 +787,7 @@ async function githubRequest(path,token,accept='application/vnd.github+json') {
 }
 async function validateCredential(token) {
   if(!/^(github_pat_|ghp_)[A-Za-z0-9_]+$/.test(token))throw Error('Ungültiges GitHub-Token-Format');
-  await githubRequest('/contents/catalog.json?ref=main',token);
+  await githubRequest(catalogPath('main'),token);
 }
 async function saveCredential(token,button){
   if(!token){credentialStatus('Kein verwendbarer GitHub-Zugang vorhanden.','error');return}
@@ -721,8 +806,9 @@ async function saveCredential(token,button){
     credentialElements.visibility.setAttribute('aria-pressed','false');
     credentialElements.visibility.setAttribute('aria-label','Token anzeigen');
     syncCredentialButtons();
+    if(APP_IS_TEST)loadCatalogBranches();
     await loadOnlineCatalog();
-    credentialStatus('Zugang gespeichert. Deine Bücher werden angezeigt.','success');
+    credentialStatus('Zugang gespeichert.','success');
   }catch(e){credentialStatus('Verbindung fehlgeschlagen: '+e.message,'error')}
   finally{
     credentialElements.save.disabled=false;
@@ -737,6 +823,7 @@ credentialElements.useProduction.onclick=()=>{
 credentialElements.remove.onclick=()=>{
   localStorage.removeItem(CREDENTIAL_KEY);
   sessionToken=null;onlineCatalog=[];
+  if(APP_IS_TEST)loadCatalogBranches();
   credentialElements.token.value='';
   syncCredentialButtons();
   credentialStatus('Zugang entfernt. Bereits geladene Bücher bleiben offline lesbar.','success');
@@ -744,6 +831,91 @@ credentialElements.remove.onclick=()=>{
 };
 syncCredentialButtons();
 sessionToken=localStorage.getItem(CREDENTIAL_KEY)||null;
+
+const catalogPicker=$('catalogBranch');
+const catalogApply=$('catalogApply');
+const catalogReset=$('catalogReset');
+const catalogFeedback=$('catalogFeedback');
+let catalogBranchRequest=0;
+
+function displayCatalogBranches(branches){
+  catalogPicker.replaceChildren();
+  for(const ref of new Set(['main',catalogRef,...branches])){
+    const option=document.createElement('option');
+    option.value=ref;
+    option.textContent=ref==='main'?'main (Standard)':ref;
+    catalogPicker.append(option);
+  }
+  catalogPicker.value=catalogRef;
+}
+async function loadCatalogBranches(){
+  const request=++catalogBranchRequest;
+  const token=sessionToken;
+  catalogPicker.disabled=true;
+  catalogApply.disabled=true;
+  if(!token){
+    displayCatalogBranches([]);
+    catalogFeedback.textContent='Speichere unter GitHub-Zugang einen Lesetoken, um Bücher-Branches zu laden.';
+    return;
+  }
+  catalogFeedback.textContent='Bücher-Branches werden geladen …';
+  try{
+    const branches=[];
+    for(let page=1;;page++){
+      const response=await githubRequest('/branches?'+new URLSearchParams({per_page:100,page}),token);
+      const batch=await response.json();
+      if(request!==catalogBranchRequest)return;
+      branches.push(...batch.map(branch=>branch.name));
+      if(batch.length<100)break;
+    }
+    displayCatalogBranches(branches);
+    catalogPicker.disabled=false;
+    catalogApply.disabled=catalogPicker.value===catalogRef;
+    catalogFeedback.textContent='';
+  }catch(e){
+    if(request!==catalogBranchRequest)return;
+    displayCatalogBranches([]);
+    catalogFeedback.textContent='Bücher-Branches konnten nicht geladen werden: '+e.message;
+  }
+}
+function openTestCatalog(ref){
+  catalogBranchRequest++;
+  storeTestCatalogRef(ref);
+  const url=new URL(location.href);
+  url.searchParams.delete('catalogRef');
+  history.replaceState(history.state,'',url);
+  location.reload();
+}
+if(APP_IS_TEST){
+  $('catalogSettings').hidden=false;
+  $('catalogCurrent').textContent='Aktiv: '+catalogRef;
+  displayCatalogBranches([]);
+  catalogReset.disabled=catalogRef==='main';
+  catalogReset.onclick=()=>openTestCatalog('main');
+  catalogPicker.onchange=()=>{
+    catalogApply.disabled=catalogPicker.value===catalogRef;
+    catalogFeedback.textContent='';
+  };
+  catalogApply.onclick=async()=>{
+    const ref=catalogPicker.value;
+    const token=sessionToken;
+    if(!token||ref===catalogRef)return;
+    if(ref==='main'){openTestCatalog(ref);return}
+    const request=catalogBranchRequest;
+    catalogPicker.disabled=true;
+    catalogApply.disabled=true;
+    catalogFeedback.textContent='Bücherkatalog wird geprüft …';
+    try{
+      await fetchOnlineCatalog(ref,token);
+      if(request===catalogBranchRequest)openTestCatalog(ref);
+    }catch(e){
+      if(request!==catalogBranchRequest)return;
+      catalogFeedback.textContent='Katalog konnte nicht geladen werden. Erzeuge auf dem gewählten Branch einen gültigen Bücherkatalog und versuche es erneut. '+e.message;
+      catalogPicker.disabled=false;
+      catalogApply.disabled=false;
+    }
+  };
+}
 
 function renderOnlineCatalog(){
   const hint=$('onlineHint');
@@ -754,26 +926,40 @@ function renderOnlineCatalog(){
   }
   render();
 }
+async function fetchOnlineCatalog(ref,token,signal){
+  const response=await githubRequest(catalogPath(ref),token,signal);
+  const payload=await response.json();
+  if(payload.encoding!=='base64'||typeof payload.content!=='string')throw Error('Unbekanntes GitHub-Dateiformat');
+  const bytes=base64ToBytes(payload.content.replace(/\s/g,''));
+  const catalog=JSON.parse(new TextDecoder().decode(bytes));
+  if(catalog.schemaVersion!==3||!Array.isArray(catalog.books))throw Error('Unbekannte Katalogversion');
+  return catalog.books.filter(b=>b&&typeof b.id==='string'&&typeof b.title==='string'&&
+    Number.isSafeInteger(b.zipSize)&&b.zipSize>0&&b.zipSize<=100*1024*1024&&
+    /^[a-f0-9]{64}$/.test(b.zipSha256)&&Array.isArray(b.blobChunks)&&b.blobChunks.length>0&&
+    b.blobChunks.every(sha=>typeof sha==='string'&&/^[a-f0-9]{40}$/.test(sha))&&
+    Number.isSafeInteger(b.pageCount)&&b.pageCount>0&&
+    typeof b.coverDataUri==='string'&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(b.coverDataUri));
+}
+
 async function loadOnlineCatalog(){
-  if(!sessionToken){renderOnlineCatalog();return}
+  const token=sessionToken;
+  if(!token){renderOnlineCatalog();return}
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),10000);
   try{
-    const response=await githubRequest('/contents/catalog.json?ref=main',sessionToken);
-    const payload=await response.json();
-    if(payload.encoding!=='base64'||typeof payload.content!=='string')throw Error('Unbekanntes GitHub-Dateiformat');
-    const bytes=base64ToBytes(payload.content.replace(/\s/g,''));
-    const catalog=JSON.parse(new TextDecoder().decode(bytes));
-    if(catalog.schemaVersion!==3||!Array.isArray(catalog.books))throw Error('Unbekannte Katalogversion');
-    onlineCatalog=catalog.books.filter(b=>b&&typeof b.id==='string'&&typeof b.title==='string'&&
-      Number.isSafeInteger(b.zipSize)&&b.zipSize>0&&b.zipSize<=100*1024*1024&&
-      /^[a-f0-9]{64}$/.test(b.zipSha256)&&Array.isArray(b.blobChunks)&&b.blobChunks.length>0&&
-      b.blobChunks.every(sha=>typeof sha==='string'&&/^[a-f0-9]{40}$/.test(sha))&&
-      Number.isSafeInteger(b.pageCount)&&b.pageCount>0&&
-      typeof b.coverDataUri==='string'&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(b.coverDataUri));
-    render();renderOnlineCatalog();
+    const entries=await fetchOnlineCatalog(catalogRef,token,controller.signal);
+    if(token!==sessionToken)return;
+    onlineCatalog=selectCatalogBooks(entries);
+    $('onlineHint').textContent='';
+    renderOnlineCatalog();
   }catch(e){
-    onlineCatalog=[];renderOnlineCatalog();
-    document.getElementById('onlineHint').textContent='Katalog nicht verfügbar: '+e.message;
-  }
+    if(token!==sessionToken)return;
+    onlineCatalog=[];
+    $('onlineHint').textContent=controller.signal.aborted
+      ?'Der Bücherkatalog hat zu lange zum Laden gebraucht. Lade die App neu, um es erneut zu versuchen.'
+      :'Katalog nicht verfügbar: '+e.message;
+    renderOnlineCatalog();
+  }finally{clearTimeout(timeout)}
 }
 async function downloadGitBlobs(entry){
   // Fetch only GitHub API JSON responses: no private Release redirect or third-party proxy.
@@ -802,7 +988,7 @@ async function downloadGitBlobs(entry){
   return zip.buffer;
 }
 async function downloadOnlineBook(entry){
-  if(importingBooks||!sessionToken)return;
+  if(importingBooks||!sessionToken||!visibleBookStatus(entry.status))return;
   importingBooks=true;
   $('importOverlay').hidden=false;
   $('importFile').textContent=entry.title;$('importCounter').textContent='Privater GitHub-Download';
@@ -819,6 +1005,8 @@ async function downloadOnlineBook(entry){
     });
     book.id=book.id||book.title;
     if(book.id!==entry.id)throw Error('Buch-ID stimmt nicht mit dem Katalog überein');
+    book.status=entry.status??'released';
+    book.catalogZipSha256=entry.zipSha256;
     await saveBook(book);
     add(book);renderOnlineCatalog();openBook(book.id);
   }catch(e){
@@ -830,14 +1018,10 @@ if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostn
   addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(registration=>registration.update()).catch(e=>console.warn('Offline-App nicht verfügbar:',e)));
 }
 
-restoreBooks().then(async()=>{
-  // Local books can appear immediately while the private catalog is still loading.
+Promise.all([restoreBooks(),loadOnlineCatalog()]).then(()=>{
   startupReady=true;
-  document.querySelector('main').classList.remove('library-loading');
   render();
-  if(sessionToken) await loadOnlineCatalog();
   $('shelfSkeleton').hidden=true;
-  render();
-  renderOnlineCatalog();
+  document.querySelector('main').classList.remove('library-loading');
 });
 </script></body></html>
