@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="6230cba347fd7e0a81341f3156385e9638db5c75"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="1aaa6ceb0653a9d17913f8204ee1469b73ed5956"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -417,13 +417,18 @@ body{background:#f8f2e7;background-attachment:initial}
 /* Reserve one status line so the Settings position stays stable during a refresh. */
 #catalogSettings #catalogFeedback{min-block-size:1.45em}
 #catalogSettings label{display:block;font-size:13px;font-weight:700;color:#543820}
-#catalogSettings .catalog-select{position:relative;margin-top:6px;color:#704c2b}
-#catalogSettings .catalog-select::after{content:"";position:absolute;top:50%;inset-inline-end:18px;width:8px;height:8px;border:solid currentColor;border-width:0 2px 2px 0;transform:translateY(-70%) rotate(45deg);pointer-events:none}
-#catalogBranch{appearance:none;display:block;width:100%;min-height:44px;padding:6px 42px 6px 14px;border:1px solid #d4bc9e;border-radius:10px;background:#fffaf0;color:#4b321f;font:inherit;font-size:16px;text-overflow:ellipsis}
-@media(forced-colors:active){
-  #catalogSettings .catalog-select::after{display:none}
-  #catalogBranch{appearance:auto;padding-inline-end:14px}
-}
+#catalogSettings .catalog-select{margin-top:6px;color:#704c2b}
+#catalogBranch[hidden],#catalogBranchList[hidden]{display:none}
+#catalogBranchTrigger{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:48px;padding:9px 15px;border:1px solid #b79770;border-radius:10px;background:#fffaf0;color:#4b321f;font:inherit;font-size:16px;text-align:left}
+#catalogBranchTrigger span{min-width:0;overflow-wrap:anywhere}
+#catalogBranchTrigger svg{width:18px;height:18px;flex:none;transition:transform .15s ease}
+#catalogBranchTrigger[aria-expanded="true"] svg{transform:rotate(180deg)}
+#catalogBranchList{max-height:min(240px,40vh);overflow-y:auto;overscroll-behavior:contain;margin-top:5px;padding:5px;border:1px solid #d4bc9e;border-radius:10px;background:#fffaf0;box-shadow:0 6px 16px #65472a1c}
+#catalogBranchList button{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;padding:9px 11px;border:0;border-radius:7px;background:transparent;color:#4b321f;font:inherit;font-size:15px;text-align:left;overflow-wrap:anywhere}
+#catalogBranchList button[aria-selected="true"]{background:#f0dfc5;font-weight:650}
+#catalogBranchList button[aria-selected="true"]::after{content:"✓";flex:none;color:#795436}
+#catalogBranchList button:hover,#catalogBranchList button:focus-visible{background:#ead4b4}
+@media(forced-colors:active){#catalogBranchList button[aria-selected="true"]{outline:2px solid Highlight}}
 #catalogSettings .catalog-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 #catalogSettings .catalog-buttons button{min-height:44px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#fffaf0;color:#543820;font:inherit;font-size:13px;font-weight:650}
 #catalogSettings :is(button,select):disabled{opacity:.58;cursor:default}
@@ -475,12 +480,12 @@ body{background:#f8f2e7;background-attachment:initial}
           <button type="button" id="modeTest" aria-pressed="false">Testmodus</button>
         </div>
         <div id="catalogSettings" hidden>
-          <label for="catalogBranch">Bücher-Branch</label>
+          <label id="catalogBranchLabel" for="catalogBranchTrigger">Bücher-Branch</label>
           <p id="catalogRepositoryHint">Hier wählst du den Bücher-Branch, nicht den App-Branch.</p>
           <div class="catalog-select">
-            <select id="catalogBranch" aria-describedby="catalogRepositoryHint catalogFeedback" disabled>
-              <option value="main">main (Standard)</option>
-            </select>
+            <select id="catalogBranch" hidden disabled aria-hidden="true" tabindex="-1"><option value="main">main (Standard)</option></select>
+            <button id="catalogBranchTrigger" type="button" aria-labelledby="catalogBranchLabel catalogBranchTriggerValue" aria-describedby="catalogRepositoryHint catalogFeedback" aria-haspopup="listbox" aria-controls="catalogBranchList" aria-expanded="false" disabled><span id="catalogBranchTriggerValue">main (Standard)</span><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m5 9 7 7 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <div id="catalogBranchList" role="listbox" aria-labelledby="catalogBranchLabel" hidden></div>
           </div>
           <div class="catalog-buttons">
             <button id="catalogApply" type="button" disabled>Übernehmen</button>
@@ -1137,6 +1142,45 @@ syncCredentialButtons();
 sessionToken=localStorage.getItem(CREDENTIAL_KEY)||null;
 
 const catalogPicker=$('catalogBranch');
+const catalogBranchTrigger=$('catalogBranchTrigger');
+const catalogBranchList=$('catalogBranchList');
+const catalogBranchTriggerValue=$('catalogBranchTriggerValue');
+function closeCatalogBranchList(focus=false){
+  if(catalogBranchList.hidden)return;
+  catalogBranchList.hidden=true;
+  catalogBranchTrigger.setAttribute('aria-expanded','false');
+  if(focus)catalogBranchTrigger.focus();
+}
+function setCatalogPickerDisabled(disabled){
+  catalogPicker.disabled=disabled;
+  catalogBranchTrigger.disabled=disabled;
+  if(disabled)closeCatalogBranchList();
+}
+function openCatalogBranchList(){
+  if(catalogBranchTrigger.disabled)return;
+  catalogBranchList.hidden=false;
+  catalogBranchTrigger.setAttribute('aria-expanded','true');
+  (catalogBranchList.querySelector('[aria-selected="true"]')||catalogBranchList.firstElementChild)?.focus();
+}
+function chooseCatalogBranch(ref){
+  catalogPicker.value=ref;
+  catalogBranchTriggerValue.textContent=catalogPicker.selectedOptions[0]?.textContent||ref;
+  for(const item of catalogBranchList.children)item.setAttribute('aria-selected',String(item.dataset.ref===ref));
+  closeCatalogBranchList(true);
+  catalogPicker.dispatchEvent(new Event('change'));
+}
+catalogBranchTrigger.onclick=()=>catalogBranchList.hidden?openCatalogBranchList():closeCatalogBranchList();
+catalogBranchTrigger.onkeydown=e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();openCatalogBranchList()}};
+catalogBranchList.onkeydown=e=>{
+  const items=Array.from(catalogBranchList.children),index=items.indexOf(document.activeElement);
+  if(e.key==='Escape'){e.preventDefault();closeCatalogBranchList(true)}
+  else if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){
+    e.preventDefault();
+    const next=e.key==='Home'?0:e.key==='End'?items.length-1:(index+(e.key==='ArrowDown'?1:-1)+items.length)%items.length;
+    items[next]?.focus();
+  }else if(e.key==='Tab')closeCatalogBranchList();
+};
+document.addEventListener('pointerdown',e=>{if(!catalogBranchTrigger.parentElement.contains(e.target))closeCatalogBranchList()});
 const catalogApply=$('catalogApply');
 const catalogReset=$('catalogReset');
 const catalogFeedback=$('catalogFeedback');
@@ -1163,19 +1207,32 @@ function resetMissingTestCatalog(branches){
 }
 
 function displayCatalogBranches(branches){
+  closeCatalogBranchList();
   catalogPicker.replaceChildren();
+  catalogBranchList.replaceChildren();
   for(const ref of new Set(['main',catalogRef,...branches])){
+    const label=ref==='main'?'main (Standard)':ref;
     const option=document.createElement('option');
     option.value=ref;
-    option.textContent=ref==='main'?'main (Standard)':ref;
+    option.textContent=label;
     catalogPicker.append(option);
+    const item=document.createElement('button');
+    item.type='button';
+    item.setAttribute('role','option');
+    item.dataset.ref=ref;
+    item.textContent=label;
+    item.tabIndex=-1;
+    item.onclick=()=>chooseCatalogBranch(ref);
+    catalogBranchList.append(item);
   }
   catalogPicker.value=catalogRef;
+  catalogBranchTriggerValue.textContent=catalogPicker.selectedOptions[0]?.textContent||catalogRef;
+  for(const item of catalogBranchList.children)item.setAttribute('aria-selected',String(item.dataset.ref===catalogRef));
 }
 async function loadCatalogBranches(){
   const request=++catalogBranchRequest;
   const token=sessionToken;
-  catalogPicker.disabled=true;
+  setCatalogPickerDisabled(true);
   catalogApply.disabled=true;
   if(!token){
     displayCatalogBranches([]);
@@ -1187,7 +1244,7 @@ async function loadCatalogBranches(){
     const branches=await fetchCatalogBranches(token);
     if(request!==catalogBranchRequest||resetMissingTestCatalog(branches))return;
     displayCatalogBranches(branches);
-    catalogPicker.disabled=false;
+    setCatalogPickerDisabled(false);
     catalogApply.disabled=catalogPicker.value===catalogRef;
     catalogFeedback.textContent='';
   }catch(e){
@@ -1221,7 +1278,7 @@ if(APP_IS_TEST){
     if(!token||ref===catalogRef)return;
     if(ref==='main'){openTestCatalog(ref);return}
     const request=catalogBranchRequest;
-    catalogPicker.disabled=true;
+    setCatalogPickerDisabled(true);
     catalogApply.disabled=true;
     catalogFeedback.textContent='Bücherkatalog wird geprüft …';
     try{
@@ -1230,7 +1287,7 @@ if(APP_IS_TEST){
     }catch(e){
       if(request!==catalogBranchRequest)return;
       catalogFeedback.textContent='Katalog konnte nicht geladen werden. Erzeuge auf dem gewählten Branch einen gültigen Bücherkatalog und versuche es erneut. '+e.message;
-      catalogPicker.disabled=false;
+      setCatalogPickerDisabled(false);
       catalogApply.disabled=false;
     }
   };
