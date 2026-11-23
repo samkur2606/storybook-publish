@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="5f3da588fbafeb522fb3e9984e3acea3238f18a5"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="df37b96d163348eeb7e056f0d0d4d192bea02920"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -499,7 +499,7 @@ body{background:#f8f2e7;background-attachment:initial}
         </div>
         <div class="test-settings-actions">
           <button id="openTestCodeReveal" class="test-settings-link" type="button" hidden>Freischaltcode anzeigen</button>
-          <button id="hideTestMode" class="test-settings-link" type="button">Testmodus auf diesem Gerät ausblenden</button>
+          <button id="hideTestMode" class="test-settings-link" type="button">Testmodus auf diesem Gerät entfernen</button>
         </div>
       </div>
     </details>
@@ -560,12 +560,12 @@ body{background:#f8f2e7;background-attachment:initial}
   </form>
 </dialog>
 <dialog id="hideTestModeDialog" aria-labelledby="hideTestModeHeading" aria-describedby="hideTestModeDescription">
-  <h2 id="hideTestModeHeading">Testmodus ausblenden?</h2>
-  <p id="hideTestModeDescription">Der Testmodus wird auf diesem Gerät ausgeblendet. Du kannst ihn später mit dem Freischaltcode erneut aktivieren. Gespeicherte Bücher bleiben erhalten.</p>
+  <h2 id="hideTestModeHeading">Testmodus von diesem Gerät entfernen?</h2>
+  <p id="hideTestModeDescription">Die Freischaltung und der gespeicherte Freischaltcode werden auf diesem Gerät gelöscht. <strong>Du kannst den Testmodus nur mit dem Freischaltcode erneut aktivieren.</strong> Gespeicherte Bücher bleiben erhalten.</p>
   <p id="hideTestModeFeedback" role="status" hidden></p>
   <div class="test-unlock-actions">
     <button id="cancelHideTestMode" type="button" autofocus>Abbrechen</button>
-    <button id="confirmHideTestMode" type="button">Testmodus ausblenden</button>
+    <button id="confirmHideTestMode" type="button">Testmodus entfernen</button>
   </div>
 </dialog>
 <dialog id="deleteDialog" aria-labelledby="deleteHeading"><h2 id="deleteHeading">Buch löschen?</h2><p id="deleteBookLabel"></p><div class="delete-notice">Das Buch wird nur aus der Browser-Datenbank gelöscht.<br><br><strong>Du kannst das Buch später erneut aus dem Online-Katalog herunterladen.</strong></div><div class="delete-buttons"><button id="cancelDelete">Abbrechen</button><button id="confirmDelete">Buch löschen</button></div></dialog>
