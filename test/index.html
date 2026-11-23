@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="c7493422ed9c3083aa5f1b279c18c1872a2b5cb7"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="682e491e17e1a8796503d1014f1a443f88cde392"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -459,29 +459,6 @@ body{background:#f8f2e7;background-attachment:initial}
     </div>
   </div>
   <div class="settings-content">
-    <details id="githubSettings" class="settings-section" name="bookshelf-settings">
-      <summary>GitHub-Zugang</summary>
-      <div class="settings-section-body">
-        <div class="github-connection" id="githubConnection" role="status">
-          <span class="github-connection-dot" aria-hidden="true"></span>
-          <span id="githubConnectionLabel">Noch kein Zugang eingerichtet</span>
-        </div>
-        <div id="githubTokenEntry">
-          <label class="github-token-label" for="githubToken">Persönlicher Lesetoken</label>
-          <div class="github-token-field">
-            <input id="githubToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…" aria-describedby="githubTokenHint" />
-            <button id="githubToggleVisibility" type="button" aria-label="Token anzeigen" aria-pressed="false">Anzeigen</button>
-          </div>
-          <p class="github-token-hint" id="githubTokenHint">Nur Leserechte für <strong>storybook-books</strong> erforderlich. Der Token bleibt unverschlüsselt auf diesem Gerät gespeichert.</p>
-        </div>
-        <p id="githubFeedback" role="status" aria-live="polite"></p>
-        <div class="github-buttons">
-          <button id="githubSave" class="github-save" type="button">Zugang prüfen &amp; speichern</button>
-          <button id="githubUseProduction" class="github-remove" type="button" hidden>Produktionszugang für Test übernehmen</button>
-          <button id="githubRemove" class="github-remove" type="button">Gespeicherten Zugang entfernen</button>
-        </div>
-      </div>
-    </details>
     <details id="appEnvironment" class="settings-section" name="bookshelf-settings" hidden>
       <summary>App-Modus</summary>
       <div class="settings-section-body">
@@ -507,6 +484,29 @@ body{background:#f8f2e7;background-attachment:initial}
         <div class="test-settings-actions">
           <button id="openTestCodeShare" class="test-settings-link" type="button" hidden>Freischaltcode teilen</button>
           <button id="hideTestMode" class="test-settings-link" type="button">Testmodus auf diesem Gerät ausblenden</button>
+        </div>
+      </div>
+    </details>
+    <details id="githubSettings" class="settings-section" name="bookshelf-settings">
+      <summary>GitHub-Zugang</summary>
+      <div class="settings-section-body">
+        <div class="github-connection" id="githubConnection" role="status">
+          <span class="github-connection-dot" aria-hidden="true"></span>
+          <span id="githubConnectionLabel">Noch kein Zugang eingerichtet</span>
+        </div>
+        <div id="githubTokenEntry">
+          <label class="github-token-label" for="githubToken">Persönlicher Lesetoken</label>
+          <div class="github-token-field">
+            <input id="githubToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…" aria-describedby="githubTokenHint" />
+            <button id="githubToggleVisibility" type="button" aria-label="Token anzeigen" aria-pressed="false">Anzeigen</button>
+          </div>
+          <p class="github-token-hint" id="githubTokenHint">Nur Leserechte für <strong>storybook-books</strong> erforderlich. Der Token bleibt unverschlüsselt auf diesem Gerät gespeichert.</p>
+        </div>
+        <p id="githubFeedback" role="status" aria-live="polite"></p>
+        <div class="github-buttons">
+          <button id="githubSave" class="github-save" type="button">Zugang prüfen &amp; speichern</button>
+          <button id="githubUseProduction" class="github-remove" type="button" hidden>Produktionszugang für Test übernehmen</button>
+          <button id="githubRemove" class="github-remove" type="button">Gespeicherten Zugang entfernen</button>
         </div>
       </div>
     </details>
