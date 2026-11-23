@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="5acf3ec63e06c7ecf1b329f2c0676007e82a7a50"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="1a2780972d1062a31e659fa65658ae9b7c644083"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -442,8 +442,8 @@ body{background:#f8f2e7;background-attachment:initial}
     </div>
     <p id="modeDescription" role="status"></p>
     <div id="catalogSettings" hidden>
-      <label for="catalogBranch">Bücher-Branch (storybook-books)</label>
-      <p id="catalogRepositoryHint">Hier wählst du den Branch für die Bücher, nicht für die App (storybook-app).</p>
+      <label for="catalogBranch">Bücher-Branch</label>
+      <p id="catalogRepositoryHint">Hier wählst du den Bücher-Branch, nicht den App-Branch.</p>
       <p id="catalogCurrent"></p>
       <div class="catalog-select">
         <select id="catalogBranch" aria-describedby="catalogRepositoryHint catalogCurrent catalogFeedback" disabled>
