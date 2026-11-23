@@ -670,8 +670,21 @@ addEventListener('popstate',()=>{if(active)closeBook()});document.addEventListen
 // The password input only masks characters; localStorage is not encrypted.
 const PRIVATE_REPO = 'samkur2606/storybook-books';
 const PRIVATE_API = 'https://api.github.com/repos/' + PRIVATE_REPO;
-const requestedCatalogRef=APP_IS_TEST?new URLSearchParams(location.search).get('catalogRef'):null;
-const catalogRef=requestedCatalogRef?.startsWith('feature/')?requestedCatalogRef:'main';
+function activeCatalogRef(){
+  if(!APP_IS_TEST)return 'main';
+  const key='storybook.github.catalog-ref.test.v1';
+  const requested=new URLSearchParams(location.search).get('catalogRef');
+  if(requested==='main'){
+    localStorage.removeItem(key);
+    return 'main';
+  }
+  if(requested?.startsWith('feature/')&&requested.length>'feature/'.length){
+    localStorage.setItem(key,requested);
+    return requested;
+  }
+  return localStorage.getItem(key)||'main';
+}
+const catalogRef=activeCatalogRef();
 const catalogPath='/contents/catalog.json?'+new URLSearchParams({ref:catalogRef});
 const PRODUCTION_CREDENTIAL_KEY = 'storybook.github.readonly.local.v2';
 const CREDENTIAL_KEY = APP_IS_TEST?'storybook.github.readonly.test.v1':PRODUCTION_CREDENTIAL_KEY;
