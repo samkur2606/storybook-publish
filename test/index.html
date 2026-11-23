@@ -518,6 +518,7 @@ function renderTestModeSettings(){
 }
 renderTestModeSettings();
 
+const TEST_MODE_CODE_KEY='storybook.app.test-code.v1';
 const testUnlockDialog=$('testUnlockDialog');
 const testUnlockCode=$('testUnlockCode');
 const testUnlockFeedback=$('testUnlockFeedback');
@@ -546,6 +547,7 @@ function openTestCodeDialog(purpose){
   const sharing=purpose==='share';
   resetTestCodeField();
   testUnlockDialog.dataset.purpose=purpose;
+  if(sharing)testUnlockCode.value=localStorage.getItem(TEST_MODE_CODE_KEY)||'';
   $('testUnlockHeading').textContent=sharing?'Freischaltcode teilen':'Testmodus freischalten';
   $('cancelTestUnlock').textContent='Abbrechen';
   submitTestUnlock.textContent=sharing?'Code anzeigen':'Freischalten';
@@ -592,13 +594,21 @@ $('testUnlockForm').onsubmit=async event=>{
     const hash=await sha256Hex(new TextEncoder().encode(code));
     if(!testUnlockDialog.open||testUnlockDialog.dataset.purpose!==purpose||testUnlockCode.value.trim()!==code)return;
     if(hash!==expectedHash){
+      const savedCode=sharing&&localStorage.getItem(TEST_MODE_CODE_KEY)===code;
+      if(savedCode){
+        localStorage.removeItem(TEST_MODE_CODE_KEY);
+        testUnlockCode.value='';
+      }
       testUnlockCode.setAttribute('aria-invalid','true');
-      testUnlockFeedback.textContent='Der Freischaltcode ist nicht richtig.';
+      testUnlockFeedback.textContent=savedCode
+        ?'Der gespeicherte Freischaltcode ist ungültig. Gib den aktuellen Code ein.'
+        :'Der Freischaltcode ist nicht richtig.';
       testUnlockCode.focus();
       return;
     }
+    if(sharing&&(!APP_IS_TEST||!isTestModeUnlocked()))return;
+    localStorage.setItem(TEST_MODE_CODE_KEY,code);
     if(sharing){
-      if(!APP_IS_TEST||!isTestModeUnlocked())return;
       testUnlockCode.value=code;
       testUnlockCode.type='text';
       testUnlockCode.readOnly=true;
@@ -624,6 +634,7 @@ $('testUnlockForm').onsubmit=async event=>{
 };
 $('hideTestMode').onclick=()=>{
   localStorage.setItem(APP_MODE_KEY,'production');
+  localStorage.removeItem(TEST_MODE_CODE_KEY);
   localStorage.removeItem(TEST_MODE_UNLOCK_KEY);
   if(APP_IS_TEST){
     location.replace(new URL('./?mode=production',APP_BASE).href);
