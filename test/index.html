@@ -446,16 +446,37 @@ function valid(b){return b&&typeof b.title==='string'&&Array.isArray(b.pages)&&b
 function readingMinutes(b){const n=b?.readingMinutes;return typeof n==='number'&&Number.isFinite(n)&&n>0&&n<=240?Math.ceil(n):null}
 let startupReady=false;
 const titleSorter=new Intl.Collator('de',{sensitivity:'base',numeric:true});
+function visibleBookStatus(status){
+  return status===undefined||status==='released'||(APP_IS_TEST&&status==='preview');
+}
+function selectCatalogBooks(entries){
+  const selected=new Map();
+  for(const book of entries){
+    if(visibleBookStatus(book.status)&&(book.status==='preview'||!selected.has(book.id))){
+      selected.set(book.id,book);
+    }
+  }
+  return [...selected.values()];
+}
+function mergeShelfBooks(catalog,offlineBooks){
+  const entries=new Map(catalog.map(book=>[book.id,{book,offline:false}]));
+  for(const book of offlineBooks){
+    if(!visibleBookStatus(book.status))continue;
+    const online=entries.get(book.id)?.book;
+    // Test must be able to open a preview even if another version is stored offline.
+    if(online&&(online.status==='preview'||book.status==='preview')&&online.zipSha256!==book.catalogZipSha256)continue;
+    const displayed=online?{...book,status:online.status}:book;
+    entries.set(book.id,{book:displayed,offline:true});
+  }
+  return [...entries.values()];
+}
 function render(){
   const grid=$('books');
   grid.replaceChildren();
   const query=$('search').value.trim().toLocaleLowerCase('de');
   $('clearSearch').hidden=!query;
   // Merge local books and online catalog into one stable alphabetic shelf.
-  const entries=new Map();
-  for(const book of onlineCatalog)entries.set(book.id,{book,offline:false});
-  for(const book of books)entries.set(book.id,{book,offline:true});
-  const ordered=[...entries.values()].sort((a,b)=>
+  const ordered=mergeShelfBooks(onlineCatalog,books).sort((a,b)=>
     titleSorter.compare(a.book.title,b.book.title)||String(a.book.id).localeCompare(String(b.book.id)));
   const visible=ordered.filter(item=>
     (item.book.title+' '+(item.book.subtitle||'')).toLocaleLowerCase('de').includes(query));
@@ -480,7 +501,7 @@ function render(){
     const b=item.book;
     const holder=document.createElement('div');holder.className='book-holder';
     const card=document.createElement('button');card.className='book';card.type='button';
-    card.setAttribute('aria-label',b.title+(item.offline?', auf diesem Gerät gespeichert':', online – zum Laden antippen'));
+    card.setAttribute('aria-label',b.title+(b.status==='preview'?', Vorabversion':'')+(item.offline?', auf diesem Gerät gespeichert':', online – zum Laden antippen'));
     const cover=document.createElement('img');
     cover.src=item.offline?(b.cover||b.pages[0]):b.coverDataUri;
     cover.alt='Buchcover: '+b.title;cover.loading='lazy';
@@ -491,6 +512,12 @@ function render(){
     pages.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.5C9 4.6 6 4.3 3 4.8v13c3-.5 6-.1 9 1.9 3-2 6-2.4 9-1.9v-13c-3-.5-6-.2-9 1.7zM12 6.5v13.2"/></svg>';
     pages.append(document.createTextNode((item.offline?b.pages.length:b.pageCount)+' Seiten'));
     meta.append(pages);
+    if(b.status==='preview'){
+      const status=document.createElement('span');
+      status.className='book-meta-item';
+      status.textContent='Vorabversion';
+      meta.append(status);
+    }
     const minutes=readingMinutes(b);
     if(minutes!==null){
       const rt=document.createElement('span');rt.className='book-meta-item';
@@ -643,6 +670,9 @@ addEventListener('popstate',()=>{if(active)closeBook()});document.addEventListen
 // The password input only masks characters; localStorage is not encrypted.
 const PRIVATE_REPO = 'samkur2606/storybook-books';
 const PRIVATE_API = 'https://api.github.com/repos/' + PRIVATE_REPO;
+const requestedCatalogRef=APP_IS_TEST?new URLSearchParams(location.search).get('catalogRef'):null;
+const catalogRef=requestedCatalogRef?.startsWith('feature/')?requestedCatalogRef:'main';
+const catalogPath='/contents/catalog.json?'+new URLSearchParams({ref:catalogRef});
 const PRODUCTION_CREDENTIAL_KEY = 'storybook.github.readonly.local.v2';
 const CREDENTIAL_KEY = APP_IS_TEST?'storybook.github.readonly.test.v1':PRODUCTION_CREDENTIAL_KEY;
 let sessionToken = null;
@@ -702,7 +732,7 @@ async function githubRequest(path,token,accept='application/vnd.github+json') {
 }
 async function validateCredential(token) {
   if(!/^(github_pat_|ghp_)[A-Za-z0-9_]+$/.test(token))throw Error('Ungültiges GitHub-Token-Format');
-  await githubRequest('/contents/catalog.json?ref=main',token);
+  await githubRequest(catalogPath,token);
 }
 async function saveCredential(token,button){
   if(!token){credentialStatus('Kein verwendbarer GitHub-Zugang vorhanden.','error');return}
@@ -757,19 +787,20 @@ function renderOnlineCatalog(){
 async function loadOnlineCatalog(){
   if(!sessionToken){renderOnlineCatalog();return}
   try{
-    const response=await githubRequest('/contents/catalog.json?ref=main',sessionToken);
+    const response=await githubRequest(catalogPath,sessionToken);
     const payload=await response.json();
     if(payload.encoding!=='base64'||typeof payload.content!=='string')throw Error('Unbekanntes GitHub-Dateiformat');
     const bytes=base64ToBytes(payload.content.replace(/\s/g,''));
     const catalog=JSON.parse(new TextDecoder().decode(bytes));
     if(catalog.schemaVersion!==3||!Array.isArray(catalog.books))throw Error('Unbekannte Katalogversion');
-    onlineCatalog=catalog.books.filter(b=>b&&typeof b.id==='string'&&typeof b.title==='string'&&
+    const validEntries=catalog.books.filter(b=>b&&typeof b.id==='string'&&typeof b.title==='string'&&
       Number.isSafeInteger(b.zipSize)&&b.zipSize>0&&b.zipSize<=100*1024*1024&&
       /^[a-f0-9]{64}$/.test(b.zipSha256)&&Array.isArray(b.blobChunks)&&b.blobChunks.length>0&&
       b.blobChunks.every(sha=>typeof sha==='string'&&/^[a-f0-9]{40}$/.test(sha))&&
       Number.isSafeInteger(b.pageCount)&&b.pageCount>0&&
       typeof b.coverDataUri==='string'&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(b.coverDataUri));
-    render();renderOnlineCatalog();
+    onlineCatalog=selectCatalogBooks(validEntries);
+    renderOnlineCatalog();
   }catch(e){
     onlineCatalog=[];renderOnlineCatalog();
     document.getElementById('onlineHint').textContent='Katalog nicht verfügbar: '+e.message;
@@ -802,7 +833,7 @@ async function downloadGitBlobs(entry){
   return zip.buffer;
 }
 async function downloadOnlineBook(entry){
-  if(importingBooks||!sessionToken)return;
+  if(importingBooks||!sessionToken||!visibleBookStatus(entry.status))return;
   importingBooks=true;
   $('importOverlay').hidden=false;
   $('importFile').textContent=entry.title;$('importCounter').textContent='Privater GitHub-Download';
@@ -819,6 +850,8 @@ async function downloadOnlineBook(entry){
     });
     book.id=book.id||book.title;
     if(book.id!==entry.id)throw Error('Buch-ID stimmt nicht mit dem Katalog überein');
+    book.status=entry.status??'released';
+    book.catalogZipSha256=entry.zipSha256;
     await saveBook(book);
     add(book);renderOnlineCatalog();openBook(book.id);
   }catch(e){
