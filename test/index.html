@@ -376,6 +376,7 @@ body{background:#f8f2e7;background-attachment:initial}
 #appInfo{border-top:1px solid #e7d5be;margin-top:18px;padding-top:12px}
 #appInfo h3{font-size:13px;color:#543820;margin:0}
 .test-settings-link{min-height:44px;padding:0;border:0;background:transparent;color:#704c2b;font-size:13px;text-align:left;text-decoration:underline;text-underline-offset:3px}
+#appEnvironment .test-settings-actions{display:flex;flex-wrap:wrap;column-gap:16px}
 #testUnlockDialog{width:min(390px,calc(100vw - 32px));padding:22px;border:1px solid #d9c1a4;border-radius:20px;background:#fffaf0;color:#4b321f}
 #testUnlockDialog::backdrop{background:#24190e91}
 #testUnlockDialog h2{font-size:21px;margin:0 0 16px}
@@ -383,9 +384,10 @@ body{background:#f8f2e7;background-attachment:initial}
 #testUnlockCode{width:100%;min-height:44px;margin-top:6px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#fffdf8;color:inherit;font:inherit}
 #testUnlockFeedback{margin:6px 0 0;color:#8f4536;font-size:13px}
 #testUnlockFeedback:empty{margin:0}
+#testUnlockFeedback[data-success]{color:#3d653c}
 .test-unlock-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:14px}
 .test-unlock-actions button{min-height:44px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#f3e5d3;color:#563c29}
-.test-unlock-actions button[type="submit"]{border-color:#69482e;background:#69482e;color:#fffaf0}
+.test-unlock-actions button[type="submit"],#copyTestUnlock{border-color:#69482e;background:#69482e;color:#fffaf0}
 #catalogSettings{border-top:1px solid #dec9ae;margin-top:14px;padding-top:14px}
 #catalogSettings label{display:block;font-size:13px;font-weight:700;color:#543820}
 #catalogSettings .catalog-select{position:relative;margin-top:6px;color:#704c2b}
@@ -448,7 +450,10 @@ body{background:#f8f2e7;background-attachment:initial}
       <p id="catalogFeedback" role="status"></p>
     </div>
     <p class="environment-recovery">Falls die Testversion nicht startet: <a id="modeRecovery" href="./?mode=production">Produktion wiederherstellen</a>.</p>
-    <button id="hideTestMode" class="test-settings-link" type="button">Testmodus auf diesem Gerät ausblenden</button>
+    <div class="test-settings-actions">
+      <button id="openTestCodeShare" class="test-settings-link" type="button" hidden>Freischaltcode teilen</button>
+      <button id="hideTestMode" class="test-settings-link" type="button">Testmodus auf diesem Gerät ausblenden</button>
+    </div>
   </section>
   <section id="githubSettings" aria-labelledby="githubSettingsHeading">
     <div class="github-settings-title">
@@ -488,6 +493,7 @@ body{background:#f8f2e7;background-attachment:initial}
     <div class="test-unlock-actions">
       <button id="cancelTestUnlock" type="button">Abbrechen</button>
       <button id="submitTestUnlock" type="submit">Freischalten</button>
+      <button id="copyTestUnlock" type="button" hidden>Kopieren</button>
     </div>
   </form>
 </dialog>
@@ -509,38 +515,95 @@ function renderTestModeSettings(){
   $('appInfo').hidden=unlocked;
 }
 renderTestModeSettings();
-addEventListener('storage',event=>{
-  if(event.key===TEST_MODE_UNLOCK_KEY||event.key===null)renderTestModeSettings();
-});
 
 const testUnlockDialog=$('testUnlockDialog');
 const testUnlockCode=$('testUnlockCode');
 const testUnlockFeedback=$('testUnlockFeedback');
-$('openTestUnlock').onclick=()=>testUnlockDialog.showModal();
+const submitTestUnlock=$('submitTestUnlock');
+const copyTestUnlock=$('copyTestUnlock');
+$('openTestCodeShare').hidden=!APP_IS_TEST;
+addEventListener('storage',event=>{
+  if(event.key!==TEST_MODE_UNLOCK_KEY&&event.key!==null)return;
+  renderTestModeSettings();
+  if(testUnlockDialog.open&&testUnlockDialog.dataset.purpose==='share'&&!isTestModeUnlocked()){
+    testUnlockDialog.close();
+  }
+});
+
+function resetTestCodeField(){
+  $('testUnlockForm').reset();
+  testUnlockCode.type='password';
+  testUnlockCode.readOnly=false;
+  testUnlockCode.removeAttribute('aria-invalid');
+  testUnlockFeedback.removeAttribute('data-success');
+  testUnlockFeedback.textContent='';
+  submitTestUnlock.hidden=false;
+  copyTestUnlock.hidden=true;
+}
+function openTestCodeDialog(purpose){
+  const sharing=purpose==='share';
+  resetTestCodeField();
+  testUnlockDialog.dataset.purpose=purpose;
+  $('testUnlockHeading').textContent=sharing?'Freischaltcode teilen':'Testmodus freischalten';
+  $('cancelTestUnlock').textContent='Abbrechen';
+  submitTestUnlock.textContent=sharing?'Code anzeigen':'Freischalten';
+  testUnlockDialog.showModal();
+}
+$('openTestUnlock').onclick=()=>openTestCodeDialog('unlock');
+$('openTestCodeShare').onclick=()=>{
+  if(APP_IS_TEST&&isTestModeUnlocked())openTestCodeDialog('share');
+};
 $('cancelTestUnlock').onclick=()=>testUnlockDialog.close();
 testUnlockDialog.addEventListener('close',()=>{
-  $('testUnlockForm').reset();
-  testUnlockCode.removeAttribute('aria-invalid');
-  testUnlockFeedback.textContent='';
+  if(!testUnlockDialog.open)resetTestCodeField();
 });
 testUnlockCode.oninput=()=>{
   testUnlockCode.removeAttribute('aria-invalid');
   testUnlockFeedback.textContent='';
 };
+copyTestUnlock.onclick=async()=>{
+  if(!testUnlockDialog.open||!testUnlockCode.readOnly||!isTestModeUnlocked())return;
+  const code=testUnlockCode.value;
+  try{
+    await navigator.clipboard.writeText(code);
+    if(!testUnlockDialog.open||testUnlockCode.value!==code)return;
+    testUnlockFeedback.setAttribute('data-success','');
+    testUnlockFeedback.textContent='Freischaltcode kopiert.';
+  }catch{
+    if(!testUnlockDialog.open||testUnlockCode.value!==code)return;
+    testUnlockFeedback.removeAttribute('data-success');
+    testUnlockCode.focus();
+    testUnlockCode.select();
+    testUnlockFeedback.textContent='Kopieren war nicht möglich. Kopiere den markierten Code manuell.';
+  }
+};
 $('testUnlockForm').onsubmit=async event=>{
   event.preventDefault();
+  if(testUnlockCode.readOnly)return;
   const code=testUnlockCode.value.trim();
-  const submit=$('submitTestUnlock');
-  submit.disabled=true;
+  const purpose=testUnlockDialog.dataset.purpose;
+  const sharing=purpose==='share';
+  submitTestUnlock.disabled=true;
   try{
     const expectedHash=globalThis.storybookTestModeCodeHash;
     if(!/^[0-9a-f]{64}$/.test(expectedHash))throw Error('Missing or invalid Test mode configuration');
     const hash=await sha256Hex(new TextEncoder().encode(code));
-    if(!testUnlockDialog.open||testUnlockCode.value.trim()!==code)return;
+    if(!testUnlockDialog.open||testUnlockDialog.dataset.purpose!==purpose||testUnlockCode.value.trim()!==code)return;
     if(hash!==expectedHash){
       testUnlockCode.setAttribute('aria-invalid','true');
       testUnlockFeedback.textContent='Der Freischaltcode ist nicht richtig.';
       testUnlockCode.focus();
+      return;
+    }
+    if(sharing){
+      if(!APP_IS_TEST||!isTestModeUnlocked())return;
+      testUnlockCode.value=code;
+      testUnlockCode.type='text';
+      testUnlockCode.readOnly=true;
+      submitTestUnlock.hidden=true;
+      copyTestUnlock.hidden=false;
+      $('cancelTestUnlock').textContent='Schließen';
+      copyTestUnlock.focus();
       return;
     }
     localStorage.setItem(APP_MODE_KEY,APP_IS_TEST?'test':'production');
@@ -550,9 +613,11 @@ $('testUnlockForm').onsubmit=async event=>{
     $(APP_IS_TEST?'modeTest':'modeProduction').focus();
     if(APP_IS_TEST)loadCatalogBranches();
   }catch{
-    testUnlockFeedback.textContent='Der Testmodus konnte nicht freigeschaltet werden.';
+    if(testUnlockDialog.open&&testUnlockDialog.dataset.purpose===purpose){
+      testUnlockFeedback.textContent=sharing?'Der Freischaltcode konnte nicht geprüft werden.':'Der Testmodus konnte nicht freigeschaltet werden.';
+    }
   }finally{
-    submit.disabled=false;
+    submitTestUnlock.disabled=false;
   }
 };
 $('hideTestMode').onclick=()=>{
