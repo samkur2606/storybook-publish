@@ -479,10 +479,23 @@ const titleSorter=new Intl.Collator('de',{sensitivity:'base',numeric:true});
 function visibleBookStatus(status){
   return status===undefined||status==='released'||(APP_IS_TEST&&status==='preview');
 }
+const bookVersionPattern=/^\d+\.\d+\.\d+$/;
+const bookVersionSorter=new Intl.Collator('en',{numeric:true});
 function selectCatalogBooks(entries){
   const selected=new Map();
   for(const book of entries){
-    if(visibleBookStatus(book.status)&&(book.status==='preview'||!selected.has(book.id))){
+    if(!visibleBookStatus(book.status))continue;
+    const current=selected.get(book.id);
+    if(!current){
+      selected.set(book.id,book);
+      continue;
+    }
+    if(!APP_IS_TEST)continue;
+    const comparable=[book.version,current.version].every(version=>typeof version==='string'&&bookVersionPattern.test(version));
+    const versionOrder=comparable
+      ?bookVersionSorter.compare(book.version,current.version)
+      :0;
+    if(versionOrder>0||(versionOrder===0&&current.status==='preview'&&book.status!=='preview')){
       selected.set(book.id,book);
     }
   }
@@ -493,8 +506,8 @@ function mergeShelfBooks(catalog,offlineBooks){
   for(const book of offlineBooks){
     if(!visibleBookStatus(book.status))continue;
     const online=entries.get(book.id)?.book;
-    // Test must be able to open a preview even if another version is stored offline.
-    if(online&&(online.status==='preview'||book.status==='preview')&&online.zipSha256!==book.catalogZipSha256)continue;
+    // Reuse a Test download only when it matches the selected catalog entry.
+    if(APP_IS_TEST&&online&&online.zipSha256!==book.catalogZipSha256)continue;
     const displayed=online?{...book,status:online.status}:book;
     entries.set(book.id,{book:displayed,offline:true});
   }
