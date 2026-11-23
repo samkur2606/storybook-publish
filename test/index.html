@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="a6a2ed4ac6d41c8c1204b2c803baff5212501531"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="5928e5c5b6ec96237c0bfac36df4ef9300e20291"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -106,7 +106,7 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
   max-width:680px;margin-inline:auto;
   padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))
 }
-#settingsDialog .settings-header{display:flex;align-items:center;gap:12px;padding-block:12px}
+#settingsDialog .settings-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
 #settingsDialog h2{font-size:clamp(22px,4vw,28px);margin:0}
 #settingsDialog .settings-close{
   display:grid;place-items:center;flex:none;width:44px;height:44px;
@@ -441,10 +441,10 @@ body{background:#f8f2e7;background-attachment:initial}
 <dialog id="settingsDialog" aria-labelledby="settingsHeading">
   <div class="settings-toolbar">
     <div class="settings-header">
-      <button type="button" class="settings-close" id="closeSettings" aria-label="Zurück zum Bücherregal" autofocus>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg>
-      </button>
       <h2 id="settingsHeading">Einstellungen</h2>
+      <button type="button" class="settings-close" id="closeSettings" aria-label="Einstellungen schließen" autofocus>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
     </div>
   </div>
   <div class="settings-content">
