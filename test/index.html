@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="7721ec629c19da9edbfc375cde78890a22bf5301"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="6230cba347fd7e0a81341f3156385e9638db5c75"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -406,6 +406,7 @@ body{background:#f8f2e7;background-attachment:initial}
 #testUnlockHash{resize:none;font-family:monospace;font-size:13px;overflow-wrap:anywhere}
 #testUnlockDialog :is(#testUnlockCode,#testUnlockHash){width:100%;min-height:44px;margin-top:6px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#fffdf8;color:inherit}
 #testUnlockCode{font:inherit}
+#testUnlockSetup{margin:8px 0 0;color:#796a56;font-size:13px}
 #testUnlockFeedback{margin:6px 0 0;color:#8f4536;font-size:13px}
 #testUnlockFeedback:empty{margin:0}
 #testUnlockFeedback[data-success]{color:#3d653c}
@@ -534,7 +535,8 @@ body{background:#f8f2e7;background-attachment:initial}
   <form id="testUnlockForm">
     <h2 id="testUnlockHeading">Testmodus freischalten</h2>
     <label for="testUnlockCode">Freischaltcode</label>
-    <input id="testUnlockCode" type="password" required autofocus autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="testUnlockFeedback">
+    <input id="testUnlockCode" type="password" required autofocus autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="testUnlockSetup testUnlockFeedback">
+    <p id="testUnlockSetup" hidden>Auf diesem Gerät ist noch kein Code gespeichert. Gib den Freischaltcode einmal ein. Danach ist er hier automatisch hinterlegt.</p>
     <div id="testUnlockHashGroup" hidden>
       <label for="testUnlockHash">Freischaltcode-Hash (SHA-256)</label>
       <textarea id="testUnlockHash" rows="2" readonly spellcheck="false"></textarea>
@@ -598,6 +600,7 @@ const TEST_MODE_CODE_KEY='storybook.app.test-code.v1';
 const testUnlockDialog=$('testUnlockDialog');
 const testUnlockCode=$('testUnlockCode');
 const testUnlockFeedback=$('testUnlockFeedback');
+const testUnlockSetup=$('testUnlockSetup');
 const submitTestUnlock=$('submitTestUnlock');
 const copyTestUnlock=$('copyTestUnlock');
 const copyTestUnlockHash=$('copyTestUnlockHash');
@@ -624,15 +627,19 @@ function resetTestCodeField(){
   copyTestUnlockHash.hidden=true;
   testUnlockHash.value='';
   testUnlockHashGroup.hidden=true;
+  testUnlockSetup.hidden=true;
 }
 function openTestCodeDialog(purpose){
   const revealing=purpose==='reveal';
   resetTestCodeField();
   testUnlockDialog.dataset.purpose=purpose;
-  if(revealing)testUnlockCode.value=localStorage.getItem(TEST_MODE_CODE_KEY)||'';
+  const savedCode=revealing?localStorage.getItem(TEST_MODE_CODE_KEY):null;
+  testUnlockCode.value=savedCode||'';
+  testUnlockSetup.hidden=!revealing||Boolean(savedCode);
   $('testUnlockHeading').textContent=revealing?'Freischaltcode anzeigen':'Testmodus freischalten';
   $('cancelTestUnlock').textContent='Abbrechen';
-  submitTestUnlock.textContent=revealing?'Anzeigen':'Freischalten';
+  submitTestUnlock.textContent=testUnlockSetup.hidden?'Anzeigen':'Speichern und anzeigen';
+  if(!revealing)submitTestUnlock.textContent='Freischalten';
   testUnlockDialog.showModal();
 }
 $('openTestUnlock').onclick=()=>openTestCodeDialog('unlock');
@@ -682,6 +689,7 @@ $('testUnlockForm').onsubmit=async event=>{
       if(savedCode){
         localStorage.removeItem(TEST_MODE_CODE_KEY);
         testUnlockCode.value='';
+        submitTestUnlock.textContent='Speichern und anzeigen';
       }
       testUnlockCode.setAttribute('aria-invalid','true');
       testUnlockFeedback.textContent=savedCode
@@ -699,6 +707,7 @@ $('testUnlockForm').onsubmit=async event=>{
       submitTestUnlock.hidden=true;
       testUnlockHash.value=expectedTestCodeHash;
       testUnlockHashGroup.hidden=false;
+      testUnlockSetup.hidden=true;
       copyTestUnlock.hidden=false;
       copyTestUnlockHash.hidden=false;
       $('cancelTestUnlock').textContent='Schließen';
