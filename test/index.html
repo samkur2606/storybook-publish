@@ -438,10 +438,11 @@ body{background:#f8f2e7;background-attachment:initial}
     </div>
     <p id="modeDescription" role="status"></p>
     <div id="catalogSettings" hidden>
-      <label for="catalogBranch">Bücher-Branch</label>
+      <label for="catalogBranch">Bücher-Branch (storybook-books)</label>
+      <p id="catalogRepositoryHint">Hier wählst du den Branch für die Bücher, nicht für die App (storybook-app).</p>
       <p id="catalogCurrent"></p>
       <div class="catalog-select">
-        <select id="catalogBranch" aria-describedby="catalogCurrent catalogFeedback" disabled>
+        <select id="catalogBranch" aria-describedby="catalogRepositoryHint catalogCurrent catalogFeedback" disabled>
           <option value="main">main (Standard)</option>
         </select>
       </div>
@@ -1076,7 +1077,7 @@ async function loadCatalogBranches(){
   catalogApply.disabled=true;
   if(!token){
     displayCatalogBranches([]);
-    catalogFeedback.textContent='Speichere unter GitHub-Zugang einen Lesetoken, um Bücher-Branches zu laden.';
+    catalogFeedback.textContent='Speichere unter GitHub-Zugang einen Lesetoken, um Branches aus storybook-books zu laden.';
     return;
   }
   catalogFeedback.textContent='Lade Bücher-Branches …';
