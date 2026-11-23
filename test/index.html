@@ -151,9 +151,10 @@ html,body{background:var(--cream);color:var(--walnut)}
 body{background:linear-gradient(180deg,#efe2cf 0,#f8f2e7 210px,#fbf7ef 100%);background-attachment:fixed}
 header h1{color:#3d2a1c;letter-spacing:-.35px}
 header .header-title{min-width:0}
-#testModeBadge{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;max-width:100%;margin-top:5px;padding:3px 9px;border:1px solid #c99d67;border-radius:999px;background:#f5e2c4;color:#62401f;font-size:12px;font-weight:700;line-height:1.3}
-#testModeBadge[hidden]{display:none}
-#testCatalogBranch{min-width:0;overflow-wrap:anywhere;font-weight:500}
+#testModeBadges{display:flex;flex-wrap:wrap;align-items:flex-start;gap:5px 6px;margin-top:5px}
+#testModeBadges[hidden],#testCatalogBranch[hidden]{display:none}
+.test-badge{max-width:100%;padding:3px 9px;border:1px solid #c99d67;border-radius:999px;background:#f5e2c4;color:#62401f;font-size:12px;font-weight:700;line-height:1.3}
+#testCatalogBranch{min-width:0;overflow-wrap:anywhere;border-color:#d8c4a5;background:#fff8ed;color:#624529;font-weight:600}
 p,.hint{color:#796b59}
 #settingsBtn{background:#fff8ed;border:1px solid #d8c4a5;color:#624529;box-shadow:0 2px 8px #79543612}
 #settingsBtn:focus-visible,.book:focus-visible,.btn:focus-visible,.search-wrap:focus-within{outline:2px solid #b17c3f;outline-offset:2px}
@@ -378,7 +379,7 @@ body{background:#f8f2e7;background-attachment:initial}
 #catalogSettings :is(button,select):focus-visible{outline:2px solid #8b6038;outline-offset:2px}
 #catalogCurrent{overflow-wrap:anywhere}
 </style></head><body>
-<header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><span id="testModeBadge" hidden><span>Testmodus</span><span id="testCatalogBranch" hidden></span></span></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
+<header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
@@ -718,7 +719,7 @@ function activeCatalogRef(){
 }
 const catalogRef=activeCatalogRef();
 if(APP_IS_TEST){
-  $('testModeBadge').hidden=false;
+  $('testModeBadges').hidden=false;
   if(catalogRef!=='main'){
     const branchLabel=$('testCatalogBranch');
     branchLabel.textContent=catalogRef;
