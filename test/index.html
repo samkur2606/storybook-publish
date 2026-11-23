@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="738733af1f92814918c3887d062830a08287f1d3"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="495f04de43578ca4c0214cc9708100b8282889c0"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -392,15 +392,16 @@ body{background:#f8f2e7;background-attachment:initial}
 #appInfo dt{color:#796a56}
 #appInfo dd{margin:0;color:#543820;overflow-wrap:anywhere}
 #appInfo dd a{color:inherit;text-underline-offset:2px}
-#appInfo :is(#testCodeHashLabel,#testCodeHashValue){grid-column:1/-1}
-#testCodeHashLabel{margin-top:6px}
 .test-settings-link{min-height:44px;padding:0;border:0;background:transparent;color:#704c2b;font-size:13px;text-align:left;text-decoration:underline;text-underline-offset:3px}
 #appEnvironment .test-settings-actions{display:flex;flex-wrap:wrap;column-gap:16px}
 #testUnlockDialog{width:min(390px,calc(100vw - 32px));padding:22px;border:1px solid #d9c1a4;border-radius:20px;background:#fffaf0;color:#4b321f}
 #testUnlockDialog::backdrop{background:#24190e91}
 #testUnlockDialog h2{font-size:21px;margin:0 0 16px}
 #testUnlockDialog label{display:block;font-size:13px;font-weight:700}
-#testUnlockCode{width:100%;min-height:44px;margin-top:6px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#fffdf8;color:inherit;font:inherit}
+#testUnlockHashGroup{margin-top:12px}
+#testUnlockHash{resize:none;font-family:monospace;font-size:13px;overflow-wrap:anywhere}
+#testUnlockDialog :is(#testUnlockCode,#testUnlockHash){width:100%;min-height:44px;margin-top:6px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#fffdf8;color:inherit}
+#testUnlockCode{font:inherit}
 #testUnlockFeedback{margin:6px 0 0;color:#8f4536;font-size:13px}
 #testUnlockFeedback:empty{margin:0}
 #testUnlockFeedback[data-success]{color:#3d653c}
@@ -484,7 +485,7 @@ body{background:#f8f2e7;background-attachment:initial}
         </div>
         <p class="environment-recovery">Falls die Testversion nicht startet: <a id="modeRecovery" href="./?mode=production">Produktion wiederherstellen</a>.</p>
         <div class="test-settings-actions">
-          <button id="openTestCodeShare" class="test-settings-link" type="button" hidden>Freischaltcode teilen</button>
+          <button id="openTestCodeReveal" class="test-settings-link" type="button" hidden>Freischaltcode anzeigen</button>
           <button id="hideTestMode" class="test-settings-link" type="button">Testmodus auf diesem Gerät ausblenden</button>
         </div>
       </div>
@@ -520,8 +521,6 @@ body{background:#f8f2e7;background-attachment:initial}
           <dt>Umgebung</dt><dd id="appBuildMode">Produktion</dd>
           <dt id="appBuildCommitLabel" hidden>Commit</dt>
           <dd id="appBuildCommitValue" hidden><a id="appBuildCommitLink" target="_blank" rel="noopener"></a></dd>
-          <dt id="testCodeHashLabel">Freischaltcode-Hash (SHA-256)</dt>
-          <dd id="testCodeHashValue"><code id="testCodeHash">Nicht verfügbar</code></dd>
         </dl>
         <button id="openTestUnlock" class="test-settings-link" type="button">Testmodus freischalten</button>
       </div>
@@ -533,11 +532,16 @@ body{background:#f8f2e7;background-attachment:initial}
     <h2 id="testUnlockHeading">Testmodus freischalten</h2>
     <label for="testUnlockCode">Freischaltcode</label>
     <input id="testUnlockCode" type="password" required autofocus autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="testUnlockFeedback">
+    <div id="testUnlockHashGroup" hidden>
+      <label for="testUnlockHash">Freischaltcode-Hash (SHA-256)</label>
+      <textarea id="testUnlockHash" rows="2" readonly spellcheck="false"></textarea>
+    </div>
     <p id="testUnlockFeedback" role="status"></p>
     <div class="test-unlock-actions">
       <button id="cancelTestUnlock" type="button">Abbrechen</button>
       <button id="submitTestUnlock" type="submit">Freischalten</button>
-      <button id="copyTestUnlock" type="button" hidden>Kopieren</button>
+      <button id="copyTestUnlock" type="button" hidden>Code kopieren</button>
+      <button id="copyTestUnlockHash" type="button" hidden>Hash kopieren</button>
     </div>
   </form>
 </dialog>
@@ -569,7 +573,6 @@ if(appBuildCommit){
 
 const expectedTestCodeHash=globalThis.storybookTestModeCodeHash;
 const hasTestCodeHash=/^[0-9a-f]{64}$/.test(expectedTestCodeHash);
-if(hasTestCodeHash)$('testCodeHash').textContent=expectedTestCodeHash;
 
 function renderTestModeSettings(){
   const unlocked=isTestModeUnlocked();
@@ -586,11 +589,14 @@ const testUnlockCode=$('testUnlockCode');
 const testUnlockFeedback=$('testUnlockFeedback');
 const submitTestUnlock=$('submitTestUnlock');
 const copyTestUnlock=$('copyTestUnlock');
-$('openTestCodeShare').hidden=!APP_IS_TEST;
+const copyTestUnlockHash=$('copyTestUnlockHash');
+const testUnlockHash=$('testUnlockHash');
+const testUnlockHashGroup=$('testUnlockHashGroup');
+$('openTestCodeReveal').hidden=!APP_IS_TEST;
 addEventListener('storage',event=>{
   if(event.key!==TEST_MODE_UNLOCK_KEY&&event.key!==null)return;
   renderTestModeSettings();
-  if(testUnlockDialog.open&&testUnlockDialog.dataset.purpose==='share'&&!isTestModeUnlocked()){
+  if(testUnlockDialog.open&&testUnlockDialog.dataset.purpose==='reveal'&&!isTestModeUnlocked()){
     testUnlockDialog.close();
   }
 });
@@ -604,20 +610,23 @@ function resetTestCodeField(){
   testUnlockFeedback.textContent='';
   submitTestUnlock.hidden=false;
   copyTestUnlock.hidden=true;
+  copyTestUnlockHash.hidden=true;
+  testUnlockHash.value='';
+  testUnlockHashGroup.hidden=true;
 }
 function openTestCodeDialog(purpose){
-  const sharing=purpose==='share';
+  const revealing=purpose==='reveal';
   resetTestCodeField();
   testUnlockDialog.dataset.purpose=purpose;
-  if(sharing)testUnlockCode.value=localStorage.getItem(TEST_MODE_CODE_KEY)||'';
-  $('testUnlockHeading').textContent=sharing?'Freischaltcode teilen':'Testmodus freischalten';
+  if(revealing)testUnlockCode.value=localStorage.getItem(TEST_MODE_CODE_KEY)||'';
+  $('testUnlockHeading').textContent=revealing?'Freischaltcode anzeigen':'Testmodus freischalten';
   $('cancelTestUnlock').textContent='Abbrechen';
-  submitTestUnlock.textContent=sharing?'Code anzeigen':'Freischalten';
+  submitTestUnlock.textContent=revealing?'Anzeigen':'Freischalten';
   testUnlockDialog.showModal();
 }
 $('openTestUnlock').onclick=()=>openTestCodeDialog('unlock');
-$('openTestCodeShare').onclick=()=>{
-  if(APP_IS_TEST&&isTestModeUnlocked())openTestCodeDialog('share');
+$('openTestCodeReveal').onclick=()=>{
+  if(APP_IS_TEST&&isTestModeUnlocked())openTestCodeDialog('reveal');
 };
 $('cancelTestUnlock').onclick=()=>testUnlockDialog.close();
 testUnlockDialog.addEventListener('close',()=>{
@@ -627,35 +636,38 @@ testUnlockCode.oninput=()=>{
   testUnlockCode.removeAttribute('aria-invalid');
   testUnlockFeedback.textContent='';
 };
-copyTestUnlock.onclick=async()=>{
-  if(!testUnlockDialog.open||!testUnlockCode.readOnly||!isTestModeUnlocked())return;
-  const code=testUnlockCode.value;
+async function copyRevealedTestValue(field,label){
+  if(!APP_IS_TEST||!isTestModeUnlocked()||!testUnlockDialog.open||!testUnlockCode.readOnly)return;
+  const value=field.value;
+  if(!value)return;
   try{
-    await navigator.clipboard.writeText(code);
-    if(!testUnlockDialog.open||testUnlockCode.value!==code)return;
+    await navigator.clipboard.writeText(value);
+    if(!testUnlockDialog.open||field.value!==value)return;
     testUnlockFeedback.setAttribute('data-success','');
-    testUnlockFeedback.textContent='Freischaltcode kopiert.';
+    testUnlockFeedback.textContent=label+' kopiert.';
   }catch{
-    if(!testUnlockDialog.open||testUnlockCode.value!==code)return;
+    if(!testUnlockDialog.open||field.value!==value)return;
     testUnlockFeedback.removeAttribute('data-success');
-    testUnlockCode.focus();
-    testUnlockCode.select();
-    testUnlockFeedback.textContent='Kopieren war nicht möglich. Kopiere den markierten Code manuell.';
+    field.focus();
+    field.select();
+    testUnlockFeedback.textContent='Kopieren war nicht möglich. Kopiere den markierten Wert manuell.';
   }
-};
+}
+copyTestUnlock.onclick=()=>copyRevealedTestValue(testUnlockCode,'Freischaltcode');
+copyTestUnlockHash.onclick=()=>copyRevealedTestValue(testUnlockHash,'Freischaltcode-Hash');
 $('testUnlockForm').onsubmit=async event=>{
   event.preventDefault();
   if(testUnlockCode.readOnly)return;
   const code=testUnlockCode.value.trim();
   const purpose=testUnlockDialog.dataset.purpose;
-  const sharing=purpose==='share';
+  const revealing=purpose==='reveal';
   submitTestUnlock.disabled=true;
   try{
     if(!hasTestCodeHash)throw Error('Missing or invalid Test mode configuration');
     const hash=await sha256Hex(new TextEncoder().encode(code));
     if(!testUnlockDialog.open||testUnlockDialog.dataset.purpose!==purpose||testUnlockCode.value.trim()!==code)return;
     if(hash!==expectedTestCodeHash){
-      const savedCode=sharing&&localStorage.getItem(TEST_MODE_CODE_KEY)===code;
+      const savedCode=revealing&&localStorage.getItem(TEST_MODE_CODE_KEY)===code;
       if(savedCode){
         localStorage.removeItem(TEST_MODE_CODE_KEY);
         testUnlockCode.value='';
@@ -667,14 +679,17 @@ $('testUnlockForm').onsubmit=async event=>{
       testUnlockCode.focus();
       return;
     }
-    if(sharing&&(!APP_IS_TEST||!isTestModeUnlocked()))return;
+    if(revealing&&(!APP_IS_TEST||!isTestModeUnlocked()))return;
     localStorage.setItem(TEST_MODE_CODE_KEY,code);
-    if(sharing){
+    if(revealing){
       testUnlockCode.value=code;
       testUnlockCode.type='text';
       testUnlockCode.readOnly=true;
       submitTestUnlock.hidden=true;
+      testUnlockHash.value=expectedTestCodeHash;
+      testUnlockHashGroup.hidden=false;
       copyTestUnlock.hidden=false;
+      copyTestUnlockHash.hidden=false;
       $('cancelTestUnlock').textContent='Schließen';
       copyTestUnlock.focus();
       return;
@@ -687,7 +702,7 @@ $('testUnlockForm').onsubmit=async event=>{
     $(APP_IS_TEST?'modeTest':'modeProduction').focus();
   }catch{
     if(testUnlockDialog.open&&testUnlockDialog.dataset.purpose===purpose){
-      testUnlockFeedback.textContent=sharing?'Der Freischaltcode konnte nicht geprüft werden.':'Der Testmodus konnte nicht freigeschaltet werden.';
+      testUnlockFeedback.textContent=revealing?'Der Freischaltcode konnte nicht geprüft werden.':'Der Testmodus konnte nicht freigeschaltet werden.';
     }
   }finally{
     submitTestUnlock.disabled=false;
