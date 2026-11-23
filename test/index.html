@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="df37b96d163348eeb7e056f0d0d4d192bea02920"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.1-test"><meta name="storybook-build-commit" content="eb06900b58d50ec8893c1e48ee401639a9a60b84"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -108,11 +108,11 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
 }
 #settingsDialog .settings-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
 #settingsDialog h2{font-size:clamp(22px,4vw,28px);margin:0}
-#settingsDialog .settings-close{
+.dialog-close{
   display:grid;place-items:center;flex:none;width:44px;height:44px;
   border:1px solid #d4bc9e;border-radius:12px;background:#f0e2cd;color:#624329
 }
-#settingsDialog .settings-close svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.dialog-close svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 #settingsDialog .settings-content{display:grid;gap:12px;padding-top:20px;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 #settingsDialog .settings-section{min-width:0;border:1px solid #dec9ae;border-radius:16px;background:#fffaf0}
 #settingsDialog .settings-section[hidden]{display:none}
@@ -126,7 +126,7 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
   border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg)
 }
 #settingsDialog .settings-section[open]>summary::after{transform:rotate(225deg)}
-#settingsDialog .settings-section>summary:focus-visible,#settingsDialog .settings-close:focus-visible{outline:2px solid #8b6038;outline-offset:2px}
+#settingsDialog .settings-section>summary:focus-visible,.dialog-close:focus-visible{outline:2px solid #8b6038;outline-offset:2px}
 #settingsDialog .settings-section-body{padding:12px 16px 16px;border-top:1px solid #eadbc7}
 .github-connection{display:flex;align-items:center;gap:9px;margin:0 0 16px;padding:11px 13px;border:1px solid #695774;border-radius:12px;background:#251a2e;color:#d5c6dc;font-size:13px}
 .github-connection-dot{width:8px;height:8px;flex:none;border-radius:50%;background:#ae9eb7}
@@ -400,7 +400,8 @@ body{background:#f8f2e7;background-attachment:initial}
 #hideTestModeDialog p{font-size:14px;line-height:1.5;margin:0 0 16px;color:#796a56}
 #hideTestModeDialog .test-unlock-actions button{min-height:44px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#f3e5d3;color:#563c29}
 #hideTestModeDialog #confirmHideTestMode{border-color:#69482e;background:#69482e;color:#fffaf0}
-#testUnlockDialog h2{font-size:21px;margin:0 0 16px}
+#testUnlockDialog .test-unlock-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+#testUnlockDialog h2{font-size:21px;margin:0}
 #testUnlockDialog label{display:block;font-size:13px;font-weight:700}
 #testUnlockHashGroup{margin-top:12px}
 #testUnlockHash{resize:none;font-family:monospace;font-size:13px;overflow-wrap:anywhere}
@@ -470,7 +471,7 @@ body{background:#f8f2e7;background-attachment:initial}
   <div class="settings-toolbar">
     <div class="settings-header">
       <h2 id="settingsHeading">Einstellungen</h2>
-      <button type="button" class="settings-close" id="closeSettings" aria-label="Einstellungen schließen" autofocus>
+      <button type="button" class="dialog-close" id="closeSettings" aria-label="Einstellungen schließen" autofocus>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
       </button>
     </div>
@@ -542,7 +543,12 @@ body{background:#f8f2e7;background-attachment:initial}
 </dialog>
 <dialog id="testUnlockDialog" aria-labelledby="testUnlockHeading">
   <form id="testUnlockForm">
-    <h2 id="testUnlockHeading">Testmodus freischalten</h2>
+    <div class="test-unlock-header">
+      <h2 id="testUnlockHeading">Testmodus freischalten</h2>
+      <button type="button" class="dialog-close" id="closeTestUnlock" aria-label="Freischaltcode-Dialog schließen">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
     <label for="testUnlockCode">Freischaltcode</label>
     <input id="testUnlockCode" type="password" required autofocus autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="testUnlockSetup testUnlockFeedback">
     <p id="testUnlockSetup" hidden>Auf diesem Gerät ist noch kein Code gespeichert. Gib den Freischaltcode einmal ein. Danach ist er hier automatisch hinterlegt.</p>
@@ -552,7 +558,6 @@ body{background:#f8f2e7;background-attachment:initial}
     </div>
     <p id="testUnlockFeedback" role="status"></p>
     <div class="test-unlock-actions">
-      <button id="cancelTestUnlock" type="button">Abbrechen</button>
       <button id="submitTestUnlock" type="submit">Freischalten</button>
       <button id="copyTestUnlock" type="button" hidden>Code kopieren</button>
       <button id="copyTestUnlockHash" type="button" hidden>Hash kopieren</button>
@@ -698,7 +703,6 @@ async function openTestCodeDialog(purpose){
   resetTestCodeField();
   testUnlockDialog.dataset.purpose=purpose;
   $('testUnlockHeading').textContent=revealing?'Freischaltcode anzeigen':'Testmodus freischalten';
-  $('cancelTestUnlock').textContent='Abbrechen';
   submitTestUnlock.textContent=revealing?'Anzeigen':'Freischalten';
   testUnlockCode.disabled=revealing;
   submitTestUnlock.disabled=revealing;
@@ -730,7 +734,7 @@ $('openTestUnlock').onclick=()=>openTestCodeDialog('unlock');
 $('openTestCodeReveal').onclick=()=>{
   if(APP_IS_TEST&&isTestModeUnlocked())openTestCodeDialog('reveal');
 };
-$('cancelTestUnlock').onclick=()=>testUnlockDialog.close();
+$('closeTestUnlock').onclick=()=>testUnlockDialog.close();
 testUnlockDialog.addEventListener('close',()=>{
   if(!testUnlockDialog.open)resetTestCodeField();
 });
@@ -790,7 +794,6 @@ $('testUnlockForm').onsubmit=async event=>{
       testUnlockSetup.hidden=true;
       copyTestUnlock.hidden=false;
       copyTestUnlockHash.hidden=false;
-      $('cancelTestUnlock').textContent='Schließen';
       copyTestUnlock.focus();
       return;
     }
