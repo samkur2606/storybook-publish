@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="4b5554e35d1a4395274125298a622989ca22618d"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="7721ec629c19da9edbfc375cde78890a22bf5301"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -386,8 +386,6 @@ body{background:#f8f2e7;background-attachment:initial}
 #appEnvironment .environment-switch button{padding:10px 6px;border:0;border-radius:9px;background:transparent;color:#65492e;font-size:13px;font-weight:650}
 #appEnvironment .environment-switch button[aria-pressed="true"]{background:#fffaf0;box-shadow:0 1px 5px #53391f20;color:#3b291a}
 #appEnvironment .environment-switch button:focus-visible{outline:2px solid #8b6038;outline-offset:2px}
-#settingsDialog #appEnvironment .environment-recovery{font-size:11px;margin-top:9px}
-#appEnvironment .environment-recovery a{color:#704c2b;text-decoration:underline;text-underline-offset:2px}
 #appInfo dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;margin:0;font-size:14px}
 #appInfo dt{color:#796a56}
 #appInfo dd{margin:0;color:#543820;overflow-wrap:anywhere}
@@ -489,7 +487,6 @@ body{background:#f8f2e7;background-attachment:initial}
           </div>
           <p id="catalogFeedback" role="status"></p>
         </div>
-        <p class="environment-recovery"><a id="modeRecovery" href="./?mode=production">Zu Produktion wechseln</a></p>
         <div class="test-settings-actions">
           <button id="openTestCodeReveal" class="test-settings-link" type="button" hidden>Freischaltcode anzeigen</button>
           <button id="hideTestMode" class="test-settings-link" type="button">Testmodus auf diesem Gerät ausblenden</button>
@@ -745,7 +742,6 @@ function switchAppMode(mode){
 }
 $('modeProduction').setAttribute('aria-pressed',String(!APP_IS_TEST));
 $('modeTest').setAttribute('aria-pressed',String(APP_IS_TEST));
-$('modeRecovery').href=new URL('./?mode=production',APP_BASE).href;
 $('modeProduction').onclick=()=>switchAppMode('production');
 $('modeTest').onclick=()=>switchAppMode('test');
 function valid(b){return b&&typeof b.title==='string'&&Array.isArray(b.pages)&&b.pages.length>0&&b.pages.every(s=>typeof s==='string'&&s.startsWith('data:image/'))}
