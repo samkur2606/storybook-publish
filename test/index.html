@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="f712ac95444f7593af08888aa57a0dff6306f0ba"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="438d52cb8150c3aedfdb29e989eaf9605d899279"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -56,7 +56,7 @@ function isTestModeUnlocked(){
 .book-holder{position:relative;min-width:0}.book-holder .book{display:block;width:100%;height:100%;cursor:pointer}.book-options{position:absolute;top:17px;right:17px;width:37px;height:37px;border:1px solid #ffffff66;border-radius:50%;background:#1b1326e8;color:#fff;font-size:25px;line-height:1;display:grid;place-items:center;z-index:2;box-shadow:0 2px 10px #0008}.book-options:focus-visible{outline:3px solid #d8b1e7}.book-actions{position:absolute;top:59px;right:12px;z-index:3;background:#31253b;border:1px solid #75667e;border-radius:12px;padding:5px;box-shadow:0 8px 25px #000a}.book-actions[hidden]{display:none}.book-actions button{background:transparent;border:0;color:#ffd5d5;padding:11px 13px;white-space:nowrap;font-size:14px}.book-actions button:active{background:#ffffff16}#deleteDialog{border:1px solid #705c7b;border-radius:20px;background:#24192e;color:white;padding:23px;width:min(390px,calc(100vw - 32px));box-shadow:0 20px 65px #0009}#deleteDialog::backdrop{background:#000b}#deleteDialog h2{font-size:21px;margin:0 0 12px}#deleteDialog p{font-size:14px;margin:0 0 12px}#deleteDialog .delete-notice{background:#372942;border-radius:12px;padding:13px;color:#e8dbe9;font-size:14px;line-height:1.5}#deleteDialog .delete-buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}#deleteDialog button{border-radius:11px;padding:11px 14px;border:1px solid #806e89;background:#35283e;color:#fff}#deleteDialog #confirmDelete{background:#b44758;border-color:#b44758;font-weight:650}#deleteDialog button:disabled{opacity:.5}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .search-area{margin:0 0 14px}.search-wrap{display:flex;align-items:center;gap:10px;background:#2a2032;border:1px solid #65546f;border-radius:15px;padding:0 14px;min-height:49px}.search-wrap:focus-within{border-color:#b48ac5;box-shadow:0 0 0 2px #b48ac533}.search-wrap svg{flex:none;color:#c9b5d2}.search-wrap input{width:100%;background:transparent;color:#fff;border:0;outline:0;font:inherit;font-size:16px;padding:13px 0}.search-wrap input::placeholder{color:#a99bb0}.clear-search{border:0;background:transparent;color:#cbbbd4;font-size:24px;padding:4px 2px;line-height:1}.search-meta{font-size:12px;color:#a99bb0;padding:8px 3px 0;min-height:0}.search-meta:empty{display:none}.search-empty{grid-column:1/-1;padding:28px 16px;border:1px dashed #75667e;border-radius:16px;text-align:center;color:#ddd}.search-empty strong{display:block;margin-bottom:6px}.search-empty small{color:#bcb1c3}.book[hidden]{display:none!important}
-header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#settingsBtn{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;border:1px solid #ffffff38;background:#ffffff13;color:white}#settingsDialog{border:1px solid #705c7b;border-radius:20px;background:#24192e;color:white;padding:23px;width:min(390px,calc(100vw - 32px));box-shadow:0 20px 65px #0009}#settingsDialog::backdrop{background:#000b}#settingsDialog h2{margin:0 0 12px;font-size:21px}#settingsDialog p{font-size:14px;color:#e8dbe9}.empty{line-height:1.5}.empty p{font-size:14px;opacity:.8;max-width:290px;margin:10px auto 0}
+header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#settingsBtn{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;border:1px solid #ffffff38;background:#ffffff13;color:white}.empty{line-height:1.5}.empty p{font-size:14px;opacity:.8;max-width:290px;margin:10px auto 0}
 
 /* V17: entire page always fits in available viewport; no vertical image scrolling */
 #reader{height:100dvh;overflow:hidden}
@@ -93,17 +93,42 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
 @media(prefers-reduced-motion:reduce){.import-spinner{animation:none}#importProgress::-webkit-progress-value{transition:none}}
 
 /* GitHub account settings: touch-friendly controls and readable states. */
-#settingsDialog{width:min(450px,calc(100vw - 32px));max-height:min(88dvh,760px);overflow-y:auto;padding:24px;color:#fff}
-#settingsDialog .settings-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:24px}
-#settingsDialog .settings-eyebrow{color:#c3a2d2;font-size:10px;letter-spacing:.16em;font-weight:750}
-#settingsDialog h2{font-size:24px;margin:4px 0 0}
-#settingsDialog .settings-close{flex:none;width:38px;height:38px;border-radius:12px;border:1px solid #6a5677;background:#382a43;color:#f6eafa;font-size:27px;line-height:1}
-#githubSettings{border:1px solid #594568;border-radius:18px;padding:19px;background:#2d2137}
-.github-settings-title{display:flex;align-items:center;gap:12px}
-.github-settings-icon{width:43px;height:43px;flex:none;display:grid;place-items:center;border-radius:13px;background:#503a60;font-size:21px}
-#githubSettings h3{font-size:17px;line-height:1.35;margin:0 0 3px}
-#settingsDialog .github-settings-subtitle{font-size:12px;line-height:1.4;color:#c9b6d3;margin:0}
-.github-connection{display:flex;align-items:center;gap:9px;margin:19px 0 22px;padding:11px 13px;border:1px solid #695774;border-radius:12px;background:#251a2e;color:#d5c6dc;font-size:13px}
+#settingsDialog{
+  position:fixed;inset:0;margin:0;padding:0;border:0;width:100%;height:100%;max-width:none;max-height:none;
+  overflow:auto;overscroll-behavior:contain;scroll-padding-top:calc(76px + env(safe-area-inset-top));
+  background:#f8f2e7;color:#4b321f
+}
+#settingsDialog .settings-toolbar{
+  position:sticky;top:0;z-index:1;padding-top:env(safe-area-inset-top);
+  background:#fffaf0;border-bottom:1px solid #e5d3ba
+}
+#settingsDialog .settings-header,#settingsDialog .settings-content{
+  max-width:680px;margin-inline:auto;
+  padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))
+}
+#settingsDialog .settings-header{display:flex;align-items:center;gap:12px;padding-block:12px}
+#settingsDialog h2{font-size:clamp(22px,4vw,28px);margin:0}
+#settingsDialog .settings-close{
+  display:grid;place-items:center;flex:none;width:44px;height:44px;
+  border:1px solid #d4bc9e;border-radius:12px;background:#f0e2cd;color:#624329
+}
+#settingsDialog .settings-close svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#settingsDialog .settings-content{display:grid;gap:12px;padding-top:20px;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+#settingsDialog .settings-section{min-width:0;border:1px solid #dec9ae;border-radius:16px;background:#fffaf0}
+#settingsDialog .settings-section[hidden]{display:none}
+#settingsDialog .settings-section>summary{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:56px;
+  padding:12px 16px;border-radius:15px;list-style:none;cursor:pointer;font-weight:700;color:#543820
+}
+#settingsDialog .settings-section>summary::-webkit-details-marker{display:none}
+#settingsDialog .settings-section>summary::after{
+  content:"";flex:none;width:8px;height:8px;margin-inline:4px;
+  border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg)
+}
+#settingsDialog .settings-section[open]>summary::after{transform:rotate(225deg)}
+#settingsDialog .settings-section>summary:focus-visible,#settingsDialog .settings-close:focus-visible{outline:2px solid #8b6038;outline-offset:2px}
+#settingsDialog .settings-section-body{padding:12px 16px 16px;border-top:1px solid #eadbc7}
+.github-connection{display:flex;align-items:center;gap:9px;margin:0 0 16px;padding:11px 13px;border:1px solid #695774;border-radius:12px;background:#251a2e;color:#d5c6dc;font-size:13px}
 .github-connection-dot{width:8px;height:8px;flex:none;border-radius:50%;background:#ae9eb7}
 .github-connection[data-connected="true"]{border-color:#5a856c;color:#caefdb}
 .github-connection[data-connected="true"] .github-connection-dot{background:#7bddaa}
@@ -126,7 +151,6 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
 .github-buttons button:disabled{opacity:.6;cursor:wait}
 #githubTokenEntry[hidden]{display:none}
 .github-buttons button[hidden]{display:none}
-@media(max-width:400px){#settingsDialog{padding:18px}#githubSettings{padding:15px}}
 
 /* Noninteractive book-card placeholders shown only while the initial catalog is loading. */
 #shelfSkeleton[hidden]{display:none!important}
@@ -192,15 +216,11 @@ p,.hint{color:#796b59}
 .btn.primary{background:#724c2d;border-color:#724c2d;color:#fff9ee}
 #onlineHint{color:#725b42}
 /* Dialogs and form controls share the warm paper treatment. */
-#settingsDialog,#downloadDialog,#deleteDialog{background:#fffaf0;border:1px solid #d9c1a4;color:#4b321f;box-shadow:0 20px 65px #3e2d2059}
-#settingsDialog::backdrop,#downloadDialog::backdrop,#deleteDialog::backdrop{background:#24190e91}
+#downloadDialog,#deleteDialog{background:#fffaf0;border:1px solid #d9c1a4;color:#4b321f;box-shadow:0 20px 65px #3e2d2059}
+#downloadDialog::backdrop,#deleteDialog::backdrop{background:#24190e91}
 #settingsDialog h2,#downloadDialog h2,#deleteDialog h2{color:#46301f}
 #settingsDialog p,#downloadDialog p,#deleteDialog p{color:#796a56}
-#settingsDialog .settings-eyebrow{color:#946b42}
-#settingsDialog .settings-close{background:#f0e2cd;color:#624329;border:1px solid #d4bc9e}
-#githubSettings{background:#f7efdf;border:1px solid #e0caaa}
-.github-settings-icon{background:#e8d3b8;color:#5b3b22}
-#settingsDialog .github-settings-subtitle,#settingsDialog .github-token-hint{color:#756552}
+#settingsDialog .github-token-hint{color:#756552}
 .github-connection{background:#fffaf2;border:1px solid #dac4a8;color:#76604a}
 .github-connection-dot{background:#b5a48f}
 .github-connection[data-connected="true"]{border-color:#8dad85;color:#35623c;background:#f2f8eb}
@@ -361,20 +381,14 @@ body{background:#f8f2e7;background-attachment:initial}
 }
 
 /* Production/Test settings and local UI activation. */
-#appEnvironment{border:1px solid #dec9ae;border-radius:18px;padding:16px;margin:0 0 18px;background:#f7efdf}
-#appEnvironment .environment-title{display:flex;align-items:center;gap:10px}
-#appEnvironment .environment-title>span{display:grid;place-items:center;flex:none;width:35px;height:35px;border-radius:11px;background:#e8d3b8;color:#5b3b22;font-size:19px}
-#appEnvironment h3{font-size:15px;margin:0;color:#543820}
 #settingsDialog #appEnvironment p{color:#796a56;margin:4px 0 0;font-size:12px;line-height:1.45}
-#appEnvironment .environment-switch{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:14px;padding:4px;border:1px solid #d8c3a7;border-radius:13px;background:#ecdfcd}
+#appEnvironment .environment-switch{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:4px;border:1px solid #d8c3a7;border-radius:13px;background:#ecdfcd}
 #appEnvironment .environment-switch button{padding:10px 6px;border:0;border-radius:9px;background:transparent;color:#65492e;font-size:13px;font-weight:650}
 #appEnvironment .environment-switch button[aria-pressed="true"]{background:#fffaf0;box-shadow:0 1px 5px #53391f20;color:#3b291a}
 #appEnvironment .environment-switch button:focus-visible{outline:2px solid #8b6038;outline-offset:2px}
 #settingsDialog #appEnvironment .environment-recovery{font-size:11px;margin-top:9px}
 #appEnvironment .environment-recovery a{color:#704c2b;text-decoration:underline;text-underline-offset:2px}
-#appInfo{border-top:1px solid #e7d5be;margin-top:18px;padding-top:12px}
-#appInfo h3{font-size:13px;color:#543820;margin:0}
-#appInfo dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 12px;margin:8px 0 0;font-size:13px}
+#appInfo dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;margin:0;font-size:14px}
 #appInfo dt{color:#796a56}
 #appInfo dd{margin:0;color:#543820;overflow-wrap:anywhere}
 #appInfo dd a{color:inherit;text-underline-offset:2px}
@@ -425,73 +439,79 @@ body{background:#f8f2e7;background-attachment:initial}
   </div>
 </div>
 <dialog id="settingsDialog" aria-labelledby="settingsHeading">
-  <div class="settings-header">
-    <div>
-      <span class="settings-eyebrow">MEIN BÜCHERREGAL</span>
+  <div class="settings-toolbar">
+    <div class="settings-header">
+      <button type="button" class="settings-close" id="closeSettings" aria-label="Zurück zum Bücherregal" autofocus>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg>
+      </button>
       <h2 id="settingsHeading">Einstellungen</h2>
     </div>
-    <button type="button" class="settings-close" id="closeSettings" aria-label="Einstellungen schließen">×</button>
   </div>
-  <section id="appEnvironment" aria-labelledby="appEnvironmentHeading" hidden>
-    <div class="environment-title"><span aria-hidden="true">⚙</span><div><h3 id="appEnvironmentHeading">App-Modus</h3><p>Zwischen stabiler Version und Test wechseln</p></div></div>
-    <div class="environment-switch" role="group" aria-label="App-Modus auswählen">
-      <button type="button" id="modeProduction" aria-pressed="true">Produktion</button>
-      <button type="button" id="modeTest" aria-pressed="false">Testmodus</button>
-    </div>
-    <div id="catalogSettings" hidden>
-      <label for="catalogBranch">Bücher-Branch</label>
-      <p id="catalogRepositoryHint">Hier wählst du den Bücher-Branch, nicht den App-Branch.</p>
-      <div class="catalog-select">
-        <select id="catalogBranch" aria-describedby="catalogRepositoryHint catalogFeedback" disabled>
-          <option value="main">main (Standard)</option>
-        </select>
+  <div class="settings-content">
+    <details id="githubSettings" class="settings-section" name="bookshelf-settings">
+      <summary>GitHub-Zugang</summary>
+      <div class="settings-section-body">
+        <div class="github-connection" id="githubConnection" role="status">
+          <span class="github-connection-dot" aria-hidden="true"></span>
+          <span id="githubConnectionLabel">Noch kein Zugang eingerichtet</span>
+        </div>
+        <div id="githubTokenEntry">
+          <label class="github-token-label" for="githubToken">Persönlicher Lesetoken</label>
+          <div class="github-token-field">
+            <input id="githubToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…" aria-describedby="githubTokenHint" />
+            <button id="githubToggleVisibility" type="button" aria-label="Token anzeigen" aria-pressed="false">Anzeigen</button>
+          </div>
+          <p class="github-token-hint" id="githubTokenHint">Nur Leserechte für <strong>storybook-books</strong> erforderlich. Der Token bleibt unverschlüsselt auf diesem Gerät gespeichert.</p>
+        </div>
+        <p id="githubFeedback" role="status" aria-live="polite"></p>
+        <div class="github-buttons">
+          <button id="githubSave" class="github-save" type="button">Zugang prüfen &amp; speichern</button>
+          <button id="githubUseProduction" class="github-remove" type="button" hidden>Produktionszugang für Test übernehmen</button>
+          <button id="githubRemove" class="github-remove" type="button">Gespeicherten Zugang entfernen</button>
+        </div>
       </div>
-      <div class="catalog-buttons">
-        <button id="catalogApply" type="button" disabled>Übernehmen</button>
-        <button id="catalogReset" type="button" disabled>Auf main zurücksetzen</button>
+    </details>
+    <details id="appEnvironment" class="settings-section" name="bookshelf-settings" hidden>
+      <summary>App-Modus</summary>
+      <div class="settings-section-body">
+        <div class="environment-switch" role="group" aria-label="App-Modus auswählen">
+          <button type="button" id="modeProduction" aria-pressed="true">Produktion</button>
+          <button type="button" id="modeTest" aria-pressed="false">Testmodus</button>
+        </div>
+        <div id="catalogSettings" hidden>
+          <label for="catalogBranch">Bücher-Branch</label>
+          <p id="catalogRepositoryHint">Hier wählst du den Bücher-Branch, nicht den App-Branch.</p>
+          <div class="catalog-select">
+            <select id="catalogBranch" aria-describedby="catalogRepositoryHint catalogFeedback" disabled>
+              <option value="main">main (Standard)</option>
+            </select>
+          </div>
+          <div class="catalog-buttons">
+            <button id="catalogApply" type="button" disabled>Übernehmen</button>
+            <button id="catalogReset" type="button" disabled>Auf main zurücksetzen</button>
+          </div>
+          <p id="catalogFeedback" role="status"></p>
+        </div>
+        <p class="environment-recovery">Falls die Testversion nicht startet: <a id="modeRecovery" href="./?mode=production">Produktion wiederherstellen</a>.</p>
+        <div class="test-settings-actions">
+          <button id="openTestCodeShare" class="test-settings-link" type="button" hidden>Freischaltcode teilen</button>
+          <button id="hideTestMode" class="test-settings-link" type="button">Testmodus auf diesem Gerät ausblenden</button>
+        </div>
       </div>
-      <p id="catalogFeedback" role="status"></p>
-    </div>
-    <p class="environment-recovery">Falls die Testversion nicht startet: <a id="modeRecovery" href="./?mode=production">Produktion wiederherstellen</a>.</p>
-    <div class="test-settings-actions">
-      <button id="openTestCodeShare" class="test-settings-link" type="button" hidden>Freischaltcode teilen</button>
-      <button id="hideTestMode" class="test-settings-link" type="button">Testmodus auf diesem Gerät ausblenden</button>
-    </div>
-  </section>
-  <section id="githubSettings" aria-labelledby="githubSettingsHeading">
-    <div class="github-settings-title">
-      <span class="github-settings-icon" aria-hidden="true">🔐</span>
-      <div><h3 id="githubSettingsHeading">GitHub-Zugang</h3><p class="github-settings-subtitle">Deine privaten Bücher sicher verbinden</p></div>
-    </div>
-    <div class="github-connection" id="githubConnection" role="status">
-      <span class="github-connection-dot" aria-hidden="true"></span>
-      <span id="githubConnectionLabel">Noch kein Zugang eingerichtet</span>
-    </div>
-    <div id="githubTokenEntry">
-      <label class="github-token-label" for="githubToken">Persönlicher Lesetoken</label>
-      <div class="github-token-field">
-        <input id="githubToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…" aria-describedby="githubTokenHint" />
-        <button id="githubToggleVisibility" type="button" aria-label="Token anzeigen" aria-pressed="false">Anzeigen</button>
+    </details>
+    <details id="appInfo" class="settings-section" name="bookshelf-settings">
+      <summary>App-Info</summary>
+      <div class="settings-section-body">
+        <dl>
+          <dt>App-Version</dt><dd id="appBuildVersion">Entwicklungsstand</dd>
+          <dt>Umgebung</dt><dd id="appBuildMode">Produktion</dd>
+          <dt id="appBuildCommitLabel" hidden>Commit</dt>
+          <dd id="appBuildCommitValue" hidden><a id="appBuildCommitLink" target="_blank" rel="noopener"></a></dd>
+        </dl>
+        <button id="openTestUnlock" class="test-settings-link" type="button">Testmodus freischalten</button>
       </div>
-      <p class="github-token-hint" id="githubTokenHint">Nur Leserechte für <strong>storybook-books</strong> erforderlich. Der Token bleibt unverschlüsselt auf diesem Gerät gespeichert.</p>
-    </div>
-    <p id="githubFeedback" role="status" aria-live="polite"></p>
-    <div class="github-buttons">
-      <button id="githubSave" class="github-save" type="button">Zugang prüfen &amp; speichern</button>
-      <button id="githubUseProduction" class="github-remove" type="button" hidden>Produktionszugang für Test übernehmen</button>
-      <button id="githubRemove" class="github-remove" type="button">Gespeicherten Zugang entfernen</button>
-    </div>
-  </section>
-  <section id="appInfo" aria-labelledby="appInfoHeading">
-    <h3 id="appInfoHeading">App-Info</h3>
-    <dl>
-      <dt>App-Version</dt><dd id="appBuildVersion">Entwicklungsstand</dd>
-      <dt>Umgebung</dt><dd id="appBuildMode">Produktion</dd>
-      <dt id="appBuildCommitLabel" hidden>Commit</dt>
-      <dd id="appBuildCommitValue" hidden><a id="appBuildCommitLink" target="_blank" rel="noopener"></a></dd>
-    </dl>
-    <button id="openTestUnlock" class="test-settings-link" type="button">Testmodus freischalten</button>
-  </section>
+    </details>
+  </div>
 </dialog>
 <dialog id="testUnlockDialog" aria-labelledby="testUnlockHeading">
   <form id="testUnlockForm">
@@ -534,7 +554,9 @@ if(appBuildCommit){
 
 function renderTestModeSettings(){
   const unlocked=isTestModeUnlocked();
-  $('appEnvironment').hidden=!unlocked;
+  const environment=$('appEnvironment');
+  environment.hidden=!unlocked;
+  if(!unlocked)environment.open=false;
   $('openTestUnlock').hidden=unlocked;
 }
 renderTestModeSettings();
@@ -643,8 +665,8 @@ $('testUnlockForm').onsubmit=async event=>{
     localStorage.setItem(TEST_MODE_UNLOCK_KEY,'1');
     testUnlockDialog.close();
     renderTestModeSettings();
+    $('appEnvironment').open=true;
     $(APP_IS_TEST?'modeTest':'modeProduction').focus();
-    if(APP_IS_TEST)loadCatalogBranches();
   }catch{
     if(testUnlockDialog.open&&testUnlockDialog.dataset.purpose===purpose){
       testUnlockFeedback.textContent=sharing?'Der Freischaltcode konnte nicht geprüft werden.':'Der Testmodus konnte nicht freigeschaltet werden.';
@@ -662,6 +684,7 @@ $('hideTestMode').onclick=()=>{
     return;
   }
   renderTestModeSettings();
+  $('appInfo').open=true;
   $('openTestUnlock').focus();
 };
 function switchAppMode(mode){
@@ -840,11 +863,16 @@ async function saveBook(book){
   });
 }
 $('deleteBook').onclick=()=>{if(active){$('menu').classList.remove('show');askDelete(active.id)}};
+const settingsDialog=$('settingsDialog');
 $('settingsBtn').onclick=()=>{
-  $('settingsDialog').showModal();
-  if(APP_IS_TEST&&isTestModeUnlocked())loadCatalogBranches();
+  for(const section of settingsDialog.querySelectorAll('.settings-section'))section.open=false;
+  settingsDialog.showModal();
+  settingsDialog.scrollTop=0;
 };
-$('closeSettings').onclick=()=>$('settingsDialog').close();
+$('closeSettings').onclick=()=>settingsDialog.close();
+$('appEnvironment').addEventListener('toggle',event=>{
+  if(APP_IS_TEST&&settingsDialog.open&&event.currentTarget.open&&isTestModeUnlocked())loadCatalogBranches();
+});
 let pendingDeleteId=null;
 function askDelete(id){let b=books.find(x=>x.id===id);if(!b)return;pendingDeleteId=id;$('deleteBookLabel').textContent='Möchtest du „'+b.title+'“ wirklich aus deinem Bücherregal entfernen?';$('deleteDialog').showModal()}
 $('cancelDelete').onclick=()=>{$('deleteDialog').close();pendingDeleteId=null};
@@ -1027,7 +1055,7 @@ async function saveCredential(token,button){
     credentialElements.visibility.setAttribute('aria-pressed','false');
     credentialElements.visibility.setAttribute('aria-label','Token anzeigen');
     syncCredentialButtons();
-    if(APP_IS_TEST)loadCatalogBranches();
+    if(APP_IS_TEST&&$('appEnvironment').open)loadCatalogBranches();
     await loadOnlineCatalog();
     credentialStatus('Zugang gespeichert.','success');
   }catch(e){credentialStatus('Verbindung fehlgeschlagen: '+e.message,'error')}
@@ -1044,7 +1072,7 @@ credentialElements.useProduction.onclick=()=>{
 credentialElements.remove.onclick=()=>{
   localStorage.removeItem(CREDENTIAL_KEY);
   sessionToken=null;onlineCatalog=[];
-  if(APP_IS_TEST)loadCatalogBranches();
+  if(APP_IS_TEST&&$('appEnvironment').open)loadCatalogBranches();
   credentialElements.token.value='';
   syncCredentialButtons();
   credentialStatus('Zugang entfernt. Bereits geladene Bücher bleiben offline lesbar.','success');
