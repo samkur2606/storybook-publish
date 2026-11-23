@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="5928e5c5b6ec96237c0bfac36df4ef9300e20291"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="c7493422ed9c3083aa5f1b279c18c1872a2b5cb7"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -420,6 +420,17 @@ body{background:#f8f2e7;background-attachment:initial}
 #catalogSettings .catalog-buttons button{min-height:44px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#fffaf0;color:#543820;font:inherit;font-size:13px;font-weight:650}
 #catalogSettings :is(button,select):disabled{opacity:.58;cursor:default}
 #catalogSettings :is(button,select):focus-visible{outline:2px solid #8b6038;outline-offset:2px}
+/* Keep touch, selection and keyboard feedback visible in the warm bookshelf palette. */
+:root{--interaction-ring:#895829;--interaction-tap:rgba(151,101,49,.20)}
+:where(button,a,select,input,textarea,summary,.book){-webkit-tap-highlight-color:var(--interaction-tap)}
+::selection{background:#dfbd8a;color:#382519}
+:where(button,a,select,input,textarea,summary,.book):focus-visible{outline:2px solid var(--interaction-ring);outline-offset:3px}
+#reader :where(button,a):focus-visible{outline-color:#f0cc92}
+#reader .toolbar button[aria-pressed="true"]{background:rgba(154,103,54,.34);border-color:rgba(109,67,32,.75);color:#392318}
+@media(forced-colors:active){
+  :where(button,a,select,input,textarea,summary,.book):focus-visible{outline:2px solid Highlight}
+  #reader .toolbar button[aria-pressed="true"]{outline:2px solid Highlight}
+}
 </style></head><body>
 <header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testAppBuildCommit" hidden>App-Commit <code></code></span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
@@ -836,7 +847,7 @@ function change(n){if(!active)return;
   showPage();
 }
 window.addEventListener('resize',()=>{if(active)showPage()});
-$('spread').onclick=()=>{spreadMode=!spreadMode;$('spread').setAttribute('aria-pressed',String(spreadMode));$('spread').style.background=spreadMode?'#705080':'';if(active)showPage()};
+$('spread').onclick=()=>{spreadMode=!spreadMode;$('spread').setAttribute('aria-pressed',String(spreadMode));if(active)showPage()};
 let start=null;$('viewport').addEventListener('touchstart',e=>{start={x:e.changedTouches[0].clientX,y:e.changedTouches[0].clientY}},{passive:true});$('viewport').addEventListener('touchend',e=>{if(!start)return;let dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.4)change(dx<0?1:-1);start=null},{passive:true});
 $('prev').onclick=()=>change(-1);$('next').onclick=()=>change(1);$('close').onclick=closeBook;$('more').onclick=()=>$('menu').classList.toggle('show');$('hide').onclick=()=>{$('menu').classList.remove('show');$('reader').classList.add('hide-controls')};$('sheet').onclick=()=>{if($('reader').classList.contains('hide-controls'))$('reader').classList.remove('hide-controls')};$('full').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('reader').requestFullscreen()}catch(e){alert('Dieser Browser unterstützt Vollbild für lokale Dateien möglicherweise nicht.')}};
 // Die Buchdaten werden ausschließlich in der IndexedDB gespeichert, nicht im HTML-Quelltext.
