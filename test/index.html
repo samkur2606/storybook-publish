@@ -389,6 +389,8 @@ body{background:#f8f2e7;background-attachment:initial}
 .test-unlock-actions button{min-height:44px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#f3e5d3;color:#563c29}
 .test-unlock-actions button[type="submit"],#copyTestUnlock{border-color:#69482e;background:#69482e;color:#fffaf0}
 #catalogSettings{border-top:1px solid #dec9ae;margin-top:14px;padding-top:14px}
+/* Reserve one status line so the Settings position stays stable during a refresh. */
+#catalogSettings #catalogFeedback{min-block-size:1.45em}
 #catalogSettings label{display:block;font-size:13px;font-weight:700;color:#543820}
 #catalogSettings .catalog-select{position:relative;margin-top:6px;color:#704c2b}
 #catalogSettings .catalog-select::after{content:"";position:absolute;top:50%;inset-inline-end:18px;width:8px;height:8px;border:solid currentColor;border-width:0 2px 2px 0;transform:translateY(-70%) rotate(45deg);pointer-events:none}
@@ -1066,7 +1068,7 @@ async function loadCatalogBranches(){
     catalogFeedback.textContent='Speichere unter GitHub-Zugang einen Lesetoken, um Bücher-Branches zu laden.';
     return;
   }
-  catalogFeedback.textContent='Bücher-Branches werden geladen …';
+  catalogFeedback.textContent='Lade Bücher-Branches …';
   try{
     const branches=await fetchCatalogBranches(token);
     if(request!==catalogBranchRequest||resetMissingTestCatalog(branches))return;
