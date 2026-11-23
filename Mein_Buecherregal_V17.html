@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.1"><meta name="storybook-build-commit" content="bddb3ce294c8655bff191156e0abc0bb86b08b6e"><title>Mein Bücherregal</title><link rel="manifest" href="./manifest.webmanifest"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.2"><meta name="storybook-build-commit" content="34630c79bca566dc4773d0c6ed90bb47c057a3c0"><title>Mein Bücherregal</title><link rel="manifest" href="./manifest.webmanifest"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -403,9 +403,7 @@ body{background:#f8f2e7;background-attachment:initial}
 #testUnlockDialog .test-unlock-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 #testUnlockDialog h2{font-size:21px;margin:0}
 #testUnlockDialog label{display:block;font-size:13px;font-weight:700}
-#testUnlockHashGroup{margin-top:12px}
-#testUnlockHash{resize:none;font-family:monospace;font-size:13px;overflow-wrap:anywhere}
-#testUnlockDialog :is(#testUnlockCode,#testUnlockHash){width:100%;min-height:44px;margin-top:6px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#fffdf8;color:inherit}
+#testUnlockDialog #testUnlockCode{width:100%;min-height:44px;margin-top:6px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#fffdf8;color:inherit}
 #testUnlockCode{font:inherit}
 #testUnlockSetup{margin:8px 0 0;color:#796a56;font-size:13px}
 #testUnlockFeedback{margin:6px 0 0;color:#8f4536;font-size:13px}
@@ -413,7 +411,8 @@ body{background:#f8f2e7;background-attachment:initial}
 #testUnlockFeedback[data-success]{color:#3d653c}
 .test-unlock-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:14px}
 .test-unlock-actions button{min-height:44px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#f3e5d3;color:#563c29}
-.test-unlock-actions button[type="submit"],#copyTestUnlock{border-color:#69482e;background:#69482e;color:#fffaf0}
+.test-unlock-actions button[type="submit"]{border-color:#69482e;background:#69482e;color:#fffaf0}
+#copyTestUnlock{border-color:var(--walnut);background:var(--walnut);color:#fffaf0}
 #catalogSettings{border-top:1px solid #dec9ae;margin-top:14px;padding-top:14px}
 #catalogSettings #catalogFeedback:empty{display:none}
 #catalogSettings #catalogFeedback:not(:empty){margin-top:7px}
@@ -552,15 +551,10 @@ body{background:#f8f2e7;background-attachment:initial}
     <label for="testUnlockCode">Freischaltcode</label>
     <input id="testUnlockCode" type="password" required autofocus autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="testUnlockSetup testUnlockFeedback">
     <p id="testUnlockSetup" hidden>Auf diesem Gerät ist noch kein Code gespeichert. Gib den Freischaltcode einmal ein. Danach ist er hier automatisch hinterlegt.</p>
-    <div id="testUnlockHashGroup" hidden>
-      <label for="testUnlockHash">Freischaltcode-Hash (SHA-256)</label>
-      <textarea id="testUnlockHash" rows="2" readonly spellcheck="false"></textarea>
-    </div>
     <p id="testUnlockFeedback" role="status"></p>
     <div class="test-unlock-actions">
       <button id="submitTestUnlock" type="submit">Freischalten</button>
       <button id="copyTestUnlock" type="button" hidden>Code kopieren</button>
-      <button id="copyTestUnlockHash" type="button" hidden>Hash kopieren</button>
     </div>
   </form>
 </dialog>
@@ -668,9 +662,6 @@ const testUnlockFeedback=$('testUnlockFeedback');
 const testUnlockSetup=$('testUnlockSetup');
 const submitTestUnlock=$('submitTestUnlock');
 const copyTestUnlock=$('copyTestUnlock');
-const copyTestUnlockHash=$('copyTestUnlockHash');
-const testUnlockHash=$('testUnlockHash');
-const testUnlockHashGroup=$('testUnlockHashGroup');
 let testCodeDialogSession=0;
 $('openTestCodeReveal').hidden=!APP_IS_TEST;
 addEventListener('storage',event=>{
@@ -692,9 +683,6 @@ function resetTestCodeField(){
   submitTestUnlock.hidden=false;
   submitTestUnlock.disabled=false;
   copyTestUnlock.hidden=true;
-  copyTestUnlockHash.hidden=true;
-  testUnlockHash.value='';
-  testUnlockHashGroup.hidden=true;
   testUnlockSetup.hidden=true;
 }
 async function openTestCodeDialog(purpose){
@@ -742,25 +730,23 @@ testUnlockCode.oninput=()=>{
   testUnlockCode.removeAttribute('aria-invalid');
   testUnlockFeedback.textContent='';
 };
-async function copyRevealedTestValue(field,label){
+copyTestUnlock.onclick=async()=>{
   if(!APP_IS_TEST||!isTestModeUnlocked()||!testUnlockDialog.open||!testUnlockCode.readOnly)return;
-  const value=field.value;
+  const value=testUnlockCode.value;
   if(!value)return;
   try{
     await navigator.clipboard.writeText(value);
-    if(!testUnlockDialog.open||field.value!==value)return;
+    if(!testUnlockDialog.open||testUnlockCode.value!==value)return;
     testUnlockFeedback.setAttribute('data-success','');
-    testUnlockFeedback.textContent=label+' kopiert.';
+    testUnlockFeedback.textContent='Freischaltcode kopiert.';
   }catch{
-    if(!testUnlockDialog.open||field.value!==value)return;
+    if(!testUnlockDialog.open||testUnlockCode.value!==value)return;
     testUnlockFeedback.removeAttribute('data-success');
-    field.focus();
-    field.select();
+    testUnlockCode.focus();
+    testUnlockCode.select();
     testUnlockFeedback.textContent='Kopieren war nicht möglich. Kopiere den markierten Wert manuell.';
   }
-}
-copyTestUnlock.onclick=()=>copyRevealedTestValue(testUnlockCode,'Freischaltcode');
-copyTestUnlockHash.onclick=()=>copyRevealedTestValue(testUnlockHash,'Freischaltcode-Hash');
+};
 $('testUnlockForm').onsubmit=async event=>{
   event.preventDefault();
   if(testUnlockCode.readOnly||submitTestUnlock.disabled)return;
@@ -789,11 +775,8 @@ $('testUnlockForm').onsubmit=async event=>{
       testUnlockCode.type='text';
       testUnlockCode.readOnly=true;
       submitTestUnlock.hidden=true;
-      testUnlockHash.value=expectedTestCodeHash;
-      testUnlockHashGroup.hidden=false;
       testUnlockSetup.hidden=true;
       copyTestUnlock.hidden=false;
-      copyTestUnlockHash.hidden=false;
       copyTestUnlock.focus();
       return;
     }
