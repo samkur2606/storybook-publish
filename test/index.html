@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="a893c19bec1483612633d9f4b6b2ba391cd59ff9"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="adfa80146ff0cfe17a248c26ec347f93f0db2976"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -414,8 +414,8 @@ body{background:#f8f2e7;background-attachment:initial}
 .test-unlock-actions button{min-height:44px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#f3e5d3;color:#563c29}
 .test-unlock-actions button[type="submit"],#copyTestUnlock{border-color:#69482e;background:#69482e;color:#fffaf0}
 #catalogSettings{border-top:1px solid #dec9ae;margin-top:14px;padding-top:14px}
-/* Reserve one status line so the Settings position stays stable during a refresh. */
-#catalogSettings #catalogFeedback{min-block-size:1.45em}
+#catalogSettings #catalogFeedback:empty{display:none}
+#catalogSettings #catalogFeedback:not(:empty){margin-top:7px}
 #catalogSettings label{display:block;font-size:13px;font-weight:700;color:#543820}
 #catalogSettings .catalog-select{position:relative;z-index:2;margin-top:6px;color:#704c2b}
 #catalogBranch[hidden],#catalogBranchList[hidden]{display:none}
@@ -423,6 +423,10 @@ body{background:#f8f2e7;background-attachment:initial}
 #catalogBranchTrigger span{min-width:0;overflow-wrap:anywhere}
 #catalogBranchTrigger svg{width:18px;height:18px;flex:none;transition:transform .15s ease}
 #catalogBranchTrigger[aria-expanded="true"] svg{transform:rotate(180deg)}
+#catalogBranchTrigger[data-loading="true"] svg{display:none}
+#catalogBranchTrigger[data-loading="true"]::after{content:"";display:block;flex:none;width:16px;height:16px;border:2px solid #d8c1a2;border-top-color:#795436;border-radius:50%;animation:catalogBranchSpin .75s linear infinite}
+@keyframes catalogBranchSpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){#catalogBranchTrigger[data-loading="true"]::after{animation:none;border-top-color:#795436;border-right-color:#795436}}
 #catalogBranchList{position:absolute;z-index:10;top:calc(100% + 5px);left:0;right:0;max-height:min(240px,40vh);overflow-y:auto;overscroll-behavior:contain;margin:0;padding:5px;border:1px solid #d4bc9e;border-radius:10px;background:#fffaf0;box-shadow:0 8px 22px #65472a33}
 #catalogBranchList button{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;padding:9px 11px;border:0;border-radius:7px;background:transparent;color:#4b321f;font:inherit;font-size:15px;text-align:left;overflow-wrap:anywhere}
 #catalogBranchList button[aria-selected="true"]{background:#f0dfc5;font-weight:650}
@@ -1151,6 +1155,11 @@ function closeCatalogBranchList(focus=false){
   catalogBranchTrigger.setAttribute('aria-expanded','false');
   if(focus)catalogBranchTrigger.focus();
 }
+function setCatalogBranchLoading(loading){
+  if(loading)catalogBranchTrigger.setAttribute('data-loading','true');
+  else catalogBranchTrigger.removeAttribute('data-loading');
+  catalogBranchTrigger.setAttribute('aria-busy',String(loading));
+}
 function setCatalogPickerDisabled(disabled){
   catalogPicker.disabled=disabled;
   catalogBranchTrigger.disabled=disabled;
@@ -1234,21 +1243,24 @@ async function loadCatalogBranches(){
   const token=sessionToken;
   setCatalogPickerDisabled(true);
   catalogApply.disabled=true;
+  catalogFeedback.textContent='';
+  setCatalogBranchLoading(Boolean(token));
   if(!token){
     displayCatalogBranches([]);
     catalogFeedback.textContent='Speichere unter GitHub-Zugang einen Lesetoken, um Branches aus storybook-books zu laden.';
     return;
   }
-  catalogFeedback.textContent='Lade Bücher-Branches …';
   try{
     const branches=await fetchCatalogBranches(token);
     if(request!==catalogBranchRequest||resetMissingTestCatalog(branches))return;
     displayCatalogBranches(branches);
+    setCatalogBranchLoading(false);
     setCatalogPickerDisabled(false);
     catalogApply.disabled=catalogPicker.value===catalogRef;
     catalogFeedback.textContent='';
   }catch(e){
     if(request!==catalogBranchRequest)return;
+    setCatalogBranchLoading(false);
     displayCatalogBranches([]);
     catalogFeedback.textContent='Bücher-Branches konnten nicht geladen werden: '+e.message;
   }
@@ -1279,14 +1291,16 @@ if(APP_IS_TEST){
     if(ref==='main'){openTestCatalog(ref);return}
     const request=catalogBranchRequest;
     setCatalogPickerDisabled(true);
+    setCatalogBranchLoading(true);
     catalogApply.disabled=true;
-    catalogFeedback.textContent='Bücherkatalog wird geprüft …';
+    catalogFeedback.textContent='';
     try{
       await fetchOnlineCatalog(ref,token);
       if(request===catalogBranchRequest)openTestCatalog(ref);
     }catch(e){
       if(request!==catalogBranchRequest)return;
       catalogFeedback.textContent='Katalog konnte nicht geladen werden. Erzeuge auf dem gewählten Branch einen gültigen Bücherkatalog und versuche es erneut. '+e.message;
+      setCatalogBranchLoading(false);
       setCatalogPickerDisabled(false);
       catalogApply.disabled=false;
     }
