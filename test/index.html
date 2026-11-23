@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="682e491e17e1a8796503d1014f1a443f88cde392"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="738733af1f92814918c3887d062830a08287f1d3"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -185,7 +185,7 @@ body{background:linear-gradient(180deg,#efe2cf 0,#f8f2e7 210px,#fbf7ef 100%);bac
 header h1{color:#3d2a1c;letter-spacing:-.35px}
 header .header-title{min-width:0}
 #testModeBadges{display:flex;flex-wrap:wrap;align-items:flex-start;gap:5px 6px;margin-top:5px}
-#testModeBadges[hidden],#testAppBuildCommit[hidden],#testCatalogBranch[hidden]{display:none}
+#testModeBadges[hidden],#testCatalogBranch[hidden]{display:none}
 .test-badge{max-width:100%;padding:3px 9px;border:1px solid #c99d67;border-radius:999px;background:#f5e2c4;color:#62401f;font-size:12px;font-weight:700;line-height:1.3}
 #testCatalogBranch{min-width:0;overflow-wrap:anywhere;border-color:#d8c4a5;background:#fff8ed;color:#624529;font-weight:600}
 p,.hint{color:#796b59}
@@ -392,6 +392,8 @@ body{background:#f8f2e7;background-attachment:initial}
 #appInfo dt{color:#796a56}
 #appInfo dd{margin:0;color:#543820;overflow-wrap:anywhere}
 #appInfo dd a{color:inherit;text-underline-offset:2px}
+#appInfo :is(#testCodeHashLabel,#testCodeHashValue){grid-column:1/-1}
+#testCodeHashLabel{margin-top:6px}
 .test-settings-link{min-height:44px;padding:0;border:0;background:transparent;color:#704c2b;font-size:13px;text-align:left;text-decoration:underline;text-underline-offset:3px}
 #appEnvironment .test-settings-actions{display:flex;flex-wrap:wrap;column-gap:16px}
 #testUnlockDialog{width:min(390px,calc(100vw - 32px));padding:22px;border:1px solid #d9c1a4;border-radius:20px;background:#fffaf0;color:#4b321f}
@@ -432,7 +434,7 @@ body{background:#f8f2e7;background-attachment:initial}
   #reader .toolbar button[aria-pressed="true"]{outline:2px solid Highlight}
 }
 </style></head><body>
-<header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testAppBuildCommit" hidden>App-Commit <code></code></span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
+<header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
@@ -518,6 +520,8 @@ body{background:#f8f2e7;background-attachment:initial}
           <dt>Umgebung</dt><dd id="appBuildMode">Produktion</dd>
           <dt id="appBuildCommitLabel" hidden>Commit</dt>
           <dd id="appBuildCommitValue" hidden><a id="appBuildCommitLink" target="_blank" rel="noopener"></a></dd>
+          <dt id="testCodeHashLabel">Freischaltcode-Hash (SHA-256)</dt>
+          <dd id="testCodeHashValue"><code id="testCodeHash">Nicht verfügbar</code></dd>
         </dl>
         <button id="openTestUnlock" class="test-settings-link" type="button">Testmodus freischalten</button>
       </div>
@@ -551,18 +555,21 @@ async function sha256Hex(bytes){
 
 const appBuildVersion=document.querySelector('meta[name="storybook-build-version"]').content;
 const appBuildCommit=document.querySelector('meta[name="storybook-build-commit"]').content;
-const shortAppBuildCommit=appBuildCommit.slice(0,12);
 $('appBuildMode').textContent=APP_IS_TEST?'Test':'Produktion';
 if(appBuildVersion)$('appBuildVersion').textContent=appBuildVersion;
 if(appBuildCommit){
   const link=$('appBuildCommitLink');
-  link.textContent=shortAppBuildCommit;
+  link.textContent=appBuildCommit.slice(0,12);
   link.href='https://github.com/samkur2606/storybook-app/commit/'+appBuildCommit;
   link.title=appBuildCommit;
   link.setAttribute('aria-label','Commit '+appBuildCommit+' auf GitHub öffnen');
   $('appBuildCommitLabel').hidden=false;
   $('appBuildCommitValue').hidden=false;
 }
+
+const expectedTestCodeHash=globalThis.storybookTestModeCodeHash;
+const hasTestCodeHash=/^[0-9a-f]{64}$/.test(expectedTestCodeHash);
+if(hasTestCodeHash)$('testCodeHash').textContent=expectedTestCodeHash;
 
 function renderTestModeSettings(){
   const unlocked=isTestModeUnlocked();
@@ -644,11 +651,10 @@ $('testUnlockForm').onsubmit=async event=>{
   const sharing=purpose==='share';
   submitTestUnlock.disabled=true;
   try{
-    const expectedHash=globalThis.storybookTestModeCodeHash;
-    if(!/^[0-9a-f]{64}$/.test(expectedHash))throw Error('Missing or invalid Test mode configuration');
+    if(!hasTestCodeHash)throw Error('Missing or invalid Test mode configuration');
     const hash=await sha256Hex(new TextEncoder().encode(code));
     if(!testUnlockDialog.open||testUnlockDialog.dataset.purpose!==purpose||testUnlockCode.value.trim()!==code)return;
-    if(hash!==expectedHash){
+    if(hash!==expectedTestCodeHash){
       const savedCode=sharing&&localStorage.getItem(TEST_MODE_CODE_KEY)===code;
       if(savedCode){
         localStorage.removeItem(TEST_MODE_CODE_KEY);
@@ -976,12 +982,6 @@ function activeCatalogRef(){
 const catalogRef=activeCatalogRef();
 if(APP_IS_TEST){
   $('testModeBadges').hidden=false;
-  if(appBuildCommit){
-    const badge=$('testAppBuildCommit');
-    badge.querySelector('code').textContent=shortAppBuildCommit;
-    badge.title=appBuildCommit;
-    badge.hidden=false;
-  }
   if(catalogRef!=='main'){
     const branchLabel=$('testCatalogBranch');
     branchLabel.textContent=catalogRef;
