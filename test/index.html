@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="1a2780972d1062a31e659fa65658ae9b7c644083"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="83b39b3693679b13c99b01738e531236d17a8f21"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -407,7 +407,6 @@ body{background:#f8f2e7;background-attachment:initial}
 #catalogSettings .catalog-buttons button{min-height:44px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#fffaf0;color:#543820;font:inherit;font-size:13px;font-weight:650}
 #catalogSettings :is(button,select):disabled{opacity:.58;cursor:default}
 #catalogSettings :is(button,select):focus-visible{outline:2px solid #8b6038;outline-offset:2px}
-#catalogCurrent{overflow-wrap:anywhere}
 </style></head><body>
 <header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
@@ -444,9 +443,8 @@ body{background:#f8f2e7;background-attachment:initial}
     <div id="catalogSettings" hidden>
       <label for="catalogBranch">Bücher-Branch</label>
       <p id="catalogRepositoryHint">Hier wählst du den Bücher-Branch, nicht den App-Branch.</p>
-      <p id="catalogCurrent"></p>
       <div class="catalog-select">
-        <select id="catalogBranch" aria-describedby="catalogRepositoryHint catalogCurrent catalogFeedback" disabled>
+        <select id="catalogBranch" aria-describedby="catalogRepositoryHint catalogFeedback" disabled>
           <option value="main">main (Standard)</option>
         </select>
       </div>
@@ -1130,7 +1128,6 @@ function openTestCatalog(ref){
 }
 if(APP_IS_TEST){
   $('catalogSettings').hidden=false;
-  $('catalogCurrent').textContent='Aktiv: '+catalogRef;
   displayCatalogBranches([]);
   catalogReset.disabled=catalogRef==='main';
   catalogReset.onclick=()=>openTestCatalog('main');
