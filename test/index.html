@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.2-test"><meta name="storybook-build-commit" content="b1b64539565772cfda973c485a0303340a113a6d"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.3-test"><meta name="storybook-build-commit" content="66804e803ef5399193ffff09697c72d34c338363"><!-- Test deployment of release 1.0.3; no functional changes. --><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -549,7 +549,7 @@ body{background:#f8f2e7;background-attachment:initial}
       </button>
     </div>
     <label for="testUnlockCode">Freischaltcode</label>
-    <input id="testUnlockCode" type="password" required autofocus autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="testUnlockSetup testUnlockFeedback">
+    <input id="testUnlockCode" type="password" required autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="testUnlockSetup testUnlockFeedback">
     <p id="testUnlockSetup" hidden>Auf diesem Gerät ist noch kein Code gespeichert. Gib den Freischaltcode einmal ein. Danach ist er hier automatisch hinterlegt.</p>
     <p id="testUnlockFeedback" role="status"></p>
     <div class="test-unlock-actions">
@@ -695,6 +695,8 @@ async function openTestCodeDialog(purpose){
   testUnlockCode.disabled=revealing;
   submitTestUnlock.disabled=revealing;
   testUnlockDialog.showModal();
+  if(revealing)$('closeTestUnlock').focus({preventScroll:true});
+  else testUnlockCode.focus({preventScroll:true});
   if(!revealing)return;
   let savedCode='';
   let feedback='';
@@ -716,7 +718,6 @@ async function openTestCodeDialog(purpose){
   if(!savedCode)submitTestUnlock.textContent='Speichern und anzeigen';
   testUnlockCode.disabled=false;
   submitTestUnlock.disabled=false;
-  testUnlockCode.focus();
 }
 $('openTestUnlock').onclick=()=>openTestCodeDialog('unlock');
 $('openTestCodeReveal').onclick=()=>{
