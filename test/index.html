@@ -1,13 +1,22 @@
 <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><title>Mein Bücherregal V17</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
+const APP_MODE_KEY='storybook.app.mode.v1';
+const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
+const APP_IS_TEST=/\/test\/(?:index\.html|Mein_Buecherregal_V17\.html)?$/.test(location.pathname);
+function isTestModeUnlocked(){
+  return localStorage.getItem(TEST_MODE_UNLOCK_KEY)==='1';
+}
 (function(){
-  const key='storybook.app.mode.v1';
-  const isTest=/\/test\/(?:index\.html|Mein_Buecherregal_V17\.html)?$/.test(location.pathname);
   const query=new URLSearchParams(location.search);
   if(query.get('mode')==='production'){
-    localStorage.setItem(key,'production');
+    localStorage.setItem(APP_MODE_KEY,'production');
     history.replaceState(null,'',location.pathname);
-  }else if(!isTest&&localStorage.getItem(key)==='test'){
+    return;
+  }
+  if(localStorage.getItem(APP_MODE_KEY)!=='test')return;
+  if(!isTestModeUnlocked()){
+    localStorage.setItem(APP_MODE_KEY,'production');
+  }else if(!APP_IS_TEST){
     location.replace(new URL('./test/',location.href).href);
   }
 })();
@@ -351,7 +360,7 @@ body{background:#f8f2e7;background-attachment:initial}
   font-size:13px;color:#fff5e7;max-width:calc(100vw - 82px)
 }
 
-/* Owner-only production/test workflow: low-profile controls in Settings. */
+/* Production/Test settings and local UI activation. */
 #appEnvironment{border:1px solid #dec9ae;border-radius:18px;padding:16px;margin:0 0 18px;background:#f7efdf}
 #appEnvironment .environment-title{display:flex;align-items:center;gap:10px}
 #appEnvironment .environment-title>span{display:grid;place-items:center;flex:none;width:35px;height:35px;border-radius:11px;background:#e8d3b8;color:#5b3b22;font-size:19px}
@@ -364,6 +373,19 @@ body{background:#f8f2e7;background-attachment:initial}
 #settingsDialog #appEnvironment #modeDescription{font-size:12px;margin-top:11px}
 #settingsDialog #appEnvironment .environment-recovery{font-size:11px;margin-top:9px}
 #appEnvironment .environment-recovery a{color:#704c2b;text-decoration:underline;text-underline-offset:2px}
+#appInfo{border-top:1px solid #e7d5be;margin-top:18px;padding-top:12px}
+#appInfo h3{font-size:13px;color:#543820;margin:0}
+.test-settings-link{min-height:44px;padding:0;border:0;background:transparent;color:#704c2b;font-size:13px;text-align:left;text-decoration:underline;text-underline-offset:3px}
+#testUnlockDialog{width:min(390px,calc(100vw - 32px));padding:22px;border:1px solid #d9c1a4;border-radius:20px;background:#fffaf0;color:#4b321f}
+#testUnlockDialog::backdrop{background:#24190e91}
+#testUnlockDialog h2{font-size:21px;margin:0 0 16px}
+#testUnlockDialog label{display:block;font-size:13px;font-weight:700}
+#testUnlockCode{width:100%;min-height:44px;margin-top:6px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#fffdf8;color:inherit;font:inherit}
+#testUnlockFeedback{margin:6px 0 0;color:#8f4536;font-size:13px}
+#testUnlockFeedback:empty{margin:0}
+.test-unlock-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:14px}
+.test-unlock-actions button{min-height:44px;padding:8px 12px;border:1px solid #d4bc9e;border-radius:10px;background:#f3e5d3;color:#563c29}
+.test-unlock-actions button[type="submit"]{border-color:#69482e;background:#69482e;color:#fffaf0}
 #catalogSettings{border-top:1px solid #dec9ae;margin-top:14px;padding-top:14px}
 #catalogSettings label{display:block;font-size:13px;font-weight:700;color:#543820}
 #catalogSettings .catalog-select{position:relative;margin-top:6px;color:#704c2b}
@@ -404,8 +426,8 @@ body{background:#f8f2e7;background-attachment:initial}
     </div>
     <button type="button" class="settings-close" id="closeSettings" aria-label="Einstellungen schließen">×</button>
   </div>
-  <section id="appEnvironment" aria-labelledby="appEnvironmentHeading">
-    <div class="environment-title"><span aria-hidden="true">⚙</span><div><h3 id="appEnvironmentHeading">App-Modus</h3><p>Zwischen stabiler Version und Test wechseln</p></div></div>
+  <section id="appEnvironment" aria-labelledby="appEnvironmentHeading" hidden>
+    <div class="environment-title"><span aria-hidden="true">⚙</span><div><h3 id="appEnvironmentHeading">Testmodus</h3><p>Zwischen stabiler Version und Test wechseln</p></div></div>
     <div class="environment-switch" role="group" aria-label="App-Modus auswählen">
       <button type="button" id="modeProduction" aria-pressed="true">Produktion</button>
       <button type="button" id="modeTest" aria-pressed="false">Testmodus</button>
@@ -426,6 +448,7 @@ body{background:#f8f2e7;background-attachment:initial}
       <p id="catalogFeedback" role="status"></p>
     </div>
     <p class="environment-recovery">Falls die Testversion nicht startet: <a id="modeRecovery" href="./?mode=production">Produktion wiederherstellen</a>.</p>
+    <button id="hideTestMode" class="test-settings-link" type="button">Testmodus auf diesem Gerät ausblenden</button>
   </section>
   <section id="githubSettings" aria-labelledby="githubSettingsHeading">
     <div class="github-settings-title">
@@ -451,16 +474,98 @@ body{background:#f8f2e7;background-attachment:initial}
       <button id="githubRemove" class="github-remove" type="button">Gespeicherten Zugang entfernen</button>
     </div>
   </section>
+  <section id="appInfo" aria-labelledby="appInfoHeading" hidden>
+    <h3 id="appInfoHeading">App-Info</h3>
+    <button id="openTestUnlock" class="test-settings-link" type="button">Testmodus freischalten</button>
+  </section>
+</dialog>
+<dialog id="testUnlockDialog" aria-labelledby="testUnlockHeading">
+  <form id="testUnlockForm">
+    <h2 id="testUnlockHeading">Testmodus freischalten</h2>
+    <label for="testUnlockCode">Freischaltcode</label>
+    <input id="testUnlockCode" type="password" required autofocus autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="testUnlockFeedback">
+    <p id="testUnlockFeedback" role="status"></p>
+    <div class="test-unlock-actions">
+      <button id="cancelTestUnlock" type="button">Abbrechen</button>
+      <button id="submitTestUnlock" type="submit">Freischalten</button>
+    </div>
+  </form>
 </dialog>
 <dialog id="deleteDialog" aria-labelledby="deleteHeading"><h2 id="deleteHeading">Buch löschen?</h2><p id="deleteBookLabel"></p><div class="delete-notice">Das Buch wird nur aus der Browser-Datenbank gelöscht.<br><br><strong>Du kannst das Buch später erneut aus dem Online-Katalog herunterladen.</strong></div><div class="delete-buttons"><button id="cancelDelete">Abbrechen</button><button id="confirmDelete">Buch löschen</button></div></dialog>
 <dialog id="downloadDialog" aria-labelledby="downloadHeading"><h2 id="downloadHeading">Buch herunterladen</h2><p>In welchem Format möchtest du dieses Märchen speichern?</p><div class="download-choices"><button id="chooseHtml"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 13-2 2 2 2m6-4 2 2-2 2"/></svg><span><strong>HTML</strong><br><small>Direkt im Browser lesen</small></span></button><button id="chooseZip"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 3v2m0 2v2m0 2v2m-2 2h4v4h-4z"/></svg><span><strong>ZIP</strong><br><small>In eine Bilderbuch-App importieren</small></span></button></div><button id="cancelDownload">Abbrechen</button></dialog>
 <script>const $=id=>document.getElementById(id);let books=[],active=null,page=0,spreadMode=false;
-const APP_IS_TEST=/\/test\/(?:index\.html|Mein_Buecherregal_V17\.html)?$/.test(location.pathname);
 const APP_BASE=APP_IS_TEST?new URL('../',location.href):new URL('./',location.href);
-const APP_MODE_KEY='storybook.app.mode.v1';
-if(APP_IS_TEST)localStorage.setItem(APP_MODE_KEY,'test');
+// This hash controls Settings visibility. The Test deployment is public.
+const TEST_MODE_CODE_HASH='e958d9df97f954e8570fc6c165f9d42b118fd3c438fa06bb15dc3712173efe06';
+if(APP_IS_TEST&&isTestModeUnlocked())localStorage.setItem(APP_MODE_KEY,'test');
+
+async function sha256Hex(bytes){
+  const digest=await crypto.subtle.digest('SHA-256',bytes);
+  return Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
+}
+
+function renderTestModeSettings(){
+  const unlocked=isTestModeUnlocked();
+  $('appEnvironment').hidden=!unlocked;
+  $('appInfo').hidden=unlocked;
+}
+renderTestModeSettings();
+addEventListener('storage',event=>{
+  if(event.key===TEST_MODE_UNLOCK_KEY||event.key===null)renderTestModeSettings();
+});
+
+const testUnlockDialog=$('testUnlockDialog');
+const testUnlockCode=$('testUnlockCode');
+const testUnlockFeedback=$('testUnlockFeedback');
+$('openTestUnlock').onclick=()=>testUnlockDialog.showModal();
+$('cancelTestUnlock').onclick=()=>testUnlockDialog.close();
+testUnlockDialog.addEventListener('close',()=>{
+  $('testUnlockForm').reset();
+  testUnlockCode.removeAttribute('aria-invalid');
+  testUnlockFeedback.textContent='';
+});
+testUnlockCode.oninput=()=>{
+  testUnlockCode.removeAttribute('aria-invalid');
+  testUnlockFeedback.textContent='';
+};
+$('testUnlockForm').onsubmit=async event=>{
+  event.preventDefault();
+  const code=testUnlockCode.value.trim();
+  const submit=$('submitTestUnlock');
+  submit.disabled=true;
+  try{
+    const hash=await sha256Hex(new TextEncoder().encode(code));
+    if(!testUnlockDialog.open||testUnlockCode.value.trim()!==code)return;
+    if(hash!==TEST_MODE_CODE_HASH){
+      testUnlockCode.setAttribute('aria-invalid','true');
+      testUnlockFeedback.textContent='Der Freischaltcode ist nicht richtig.';
+      testUnlockCode.focus();
+      return;
+    }
+    localStorage.setItem(APP_MODE_KEY,APP_IS_TEST?'test':'production');
+    localStorage.setItem(TEST_MODE_UNLOCK_KEY,'1');
+    testUnlockDialog.close();
+    renderTestModeSettings();
+    $(APP_IS_TEST?'modeTest':'modeProduction').focus();
+    if(APP_IS_TEST)loadCatalogBranches();
+  }catch{
+    testUnlockFeedback.textContent='Der Testmodus konnte nicht freigeschaltet werden.';
+  }finally{
+    submit.disabled=false;
+  }
+};
+$('hideTestMode').onclick=()=>{
+  localStorage.setItem(APP_MODE_KEY,'production');
+  localStorage.removeItem(TEST_MODE_UNLOCK_KEY);
+  if(APP_IS_TEST){
+    location.replace(new URL('./?mode=production',APP_BASE).href);
+    return;
+  }
+  renderTestModeSettings();
+  $('openTestUnlock').focus();
+};
 function switchAppMode(mode){
-  if(mode!=='test'&&mode!=='production')return;
+  if(mode==='test'&&!isTestModeUnlocked())return;
   localStorage.setItem(APP_MODE_KEY,mode);
   const target=new URL(mode==='test'?'./test/':'./?mode=production',APP_BASE);
   location.assign(target.href);
@@ -638,7 +743,7 @@ async function saveBook(book){
 $('deleteBook').onclick=()=>{if(active){$('menu').classList.remove('show');askDelete(active.id)}};
 $('settingsBtn').onclick=()=>{
   $('settingsDialog').showModal();
-  if(APP_IS_TEST)loadCatalogBranches();
+  if(APP_IS_TEST&&isTestModeUnlocked())loadCatalogBranches();
 };
 $('closeSettings').onclick=()=>$('settingsDialog').close();
 let pendingDeleteId=null;
@@ -996,7 +1101,7 @@ async function downloadGitBlobs(entry){
   }
   if(offset!==zip.byteLength)throw Error('Der Buchdownload ist unvollständig.');
   $('importStatus').textContent='Buchdaten werden geprüft …';
-  const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',zip))).map(b=>b.toString(16).padStart(2,'0')).join('');
+  const hash=await sha256Hex(zip);
   if(hash!==entry.zipSha256)throw Error('Die Integritätsprüfung des Buchdownloads ist fehlgeschlagen.');
   return zip.buffer;
 }
