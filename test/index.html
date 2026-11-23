@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="adfa80146ff0cfe17a248c26ec347f93f0db2976"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="5f3da588fbafeb522fb3e9984e3acea3238f18a5"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -562,6 +562,7 @@ body{background:#f8f2e7;background-attachment:initial}
 <dialog id="hideTestModeDialog" aria-labelledby="hideTestModeHeading" aria-describedby="hideTestModeDescription">
   <h2 id="hideTestModeHeading">Testmodus ausblenden?</h2>
   <p id="hideTestModeDescription">Der Testmodus wird auf diesem Gerät ausgeblendet. Du kannst ihn später mit dem Freischaltcode erneut aktivieren. Gespeicherte Bücher bleiben erhalten.</p>
+  <p id="hideTestModeFeedback" role="status" hidden></p>
   <div class="test-unlock-actions">
     <button id="cancelHideTestMode" type="button" autofocus>Abbrechen</button>
     <button id="confirmHideTestMode" type="button">Testmodus ausblenden</button>
@@ -605,7 +606,57 @@ function renderTestModeSettings(){
 }
 renderTestModeSettings();
 
-const TEST_MODE_CODE_KEY='storybook.app.test-code.v1';
+const LEGACY_TEST_MODE_CODE_KEY='storybook.app.test-code.v1';
+const TEST_MODE_CODE_DB='storybook.app.test-code';
+const TEST_MODE_CODE_STORE='activation';
+const TEST_MODE_CODE_RECORD='code';
+
+async function accessTestCodeStore(mode,action){
+  const db=await new Promise((resolve,reject)=>{
+    const request=indexedDB.open(TEST_MODE_CODE_DB,1);
+    request.onupgradeneeded=()=>request.result.createObjectStore(TEST_MODE_CODE_STORE);
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>reject(request.error);
+  });
+  try{
+    return await new Promise((resolve,reject)=>{
+      const transaction=db.transaction(TEST_MODE_CODE_STORE,mode);
+      const request=action(transaction.objectStore(TEST_MODE_CODE_STORE));
+      transaction.oncomplete=()=>resolve(request?.result);
+      transaction.onabort=()=>reject(transaction.error);
+    });
+  }finally{
+    db.close();
+  }
+}
+
+async function saveTestCode(code,canSave){
+  const key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ciphertext=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(code));
+  await accessTestCodeStore('readwrite',store=>{
+    if(canSave())return store.put({key,iv,ciphertext},TEST_MODE_CODE_RECORD);
+  });
+}
+
+async function readSavedTestCode(){
+  const record=await accessTestCodeStore('readonly',store=>store.get(TEST_MODE_CODE_RECORD));
+  if(!record)return '';
+  const {key,iv,ciphertext}=record;
+  const plaintext=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ciphertext);
+  return new TextDecoder().decode(plaintext);
+}
+
+async function migrateLegacyTestCode(){
+  const code=localStorage.getItem(LEGACY_TEST_MODE_CODE_KEY);
+  if(code===null)return;
+  localStorage.removeItem(LEGACY_TEST_MODE_CODE_KEY);
+  if(!isTestModeUnlocked()||!hasTestCodeHash)return;
+  const hash=await sha256Hex(new TextEncoder().encode(code));
+  if(hash===expectedTestCodeHash)await saveTestCode(code,isTestModeUnlocked);
+}
+
+const legacyTestCodeMigration=migrateLegacyTestCode().catch(()=>{});
 const testUnlockDialog=$('testUnlockDialog');
 const testUnlockCode=$('testUnlockCode');
 const testUnlockFeedback=$('testUnlockFeedback');
@@ -615,6 +666,7 @@ const copyTestUnlock=$('copyTestUnlock');
 const copyTestUnlockHash=$('copyTestUnlockHash');
 const testUnlockHash=$('testUnlockHash');
 const testUnlockHashGroup=$('testUnlockHashGroup');
+let testCodeDialogSession=0;
 $('openTestCodeReveal').hidden=!APP_IS_TEST;
 addEventListener('storage',event=>{
   if(event.key!==TEST_MODE_UNLOCK_KEY&&event.key!==null)return;
@@ -627,29 +679,52 @@ addEventListener('storage',event=>{
 function resetTestCodeField(){
   $('testUnlockForm').reset();
   testUnlockCode.type='password';
+  testUnlockCode.disabled=false;
   testUnlockCode.readOnly=false;
   testUnlockCode.removeAttribute('aria-invalid');
   testUnlockFeedback.removeAttribute('data-success');
   testUnlockFeedback.textContent='';
   submitTestUnlock.hidden=false;
+  submitTestUnlock.disabled=false;
   copyTestUnlock.hidden=true;
   copyTestUnlockHash.hidden=true;
   testUnlockHash.value='';
   testUnlockHashGroup.hidden=true;
   testUnlockSetup.hidden=true;
 }
-function openTestCodeDialog(purpose){
+async function openTestCodeDialog(purpose){
   const revealing=purpose==='reveal';
+  const session=++testCodeDialogSession;
   resetTestCodeField();
   testUnlockDialog.dataset.purpose=purpose;
-  const savedCode=revealing?localStorage.getItem(TEST_MODE_CODE_KEY):null;
-  testUnlockCode.value=savedCode||'';
-  testUnlockSetup.hidden=!revealing||Boolean(savedCode);
   $('testUnlockHeading').textContent=revealing?'Freischaltcode anzeigen':'Testmodus freischalten';
   $('cancelTestUnlock').textContent='Abbrechen';
-  submitTestUnlock.textContent=testUnlockSetup.hidden?'Anzeigen':'Speichern und anzeigen';
-  if(!revealing)submitTestUnlock.textContent='Freischalten';
+  submitTestUnlock.textContent=revealing?'Anzeigen':'Freischalten';
+  testUnlockCode.disabled=revealing;
+  submitTestUnlock.disabled=revealing;
   testUnlockDialog.showModal();
+  if(!revealing)return;
+  let savedCode='';
+  let feedback='';
+  try{
+    await legacyTestCodeMigration;
+    savedCode=await readSavedTestCode();
+    if(savedCode&&await sha256Hex(new TextEncoder().encode(savedCode))!==expectedTestCodeHash){
+      savedCode='';
+      feedback='Der gespeicherte Freischaltcode ist ungültig. Gib den aktuellen Code ein.';
+    }
+  }catch{
+    savedCode='';
+    feedback='Der gespeicherte Freischaltcode konnte nicht geladen werden.';
+  }
+  if(!testUnlockDialog.open||session!==testCodeDialogSession||!isTestModeUnlocked())return;
+  testUnlockCode.value=savedCode;
+  testUnlockSetup.hidden=Boolean(savedCode);
+  testUnlockFeedback.textContent=feedback;
+  if(!savedCode)submitTestUnlock.textContent='Speichern und anzeigen';
+  testUnlockCode.disabled=false;
+  submitTestUnlock.disabled=false;
+  testUnlockCode.focus();
 }
 $('openTestUnlock').onclick=()=>openTestCodeDialog('unlock');
 $('openTestCodeReveal').onclick=()=>{
@@ -684,31 +759,27 @@ copyTestUnlock.onclick=()=>copyRevealedTestValue(testUnlockCode,'Freischaltcode'
 copyTestUnlockHash.onclick=()=>copyRevealedTestValue(testUnlockHash,'Freischaltcode-Hash');
 $('testUnlockForm').onsubmit=async event=>{
   event.preventDefault();
-  if(testUnlockCode.readOnly)return;
+  if(testUnlockCode.readOnly||submitTestUnlock.disabled)return;
   const code=testUnlockCode.value.trim();
-  const purpose=testUnlockDialog.dataset.purpose;
-  const revealing=purpose==='reveal';
+  const session=testCodeDialogSession;
+  const revealing=testUnlockDialog.dataset.purpose==='reveal';
+  const isCurrent=()=>testUnlockDialog.open&&session===testCodeDialogSession&&(!revealing||isTestModeUnlocked());
+  const canSave=()=>isCurrent()&&testUnlockCode.value.trim()===code;
   submitTestUnlock.disabled=true;
+  let verified=false;
   try{
     if(!hasTestCodeHash)throw Error('Missing or invalid Test mode configuration');
     const hash=await sha256Hex(new TextEncoder().encode(code));
-    if(!testUnlockDialog.open||testUnlockDialog.dataset.purpose!==purpose||testUnlockCode.value.trim()!==code)return;
+    if(!canSave())return;
     if(hash!==expectedTestCodeHash){
-      const savedCode=revealing&&localStorage.getItem(TEST_MODE_CODE_KEY)===code;
-      if(savedCode){
-        localStorage.removeItem(TEST_MODE_CODE_KEY);
-        testUnlockCode.value='';
-        submitTestUnlock.textContent='Speichern und anzeigen';
-      }
       testUnlockCode.setAttribute('aria-invalid','true');
-      testUnlockFeedback.textContent=savedCode
-        ?'Der gespeicherte Freischaltcode ist ungültig. Gib den aktuellen Code ein.'
-        :'Der Freischaltcode ist nicht richtig.';
+      testUnlockFeedback.textContent='Der Freischaltcode ist nicht richtig.';
       testUnlockCode.focus();
       return;
     }
-    if(revealing&&(!APP_IS_TEST||!isTestModeUnlocked()))return;
-    localStorage.setItem(TEST_MODE_CODE_KEY,code);
+    verified=true;
+    if(!revealing||!testUnlockSetup.hidden)await saveTestCode(code,canSave);
+    if(!canSave())return;
     if(revealing){
       testUnlockCode.value=code;
       testUnlockCode.type='text';
@@ -730,20 +801,39 @@ $('testUnlockForm').onsubmit=async event=>{
     $('appEnvironment').open=true;
     $(APP_IS_TEST?'modeTest':'modeProduction').focus();
   }catch{
-    if(testUnlockDialog.open&&testUnlockDialog.dataset.purpose===purpose){
-      testUnlockFeedback.textContent=revealing?'Der Freischaltcode konnte nicht geprüft werden.':'Der Testmodus konnte nicht freigeschaltet werden.';
+    if(isCurrent()){
+      testUnlockFeedback.textContent=verified?'Der Freischaltcode konnte nicht gespeichert werden.':'Der Freischaltcode konnte nicht geprüft werden.';
     }
   }finally{
-    submitTestUnlock.disabled=false;
+    if(session===testCodeDialogSession)submitTestUnlock.disabled=false;
   }
 };
-$('hideTestMode').onclick=()=>$('hideTestModeDialog').showModal();
+$('hideTestMode').onclick=()=>{
+  $('hideTestModeFeedback').hidden=true;
+  $('hideTestModeDialog').showModal();
+};
 $('cancelHideTestMode').onclick=()=>$('hideTestModeDialog').close();
-$('confirmHideTestMode').onclick=()=>{
-  $('hideTestModeDialog').close();
-  localStorage.setItem(APP_MODE_KEY,'production');
-  localStorage.removeItem(TEST_MODE_CODE_KEY);
+$('confirmHideTestMode').onclick=async()=>{
+  const dialog=$('hideTestModeDialog');
+  const confirm=$('confirmHideTestMode');
+  const cancel=$('cancelHideTestMode');
+  confirm.disabled=cancel.disabled=true;
+  const wasUnlocked=isTestModeUnlocked();
   localStorage.removeItem(TEST_MODE_UNLOCK_KEY);
+  try{
+    localStorage.removeItem(LEGACY_TEST_MODE_CODE_KEY);
+    await accessTestCodeStore('readwrite',store=>store.delete(TEST_MODE_CODE_RECORD));
+  }catch{
+    if(wasUnlocked)localStorage.setItem(TEST_MODE_UNLOCK_KEY,'1');
+    const feedback=$('hideTestModeFeedback');
+    feedback.textContent='Der gespeicherte Freischaltcode konnte nicht entfernt werden. Versuche es erneut.';
+    feedback.hidden=false;
+    return;
+  }finally{
+    confirm.disabled=cancel.disabled=false;
+  }
+  dialog.close();
+  localStorage.setItem(APP_MODE_KEY,'production');
   if(APP_IS_TEST){
     location.replace(new URL('./?mode=production',APP_BASE).href);
     return;
