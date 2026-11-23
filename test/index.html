@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="1aaa6ceb0653a9d17913f8204ee1469b73ed5956"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="a893c19bec1483612633d9f4b6b2ba391cd59ff9"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -417,13 +417,13 @@ body{background:#f8f2e7;background-attachment:initial}
 /* Reserve one status line so the Settings position stays stable during a refresh. */
 #catalogSettings #catalogFeedback{min-block-size:1.45em}
 #catalogSettings label{display:block;font-size:13px;font-weight:700;color:#543820}
-#catalogSettings .catalog-select{margin-top:6px;color:#704c2b}
+#catalogSettings .catalog-select{position:relative;z-index:2;margin-top:6px;color:#704c2b}
 #catalogBranch[hidden],#catalogBranchList[hidden]{display:none}
 #catalogBranchTrigger{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:48px;padding:9px 15px;border:1px solid #b79770;border-radius:10px;background:#fffaf0;color:#4b321f;font:inherit;font-size:16px;text-align:left}
 #catalogBranchTrigger span{min-width:0;overflow-wrap:anywhere}
 #catalogBranchTrigger svg{width:18px;height:18px;flex:none;transition:transform .15s ease}
 #catalogBranchTrigger[aria-expanded="true"] svg{transform:rotate(180deg)}
-#catalogBranchList{max-height:min(240px,40vh);overflow-y:auto;overscroll-behavior:contain;margin-top:5px;padding:5px;border:1px solid #d4bc9e;border-radius:10px;background:#fffaf0;box-shadow:0 6px 16px #65472a1c}
+#catalogBranchList{position:absolute;z-index:10;top:calc(100% + 5px);left:0;right:0;max-height:min(240px,40vh);overflow-y:auto;overscroll-behavior:contain;margin:0;padding:5px;border:1px solid #d4bc9e;border-radius:10px;background:#fffaf0;box-shadow:0 8px 22px #65472a33}
 #catalogBranchList button{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;padding:9px 11px;border:0;border-radius:7px;background:transparent;color:#4b321f;font:inherit;font-size:15px;text-align:left;overflow-wrap:anywhere}
 #catalogBranchList button[aria-selected="true"]{background:#f0dfc5;font-weight:650}
 #catalogBranchList button[aria-selected="true"]::after{content:"✓";flex:none;color:#795436}
