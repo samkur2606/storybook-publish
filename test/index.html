@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="83b39b3693679b13c99b01738e531236d17a8f21"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="f712ac95444f7593af08888aa57a0dff6306f0ba"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -370,7 +370,6 @@ body{background:#f8f2e7;background-attachment:initial}
 #appEnvironment .environment-switch button{padding:10px 6px;border:0;border-radius:9px;background:transparent;color:#65492e;font-size:13px;font-weight:650}
 #appEnvironment .environment-switch button[aria-pressed="true"]{background:#fffaf0;box-shadow:0 1px 5px #53391f20;color:#3b291a}
 #appEnvironment .environment-switch button:focus-visible{outline:2px solid #8b6038;outline-offset:2px}
-#settingsDialog #appEnvironment #modeDescription{font-size:12px;margin-top:11px}
 #settingsDialog #appEnvironment .environment-recovery{font-size:11px;margin-top:9px}
 #appEnvironment .environment-recovery a{color:#704c2b;text-decoration:underline;text-underline-offset:2px}
 #appInfo{border-top:1px solid #e7d5be;margin-top:18px;padding-top:12px}
@@ -434,12 +433,11 @@ body{background:#f8f2e7;background-attachment:initial}
     <button type="button" class="settings-close" id="closeSettings" aria-label="Einstellungen schließen">×</button>
   </div>
   <section id="appEnvironment" aria-labelledby="appEnvironmentHeading" hidden>
-    <div class="environment-title"><span aria-hidden="true">⚙</span><div><h3 id="appEnvironmentHeading">Testmodus</h3><p>Zwischen stabiler Version und Test wechseln</p></div></div>
+    <div class="environment-title"><span aria-hidden="true">⚙</span><div><h3 id="appEnvironmentHeading">App-Modus</h3><p>Zwischen stabiler Version und Test wechseln</p></div></div>
     <div class="environment-switch" role="group" aria-label="App-Modus auswählen">
       <button type="button" id="modeProduction" aria-pressed="true">Produktion</button>
       <button type="button" id="modeTest" aria-pressed="false">Testmodus</button>
     </div>
-    <p id="modeDescription" role="status"></p>
     <div id="catalogSettings" hidden>
       <label for="catalogBranch">Bücher-Branch</label>
       <p id="catalogRepositoryHint">Hier wählst du den Bücher-Branch, nicht den App-Branch.</p>
@@ -674,7 +672,6 @@ function switchAppMode(mode){
 }
 $('modeProduction').setAttribute('aria-pressed',String(!APP_IS_TEST));
 $('modeTest').setAttribute('aria-pressed',String(APP_IS_TEST));
-$('modeDescription').textContent=APP_IS_TEST?'Testmodus aktiv: Du verwendest die aktuelle Testversion.':'Produktion aktiv: Du verwendest die freigegebene Version.';
 $('modeRecovery').href=new URL('./?mode=production',APP_BASE).href;
 $('modeProduction').onclick=()=>switchAppMode('production');
 $('modeTest').onclick=()=>switchAppMode('test');
