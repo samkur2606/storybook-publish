@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><title>Mein Bücherregal V17</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.0-test"><meta name="storybook-build-commit" content="5acf3ec63e06c7ecf1b329f2c0676007e82a7a50"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -375,6 +375,10 @@ body{background:#f8f2e7;background-attachment:initial}
 #appEnvironment .environment-recovery a{color:#704c2b;text-decoration:underline;text-underline-offset:2px}
 #appInfo{border-top:1px solid #e7d5be;margin-top:18px;padding-top:12px}
 #appInfo h3{font-size:13px;color:#543820;margin:0}
+#appInfo dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 12px;margin:8px 0 0;font-size:13px}
+#appInfo dt{color:#796a56}
+#appInfo dd{margin:0;color:#543820;overflow-wrap:anywhere}
+#appInfo dd a{color:inherit;text-underline-offset:2px}
 .test-settings-link{min-height:44px;padding:0;border:0;background:transparent;color:#704c2b;font-size:13px;text-align:left;text-decoration:underline;text-underline-offset:3px}
 #appEnvironment .test-settings-actions{display:flex;flex-wrap:wrap;column-gap:16px}
 #testUnlockDialog{width:min(390px,calc(100vw - 32px));padding:22px;border:1px solid #d9c1a4;border-radius:20px;background:#fffaf0;color:#4b321f}
@@ -482,8 +486,14 @@ body{background:#f8f2e7;background-attachment:initial}
       <button id="githubRemove" class="github-remove" type="button">Gespeicherten Zugang entfernen</button>
     </div>
   </section>
-  <section id="appInfo" aria-labelledby="appInfoHeading" hidden>
+  <section id="appInfo" aria-labelledby="appInfoHeading">
     <h3 id="appInfoHeading">App-Info</h3>
+    <dl>
+      <dt>App-Version</dt><dd id="appBuildVersion">Entwicklungsstand</dd>
+      <dt>Umgebung</dt><dd id="appBuildMode">Produktion</dd>
+      <dt id="appBuildCommitLabel" hidden>Commit</dt>
+      <dd id="appBuildCommitValue" hidden><a id="appBuildCommitLink" target="_blank" rel="noopener"></a></dd>
+    </dl>
     <button id="openTestUnlock" class="test-settings-link" type="button">Testmodus freischalten</button>
   </section>
 </dialog>
@@ -512,10 +522,24 @@ async function sha256Hex(bytes){
   return Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
 }
 
+const appBuildVersion=document.querySelector('meta[name="storybook-build-version"]').content;
+const appBuildCommit=document.querySelector('meta[name="storybook-build-commit"]').content;
+$('appBuildMode').textContent=APP_IS_TEST?'Test':'Produktion';
+if(appBuildVersion)$('appBuildVersion').textContent=appBuildVersion;
+if(appBuildCommit){
+  const link=$('appBuildCommitLink');
+  link.textContent=appBuildCommit.slice(0,12);
+  link.href='https://github.com/samkur2606/storybook-app/commit/'+appBuildCommit;
+  link.title=appBuildCommit;
+  link.setAttribute('aria-label','Commit '+appBuildCommit+' auf GitHub öffnen');
+  $('appBuildCommitLabel').hidden=false;
+  $('appBuildCommitValue').hidden=false;
+}
+
 function renderTestModeSettings(){
   const unlocked=isTestModeUnlocked();
   $('appEnvironment').hidden=!unlocked;
-  $('appInfo').hidden=unlocked;
+  $('openTestUnlock').hidden=unlocked;
 }
 renderTestModeSettings();
 
