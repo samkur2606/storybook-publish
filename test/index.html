@@ -965,7 +965,11 @@ async function githubRequest(path,token,signal) {
     cache:'no-store',redirect:'follow',signal
   });
   if(response.status===401||response.status===403)throw Error('GitHub-Zugang abgelaufen oder nicht berechtigt');
-  if(response.status===404)throw Error('Ressource nicht gefunden: Repository-Berechtigung prüfen');
+  if(response.status===404){
+    const error=Error('Ressource nicht gefunden: Repository-Berechtigung prüfen');
+    error.status=response.status;
+    throw error;
+  }
   if(!response.ok)throw Error('GitHub-Fehler HTTP '+response.status);
   return response;
 }
@@ -1021,6 +1025,26 @@ const catalogApply=$('catalogApply');
 const catalogReset=$('catalogReset');
 const catalogFeedback=$('catalogFeedback');
 let catalogBranchRequest=0;
+let catalogReloading=false;
+
+async function fetchCatalogBranches(token,signal){
+  const branches=[];
+  for(let page=1;;page++){
+    const response=await githubRequest('/branches?'+new URLSearchParams({per_page:100,page}),token,signal);
+    const batch=await response.json();
+    if(!Array.isArray(batch)||batch.some(branch=>typeof branch?.name!=='string')){
+      throw Error('Ungültige Antwort auf die Liste der Bücher-Branches');
+    }
+    branches.push(...batch.map(branch=>branch.name));
+    if(batch.length<100)return branches;
+  }
+}
+
+function resetMissingTestCatalog(branches){
+  if(!APP_IS_TEST||catalogRef==='main'||branches.includes(catalogRef))return false;
+  openTestCatalog('main');
+  return true;
+}
 
 function displayCatalogBranches(branches){
   catalogPicker.replaceChildren();
@@ -1044,14 +1068,8 @@ async function loadCatalogBranches(){
   }
   catalogFeedback.textContent='Bücher-Branches werden geladen …';
   try{
-    const branches=[];
-    for(let page=1;;page++){
-      const response=await githubRequest('/branches?'+new URLSearchParams({per_page:100,page}),token);
-      const batch=await response.json();
-      if(request!==catalogBranchRequest)return;
-      branches.push(...batch.map(branch=>branch.name));
-      if(batch.length<100)break;
-    }
+    const branches=await fetchCatalogBranches(token);
+    if(request!==catalogBranchRequest||resetMissingTestCatalog(branches))return;
     displayCatalogBranches(branches);
     catalogPicker.disabled=false;
     catalogApply.disabled=catalogPicker.value===catalogRef;
@@ -1063,6 +1081,8 @@ async function loadCatalogBranches(){
   }
 }
 function openTestCatalog(ref){
+  if(catalogReloading)return;
+  catalogReloading=true;
   catalogBranchRequest++;
   storeTestCatalogRef(ref);
   const url=new URL(location.href);
@@ -1137,7 +1157,13 @@ async function loadOnlineCatalog(){
     $('onlineHint').textContent='';
     renderOnlineCatalog();
   }catch(e){
-    if(token!==sessionToken)return;
+    if(token!==sessionToken||catalogReloading)return;
+    if(APP_IS_TEST&&catalogRef!=='main'&&e.status===404){
+      // A 404 can also mean the catalog file is missing or repository access is unavailable.
+      const branches=await fetchCatalogBranches(token,controller.signal).catch(()=>null);
+      if(token!==sessionToken||catalogReloading)return;
+      if(branches&&resetMissingTestCatalog(branches))return;
+    }
     onlineCatalog=[];
     $('onlineHint').textContent=controller.signal.aborted
       ?'Der Bücherkatalog hat zu lange zum Laden gebraucht. Lade die App neu, um es erneut zu versuchen.'
