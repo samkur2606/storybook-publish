@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.1-test"><meta name="storybook-build-commit" content="4ddd0c47775654e4201362deacb4b95bd59316e9"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.1-test"><meta name="storybook-build-commit" content="40ec6a43547ab5994094d0b39cfee9fbf56f907c"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -261,6 +261,11 @@ body{background:#f8f2e7;background-attachment:initial}
 
 /* Library cards are for opening books; infrequent deletion lives in reader options. */
 .book-holder .book{display:flex;flex-direction:column;align-items:stretch;height:100%}
+/* Temporary Test-only shelf paint, independent of the root/body background. */
+html.test-background-probe body::before{
+  content:"";position:fixed;inset:0;background:#f8f2e7;pointer-events:none;z-index:-1;
+}
+html.test-background-probe body{isolation:isolate;background-image:none}
 /* Calm walnut reader: complete pages and control rails share a solid backdrop.
    Keep geometry and styling together; native fullscreen fills its containing block. */
 html.reader-active,body.reader-active{
@@ -938,8 +943,10 @@ function syncReaderSystemBars(){
   // Color both document surfaces, including safe-area/overscroll exposure.
   // Native Android navigation bars still depend on browser/OS support.
   for(const element of [document.documentElement,document.body]){
-    element.style.backgroundColor=color;
+    element.style.backgroundColor=APP_IS_TEST?'#ff0000':color;
   }
+  // Paint the visible shelf separately from the diagnostic document surfaces.
+  document.documentElement.classList.toggle('test-background-probe',APP_IS_TEST&&!readerVisible);
   document.documentElement.classList.toggle('reader-active',readerVisible);
   document.body.classList.toggle('reader-active',readerVisible);
 }
