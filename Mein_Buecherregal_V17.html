@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.1"><meta name="storybook-build-commit" content="1d9c3322d2230226895b99e5c65a3cfd1f19c175"><title>Mein Bücherregal</title><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.2.0"><meta name="storybook-build-commit" content="447a8527c35556d9f3c0bb913e3a7563a42fec25"><title>Mein Bücherregal</title><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -155,8 +155,9 @@ body{background:linear-gradient(180deg,#efe2cf 0,#f8f2e7 210px,#fbf7ef 100%);bac
 header h1{color:#3d2a1c;letter-spacing:-.35px}
 header .header-title{min-width:0}
 #testModeBadges{display:flex;flex-wrap:wrap;align-items:flex-start;gap:5px 6px;margin-top:5px}
-#testModeBadges[hidden],#testCatalogBranch[hidden]{display:none}
+#testModeBadges[hidden],#testCatalogBranch[hidden],#testBuildVersion[hidden]{display:none}
 .test-badge{max-width:100%;padding:3px 9px;border:1px solid #c99d67;border-radius:999px;background:#f5e2c4;color:#62401f;font-size:12px;font-weight:700;line-height:1.3}
+#testBuildVersion{border-color:#d8c4a5;background:#fff8ed;color:#624529;font-weight:600;font-family:ui-monospace,monospace;white-space:nowrap}
 #testCatalogBranch{min-width:0;overflow-wrap:anywhere;border-color:#d8c4a5;background:#fff8ed;color:#624529;font-weight:600}
 p,.hint{color:#796b59}
 #settingsBtn{background:#fff8ed;border:1px solid #d8c4a5;color:#624529;box-shadow:0 2px 8px #79543612}
@@ -182,6 +183,11 @@ p,.hint{color:#796b59}
 .skeleton-book{background:#fffaf3;border:1px solid #e0d0ba}
 .skeleton-cover,.skeleton-title,.skeleton-detail{background:#e7d7c1}
 .empty,.search-empty{border-color:#d7bea0;color:#614936;background:#fff8ec}
+.github-onboarding-action{display:inline-flex;align-items:center;justify-content:center;min-height:44px;margin-top:14px;padding:10px 16px;border:1px solid #503824;border-radius:12px;background:#503824;color:#fffaf1;font:inherit;font-size:14px;font-weight:650;cursor:pointer}
+.github-onboarding-action:focus-visible{outline:2px solid #b17c3f;outline-offset:3px}
+.github-onboarding-action:active{background:#795436}
+#offlineAccessNotice{margin:0 0 14px;padding:16px;text-align:center}
+#offlineAccessNotice[hidden],main.library-loading #offlineAccessNotice{display:none}
 .btn{background:#f4e6d2;border:1px solid #ceb28e;color:#5a402a}
 .btn.primary{background:#724c2d;border-color:#724c2d;color:#fff9ee}
 #onlineHint{color:#725b42}
@@ -408,8 +414,8 @@ html.reader-active,body.reader-active{
   #reader .toolbar button[aria-pressed="true"]{outline:2px solid Highlight}
 }
 </style></head><body>
-<header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
-<main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
+<header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testBuildVersion" hidden></span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
+<main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><section id="offlineAccessNotice" class="search-empty" aria-labelledby="offlineAccessHeading" hidden><strong id="offlineAccessHeading">Kein GitHub-Zugang eingerichtet</strong><small>Deine gespeicherten Bücher bleiben offline verfügbar.</small><button type="button" class="github-onboarding-action" id="setupOfflineGithubAccess">GitHub-Zugang einrichten</button></section><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
@@ -470,7 +476,7 @@ html.reader-active,body.reader-active{
           <span id="githubConnectionLabel">Noch kein Zugang eingerichtet</span>
         </div>
         <div id="githubTokenEntry">
-          <label class="github-token-label" for="githubToken">Persönlicher Lesetoken</label>
+          <label id="githubTokenLabel" class="github-token-label" for="githubToken">Persönlicher Lesetoken</label>
           <div class="github-token-field">
             <input id="githubToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…" aria-describedby="githubTokenHint" />
             <button id="githubToggleVisibility" type="button" aria-label="Token anzeigen" aria-pressed="false">Anzeigen</button>
@@ -481,6 +487,7 @@ html.reader-active,body.reader-active{
         <div class="github-buttons">
           <button id="githubSave" class="github-save" type="button">Zugang prüfen &amp; speichern</button>
           <button id="githubUseProduction" class="github-remove" type="button" hidden>Produktionszugang für Test übernehmen</button>
+          <button id="githubCopy" class="github-save" type="button" hidden>Token kopieren</button>
           <button id="githubRemove" class="github-remove" type="button">Gespeicherten Zugang entfernen</button>
         </div>
       </div>
@@ -849,6 +856,7 @@ function render(){
   // Merge local books and online catalog into one stable alphabetic shelf.
   const ordered=mergeShelfBooks(onlineCatalog,books).sort((a,b)=>
     titleSorter.compare(a.book.title,b.book.title)||String(a.book.id).localeCompare(String(b.book.id)));
+  $('offlineAccessNotice').hidden=!!sessionToken||!books.length;
   const visible=ordered.filter(item=>
     (item.book.title+' '+(item.book.subtitle||'')).toLocaleLowerCase('de').includes(query));
   $('searchMeta').textContent=query
@@ -856,7 +864,8 @@ function render(){
     :ordered.length?(ordered.length===1?'1 Buch im Regal':ordered.length+' Bücher im Regal'):'';
   if(!ordered.length){
     if(!sessionToken){
-      grid.innerHTML='<div class="search-empty"><strong>Noch keine Bücher verfügbar</strong><small>Richte deinen GitHub-Zugang in den Einstellungen ein, um Bücher zu entdecken.</small></div>';
+      grid.innerHTML='<div class="search-empty"><strong>Noch keine Bücher verfügbar</strong><small>Richte deinen GitHub-Zugang ein, um Bücher zu entdecken.</small><button type="button" class="github-onboarding-action" id="setupGithubAccess">GitHub-Zugang einrichten</button></div>';
+      $('setupGithubAccess').onclick=()=>openSettings('githubSettings');
     }
     return;
   }
@@ -907,6 +916,7 @@ function render(){
     grid.append(holder);
   }
 }
+$('setupOfflineGithubAccess').onclick=()=>openSettings('githubSettings');
 $('search').addEventListener('input',render);
 $('clearSearch').addEventListener('click',()=>{$('search').value='';render();$('search').focus()});
 function add(b){if(!valid(b))throw Error('Das Buchpaket enthält keine gültigen Seiten.');b.id=b.id||b.title;const idx=books.findIndex(x=>x.id===b.id);if(idx>=0)books[idx]=b;else books.push(b);render();if(typeof renderOnlineCatalog==='function')renderOnlineCatalog()}
@@ -1054,11 +1064,14 @@ async function saveBook(book){
 }
 $('deleteBook').onclick=()=>{if(active){$('menu').classList.remove('show');askDelete(active.id)}};
 const settingsDialog=$('settingsDialog');
-$('settingsBtn').onclick=()=>{
-  for(const section of settingsDialog.querySelectorAll('.settings-section'))section.open=false;
+function openSettings(sectionId){
+  for(const section of settingsDialog.querySelectorAll('.settings-section'))section.open=section.id===sectionId;
   settingsDialog.showModal();
   settingsDialog.scrollTop=0;
-};
+  if(sectionId==='githubSettings')syncCredentialButtons();
+  if(sectionId)$(sectionId).querySelector('summary').focus({preventScroll:true});
+}
+$('settingsBtn').onclick=()=>openSettings();
 $('closeSettings').onclick=()=>settingsDialog.close();
 $('appEnvironment').addEventListener('toggle',event=>{
   if(APP_IS_TEST&&settingsDialog.open&&event.currentTarget.open&&isTestModeUnlocked())loadCatalogBranches();
@@ -1154,6 +1167,12 @@ function activeCatalogRef(){
 const catalogRef=activeCatalogRef();
 if(APP_IS_TEST){
   $('testModeBadges').hidden=false;
+  if(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-test\.[1-9]\d*$/.test(appBuildVersion)){
+    const versionBadge=$('testBuildVersion');
+    versionBadge.textContent=appBuildVersion;
+    versionBadge.setAttribute('aria-label','App-Version '+appBuildVersion);
+    versionBadge.hidden=false;
+  }
   if(catalogRef!=='main'){
     const branchLabel=$('testCatalogBranch');
     branchLabel.textContent=catalogRef;
@@ -1181,6 +1200,7 @@ const credentialElements = {
   save:$('githubSave'),
   useProduction:$('githubUseProduction'),
   remove:$('githubRemove'),
+  copy:$('githubCopy'),
   visibility:$('githubToggleVisibility')
 };
 function credentialStatus(message,type='neutral') {
@@ -1189,7 +1209,12 @@ function credentialStatus(message,type='neutral') {
 }
 function syncCredentialButtons() {
   const saved=!!localStorage.getItem(CREDENTIAL_KEY);
-  credentialElements.entry.hidden=saved;
+  credentialElements.entry.hidden=false;
+  credentialElements.token.readOnly=saved;
+  $('githubTokenLabel').textContent=saved?'Gespeicherter Lesetoken':'Persönlicher Lesetoken';
+  credentialElements.copy.hidden=!saved;
+  if(saved)credentialElements.token.value=settingsDialog.open&&$('githubSettings').open?(localStorage.getItem(CREDENTIAL_KEY)||''):'';
+  maskGithubToken();
   credentialElements.save.hidden=saved;
   credentialElements.useProduction.hidden=saved||!APP_IS_TEST||!localStorage.getItem(PRODUCTION_CREDENTIAL_KEY);
   credentialElements.remove.hidden=!saved;
@@ -1197,7 +1222,34 @@ function syncCredentialButtons() {
   credentialElements.connectionLabel.textContent=saved?'Zugang auf diesem Gerät gespeichert':'Noch kein Zugang eingerichtet';
   credentialElements.token.placeholder='github_pat_…';
 }
+function maskGithubToken(){
+  credentialElements.token.type='password';
+  credentialElements.visibility.textContent='Anzeigen';
+  credentialElements.visibility.setAttribute('aria-pressed','false');
+  credentialElements.visibility.setAttribute('aria-label','Token anzeigen');
+}
+function hideSavedGithubToken(){
+  maskGithubToken();
+  if(credentialElements.token.readOnly)credentialElements.token.value='';
+}
+settingsDialog.addEventListener('close',hideSavedGithubToken);
+$('githubSettings').addEventListener('toggle',()=>{
+  if(settingsDialog.open&&$('githubSettings').open)syncCredentialButtons();
+  else hideSavedGithubToken();
+});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)hideSavedGithubToken();else if(settingsDialog.open&&$('githubSettings').open&&credentialElements.token.readOnly)syncCredentialButtons();});
+credentialElements.copy.onclick=async()=>{
+  const token=localStorage.getItem(CREDENTIAL_KEY);
+  if(!token)return;
+  try{
+    await navigator.clipboard.writeText(token);
+    if(settingsDialog.open&&$('githubSettings').open&&localStorage.getItem(CREDENTIAL_KEY)===token)credentialStatus('Token kopiert.','success');
+  }catch{
+    if(settingsDialog.open&&$('githubSettings').open)credentialStatus('Kopieren nicht möglich. Zeige den Token an und kopiere ihn manuell.','error');
+  }
+};
 credentialElements.visibility.onclick=()=>{
+  if(credentialElements.token.readOnly)credentialElements.token.value=localStorage.getItem(CREDENTIAL_KEY)||'';
   const visible=credentialElements.token.type==='password';
   credentialElements.token.type=visible?'text':'password';
   credentialElements.visibility.textContent=visible?'Verbergen':'Anzeigen';
@@ -1436,7 +1488,7 @@ if(APP_IS_TEST){
 function renderOnlineCatalog(){
   const hint=$('onlineHint');
   if(!sessionToken){
-    hint.textContent=books.length?'':'In Einstellungen → GitHub-Zugang einmalig einen Lesetoken hinterlegen.';
+    hint.textContent='';
   }else if(onlineCatalog.length){
     hint.textContent='';
   }
