@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.1-test"><meta name="storybook-build-commit" content="16d0006378783c8cf5281a6bcd4373d5a0fe6cce"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.1-test"><meta name="storybook-build-commit" content="0b9ef7d1416a347d746d167feb1e3ea23688bac3"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -261,6 +261,14 @@ body{background:#f8f2e7;background-attachment:initial}
 
 /* Library cards are for opening books; infrequent deletion lives in reader options. */
 .book-holder .book{display:flex;flex-direction:column;align-items:stretch;height:100%}
+/* A slim wooden shelf plinth joins the installed system navigation bar.
+   Keep it outside the reader and leave scrollable content clear of it. */
+@media (display-mode: standalone) and (max-width: 600px){
+  html:not(.reader-active) body::after{
+    content:"";position:fixed;inset:auto 0 0;height:9px;pointer-events:none;z-index:2;
+    background:linear-gradient(to bottom,#c79653 0 1px,#795436 1px 3px,#503824 3px 5px,#241a13 8px 100%);
+  }
+}
 /* Calm walnut reader: complete pages and control rails share a solid backdrop.
    Keep geometry and styling together; native fullscreen fills its containing block. */
 html.reader-active,body.reader-active{
