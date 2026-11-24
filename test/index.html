@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.3.0-test.138"><meta name="storybook-build-commit" content="0c3a38bc58057c2ad92f3d1f9b06b545896424b6"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.3.0-test.140"><meta name="storybook-build-commit" content="faedb78af1a6e3590c5a35c8ea43750fe5ca65b8"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -468,9 +468,36 @@ html.reader-active,body.reader-active{
 #catalogSettings :is(button,select):focus-visible{outline:2px solid #8b6038;outline-offset:2px}
 /* Keep touch, selection and keyboard feedback visible in the warm bookshelf palette. */
 :root{--interaction-ring:#895829;--interaction-tap:rgba(151,101,49,.20)}
-:where(button,a,select,input,textarea,summary,.book){-webkit-tap-highlight-color:var(--interaction-tap)}
+:where(button,a,select,input,textarea,summary,label,.book){-webkit-tap-highlight-color:transparent}
 ::selection{background:#dfbd8a;color:#382519}
-:where(button,a,select,input,textarea,summary,.book):focus-visible{outline:2px solid var(--interaction-ring);outline-offset:3px}
+/* Draw feedback on the visible rounded surface, not its rectangular native hit area. */
+@media(forced-colors:none){
+  :is(button,a,select,input,textarea,summary,.book):focus-visible{
+    outline:none;box-shadow:0 0 0 2px var(--interaction-ring)
+  }
+  :is(button,a,select,input,textarea,summary,.book):active:not(:disabled){
+    box-shadow:inset 0 0 0 100vmax var(--interaction-tap)
+  }
+  .search-wrap:focus-within,.github-token-field:focus-within{
+    outline:none;box-shadow:0 0 0 3px var(--interaction-tap),0 0 0 1px var(--interaction-ring)
+  }
+  .search-wrap input:is(:focus,:active),.github-token-field input:is(:focus,:active){
+    outline:none;box-shadow:none
+  }
+  #testUnlockDialog #testUnlockCode:focus{
+    outline:none;border-color:var(--interaction-ring);box-shadow:0 0 0 3px var(--interaction-tap)
+  }
+  #reader button:focus-visible,#settingsDialog .settings-section>summary:focus-visible,
+  #appEnvironment .environment-switch button:focus-visible,#catalogSettings :is(button,select):focus-visible,
+  #settingsBtn:focus-visible,.book:focus-visible,.btn:focus-visible,.github-onboarding-action:focus-visible{
+    outline:none;box-shadow:0 0 0 2px var(--interaction-ring)
+  }
+}
+.clear-search,.test-settings-link,.book-actions button{border-radius:8px}
+.github-token-field button{border-radius:0 12px 12px 0}
+.offline-choice{border-radius:8px}
+.offline-choice input{border-radius:4px}
+#appInfo dd a{border-radius:4px}
 #reader :where(button,a):focus-visible{outline-color:#a47744}
 #reader .toolbar button[aria-pressed="true"]{background:rgba(154,103,54,.34);border-color:rgba(109,67,32,.75);color:#392318}
 @media(forced-colors:active){
