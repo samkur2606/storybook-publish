@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.172"><meta name="storybook-build-commit" content="7470eb873d8a0c05c57ba4616463faa2b8d6163a"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.174"><meta name="storybook-build-commit" content="8f38debe69a1bfa3071617a07786721944299c10"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -1343,32 +1343,42 @@ function openBook(id){
   history.pushState({reader:true},'','#lesen');
   $('close').focus({preventScroll:true});
   if(readerFullscreenPreferred&&!$('full').hidden){enterReaderFullscreen();return}
-  // Keep the original shelf visible while the reader cover and background enter together.
+  // Reverse the closing motion using the already-painted shelf cover.
   const reader=$('reader'),target=$('sheet').querySelector('img');
   if(!motionAllowed()||!target)return;
   const src=cover?.currentSrc||cover?.src;
-  const fallback=()=>reader.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});
-  if(!src||!from||!from.width){fallback();return}
   const bookAtOpen=active;
-  const finishOpen=()=>{
-    if(active!==bookAtOpen||readerClosing||!target.isConnected)return;
-    const flight=coverFlight(src,from,target.getBoundingClientRect());
-    if(!flight){fallback();return}
-    target.style.visibility='hidden';
-    const fade=reader.animate([{opacity:0},{opacity:1}],{duration:300,easing:'cubic-bezier(.22,.8,.25,1)'});
-    flight.animation.finished.catch(()=>{}).finally(()=>{target.style.visibility='';flight.image.remove();fade.finish()});
-  };
-  // Decode the actual full-size page before measuring its intrinsic layout.
-  if(target.complete&&target.naturalWidth)finishOpen();
-  else{
-    const hold=reader.animate([{opacity:0},{opacity:0}],{duration:180,fill:'both'});
-    const ready=typeof target.decode==='function'?target.decode():Promise.resolve();
-    Promise.race([ready.catch(()=>{}),new Promise(resolve=>setTimeout(resolve,160))]).then(()=>{
-      hold.cancel();
-      if(active!==bookAtOpen||readerClosing||!target.isConnected)return;
-      if(target.naturalWidth)finishOpen();else fallback();
+  const fallback=()=>reader.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});
+  if(!src||!from||!from.width||!from.height){fallback();return}
+  // Compute the final 9:16 cover rectangle from the viewport, not an undecoded image.
+  const bounds=$('sheet').getBoundingClientRect();
+  const ratio=cover.naturalWidth&&cover.naturalHeight?cover.naturalWidth/cover.naturalHeight:9/16;
+  const width=Math.min(bounds.width,bounds.height*ratio),height=width/ratio;
+  const left=bounds.left+(bounds.width-width)/2,top=bounds.top+(bounds.height-height)/2;
+  const to={left,top,width,height,bottom:top+height};
+  // Rasterize at the destination size; animate only composited transforms and opacity.
+  const layer=cover.cloneNode(false);
+  layer.removeAttribute('loading');layer.removeAttribute('id');layer.alt='';layer.setAttribute('aria-hidden','true');
+  Object.assign(layer.style,{position:'fixed',left:left+'px',top:top+'px',width:width+'px',height:height+'px',maxWidth:'none',maxHeight:'none',objectFit:'contain',pointerEvents:'none',zIndex:'950',transformOrigin:'top left',willChange:'transform',borderRadius:'0',margin:'0'});
+  const initial='translate3d('+(from.left-left)+'px,'+(from.top-top)+'px,0) scale('+(from.width/width)+','+(from.height/height)+')';
+  if(!width||!height||from.bottom<=0||from.top>=innerHeight){fallback();return}
+  layer.style.transform=initial;
+  target.style.visibility='hidden';reader.style.opacity='0';
+  document.body.append(layer);
+  const clear=()=>{layer.remove();target.style.visibility='';reader.style.opacity='';reader.style.willChange=''};
+  reader.style.willChange='opacity';
+  requestAnimationFrame(()=>{
+    if(active!==bookAtOpen||readerClosing||!target.isConnected){clear();return}
+    const timing={duration:300,easing:'cubic-bezier(.22,.8,.25,1)',fill:'both'};
+    const flight=layer.animate([{transform:initial},{transform:'translate3d(0,0,0) scale(1)'}],timing);
+    const fade=reader.animate([{opacity:0},{opacity:1}],timing);
+    flight.finished.catch(()=>{}).finally(()=>{
+      if(active!==bookAtOpen||readerClosing){fade.cancel();clear();return}
+      // Reveal the decoded page only after the moving cover reaches its destination.
+      const ready=target.complete&&target.naturalWidth?Promise.resolve():typeof target.decode==='function'?target.decode().catch(()=>{}):Promise.resolve();
+      Promise.race([ready,new Promise(resolve=>setTimeout(resolve,120))]).finally(()=>{clear();fade.cancel()});
     });
-  }
+  });
 }
 async function closeBook(){
   if(readerClosing)return;
