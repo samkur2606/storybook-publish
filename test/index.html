@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.166"><meta name="storybook-build-commit" content="796b515f540f028d4d3da2616e16f5b991789172"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.168"><meta name="storybook-build-commit" content="c510cd17e7418d8039bd6d99cbb246c62c466c40"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -1341,10 +1341,32 @@ function openBook(id){
   history.pushState({reader:true},'','#lesen');
   $('close').focus({preventScroll:true});
   if(readerFullscreenPreferred&&!$('full').hidden){enterReaderFullscreen();return}
-  const target=$('sheet').querySelector('img');
-  const flight=coverFlight(cover?.src,from,target?.getBoundingClientRect());
-  if(flight){target.style.opacity='0';flight.animation.finished.catch(()=>{}).finally(()=>{target.style.opacity='';flight.image.remove()})}
-  else if(motionAllowed())$('reader').animate([{opacity:.7},{opacity:1}],{duration:180});
+  // Keep the original shelf visible while the reader cover and background enter together.
+  const reader=$('reader'),target=$('sheet').querySelector('img');
+  if(!motionAllowed()||!target)return;
+  const src=cover?.currentSrc||cover?.src;
+  const fallback=()=>reader.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});
+  if(!src||!from||!from.width){fallback();return}
+  const bookAtOpen=active;
+  const finishOpen=()=>{
+    if(active!==bookAtOpen||readerClosing||!target.isConnected)return;
+    const flight=coverFlight(src,from,target.getBoundingClientRect());
+    if(!flight){fallback();return}
+    target.style.visibility='hidden';
+    const fade=reader.animate([{opacity:0},{opacity:1}],{duration:300,easing:'cubic-bezier(.22,.8,.25,1)'});
+    flight.animation.finished.catch(()=>{}).finally(()=>{target.style.visibility='';flight.image.remove();fade.finish()});
+  };
+  // Decode the actual full-size page before measuring its intrinsic layout.
+  if(target.complete&&target.naturalWidth)finishOpen();
+  else{
+    const hold=reader.animate([{opacity:0},{opacity:0}],{duration:180,fill:'both'});
+    const ready=typeof target.decode==='function'?target.decode():Promise.resolve();
+    Promise.race([ready.catch(()=>{}),new Promise(resolve=>setTimeout(resolve,160))]).then(()=>{
+      hold.cancel();
+      if(active!==bookAtOpen||readerClosing||!target.isConnected)return;
+      if(target.naturalWidth)finishOpen();else fallback();
+    });
+  }
 }
 async function closeBook(){
   if(readerClosing)return;
