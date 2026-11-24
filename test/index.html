@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.0-test"><meta name="storybook-build-commit" content="a5099d07646adbde52d46a328b805aea28c7e5d5"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.0-test"><meta name="storybook-build-commit" content="d184233fc2f90e0112e73351b55ccc8b25a20db7"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -260,10 +260,10 @@ body{background:#f8f2e7;background-attachment:initial}
 
 /* Library cards are for opening books; infrequent deletion lives in reader options. */
 .book-holder .book{display:flex;flex-direction:column;align-items:stretch;height:100%}
-/* Experimental reader preview: full pages with mirrored, softly blurred edges.
+/* Calm walnut reader: complete pages and control rails share a solid backdrop.
    Keep geometry and styling together; native fullscreen fills its containing block. */
 html.reader-active,body.reader-active{
-  background:var(--reader-bottom-color,#241a13);color-scheme:dark;overflow:hidden;overscroll-behavior:none;
+  background:#241a13;color-scheme:dark;overflow:hidden;overscroll-behavior:none;
 }
 #reader{
   display:none;position:fixed;inset:0;z-index:10;overflow:hidden;
@@ -288,16 +288,6 @@ html.reader-active,body.reader-active{
   flex:0 1 auto;object-fit:contain;user-select:none;-webkit-user-drag:none;
 }
 #reader .sheet.spread img{max-width:calc((100% - 8px)/2)}
-/* Only the top/bottom rails extend the artwork. Never paint side gutters.
-   Overscan keeps the softly blurred rail edges opaque. */
-#reader .reader-edge{position:absolute;left:0;right:0;overflow:hidden;pointer-events:none;opacity:0}
-#reader.has-edge-art .reader-edge{opacity:1}
-#reader .reader-edge-top{top:0;height:var(--reader-page-top,0px)}
-#reader .reader-edge-bottom{top:var(--reader-page-bottom,100%);bottom:0}
-#reader .reader-edge canvas{
-  position:absolute;left:-16px;top:-16px;width:calc(100% + 32px);height:calc(100% + 32px);
-  filter:blur(8px) brightness(.97);
-}
 #reader .reader-top{
   position:absolute;z-index:13;top:var(--reader-top-control,12px);
   left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));
@@ -424,7 +414,7 @@ html.reader-active,body.reader-active{
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
 </div></main>
-<section id="reader"><div class="reader-edge reader-edge-top" aria-hidden="true"><canvas id="readerEdgeTop"></canvas></div><div class="reader-edge reader-edge-bottom" aria-hidden="true"><canvas id="readerEdgeBottom"></canvas></div><div class="viewport" id="viewport"><div class="sheet" id="sheet"></div></div><div class="reader-top"><button class="exit" id="close" aria-label="Zur Bibliothek">×</button><div class="reader-title" id="readerTitle"></div><button id="more" class="reader-more" aria-label="Weitere Optionen" aria-expanded="false" aria-controls="menu">⋯</button></div><div class="toolbar"><button id="prev" aria-label="Vorherige Seite">‹</button><span id="count">1 / 3</span><button id="next" aria-label="Nächste Seite">›</button></div><div class="toolbar menu" id="menu"><button id="downloadBook" aria-label="Buch herunterladen" title="Buch herunterladen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></svg></button><button id="spread" title="Doppelseitenansicht (Tablet quer)" aria-label="Doppelseitenansicht umschalten"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="7" height="14" rx="1.4"/><rect x="13.5" y="5" width="7" height="14" rx="1.4"/></svg></button><button id="full" title="Vollbild">⛶</button><button id="hide" title="Bedienung ausblenden" aria-label="Bedienelemente ausblenden"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></button><button id="deleteBook" title="Dieses Buch vom Gerät löschen" aria-label="Gespeichertes Buch löschen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 4h4M7 7l1 13h8l1-13M10 11v6m4-6v6"/></svg></button></div></section>
+<section id="reader"><div class="viewport" id="viewport"><div class="sheet" id="sheet"></div></div><div class="reader-top"><button class="exit" id="close" aria-label="Zur Bibliothek">×</button><div class="reader-title" id="readerTitle"></div><button id="more" class="reader-more" aria-label="Weitere Optionen" aria-expanded="false" aria-controls="menu">⋯</button></div><div class="toolbar"><button id="prev" aria-label="Vorherige Seite">‹</button><span id="count">1 / 3</span><button id="next" aria-label="Nächste Seite">›</button></div><div class="toolbar menu" id="menu"><button id="downloadBook" aria-label="Buch herunterladen" title="Buch herunterladen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></svg></button><button id="spread" title="Doppelseitenansicht (Tablet quer)" aria-label="Doppelseitenansicht umschalten"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="7" height="14" rx="1.4"/><rect x="13.5" y="5" width="7" height="14" rx="1.4"/></svg></button><button id="full" title="Vollbild">⛶</button><button id="hide" title="Bedienung ausblenden" aria-label="Bedienelemente ausblenden"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></button><button id="deleteBook" title="Dieses Buch vom Gerät löschen" aria-label="Gespeichertes Buch löschen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 4h4M7 7l1 13h8l1-13M10 11v6m4-6v6"/></svg></button></div></section>
 <div id="importOverlay" hidden>
   <div class="import-panel" role="dialog" aria-modal="true" aria-labelledby="importTitle" aria-describedby="importStatus">
     <div class="import-heading"><span class="import-spinner" aria-hidden="true"></span><div><h2 id="importTitle">Buch wird geladen</h2><small id="importCounter">Buch 1 von 1</small></div></div>
@@ -921,7 +911,6 @@ $('clearSearch').addEventListener('click',()=>{$('search').value='';render();$('
 function add(b){if(!valid(b))throw Error('Das Buchpaket enthält keine gültigen Seiten.');b.id=b.id||b.title;const idx=books.findIndex(x=>x.id===b.id);if(idx>=0)books[idx]=b;else books.push(b);render();if(typeof renderOnlineCatalog==='function')renderOnlineCatalog()}
 const APP_THEME_COLOR='#f8f2e7';
 const READER_THEME_COLOR='#241a13';
-let readerEdgeTheme=null;
 const READER_FULLSCREEN_KEY=APP_IS_TEST?'storybook.reader.fullscreen.test.v1':'storybook.reader.fullscreen.v1';
 let readerFullscreenPreferred=false,readerWasFullscreen=false,readerClosing=false;
 try{readerFullscreenPreferred=localStorage.getItem(READER_FULLSCREEN_KEY)==='true'}catch(error){}
@@ -942,20 +931,19 @@ function onReaderFullscreenChange(){
 }
 function syncReaderSystemBars(){
   const readerVisible=$('reader').classList.contains('open')||document.fullscreenElement===$('reader');
-  const topColor=readerEdgeTheme?.top||READER_THEME_COLOR;
-  const bottomColor=readerEdgeTheme?.bottom||READER_THEME_COLOR;
-  document.querySelector('meta[name="theme-color"]').setAttribute('content',readerVisible?topColor:APP_THEME_COLOR);
-  document.documentElement.style.backgroundColor=readerVisible?bottomColor:APP_THEME_COLOR;
+  const color=readerVisible?READER_THEME_COLOR:APP_THEME_COLOR;
+  document.querySelector('meta[name="theme-color"]').setAttribute('content',color);
+  // Color both document surfaces, including safe-area/overscroll exposure.
+  // Native Android navigation bars still depend on browser/OS support.
   for(const element of [document.documentElement,document.body]){
-    if(readerVisible)element.style.setProperty('--reader-bottom-color',bottomColor);
-    else element.style.removeProperty('--reader-bottom-color');
+    element.style.backgroundColor=color;
   }
   document.documentElement.classList.toggle('reader-active',readerVisible);
   document.body.classList.toggle('reader-active',readerVisible);
 }
 document.addEventListener('fullscreenchange',onReaderFullscreenChange);
 document.addEventListener('webkitfullscreenchange',onReaderFullscreenChange);
-function openBook(id){active=books.find(b=>b.id===id);if(!active)return;$('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');page=0;spreadMode=false;$('spread').setAttribute('aria-pressed','false');readerEdgeTheme=null;$('reader').classList.add('open');syncReaderSystemBars();$('readerTitle').textContent=active.title;showPage();history.pushState({reader:true},'','#lesen');
+function openBook(id){active=books.find(b=>b.id===id);if(!active)return;$('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');page=0;spreadMode=false;$('spread').setAttribute('aria-pressed','false');$('reader').classList.add('open');syncReaderSystemBars();$('readerTitle').textContent=active.title;showPage();history.pushState({reader:true},'','#lesen');
   if(readerFullscreenPreferred)enterReaderFullscreen();
 }
 async function closeBook(){
@@ -963,8 +951,8 @@ async function closeBook(){
   readerClosing=true;
   try{
     if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){console.warn('Vollbild konnte nicht beendet werden',e)}}
-    active=null;$('reader').classList.remove('open');$('reader').classList.remove('has-edge-art');
-    readerEdgeTheme=null;syncReaderSystemBars();$('reader').classList.remove('hide-controls');
+    active=null;$('reader').classList.remove('open');
+    syncReaderSystemBars();$('reader').classList.remove('hide-controls');
     $('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');
     if(location.hash==='#lesen')history.replaceState(null,'',location.pathname+location.search);
   }finally{readerWasFullscreen=false;readerClosing=false}
@@ -983,64 +971,8 @@ function updateReaderControlPositions(){
   const safeBottom=parseFloat(style.getPropertyValue('--reader-safe-bottom'))||0;
   const headerHeight=$('reader').querySelector('.reader-top').getBoundingClientRect().height||44;
   const navigationHeight=$('reader').querySelector('.toolbar').getBoundingClientRect().height||54;
-  $('reader').style.setProperty('--reader-page-top',top+'px');
-  $('reader').style.setProperty('--reader-page-bottom',bottom+'px');
   $('reader').style.setProperty('--reader-top-control',(safeTop+Math.max(6,(top-safeTop-headerHeight)/2))+'px');
   $('reader').style.setProperty('--reader-bottom-control',(safeBottom+Math.max(6,(readerRect.height-bottom-safeBottom-navigationHeight)/2))+'px');
-  paintReaderEdgeArt(images,bounds,readerRect);
-  $('reader').classList.add('has-edge-art');
-}
-function paintReaderEdgeArt(images,bounds,readerRect){
-  const overscan=16,width=Math.ceil(readerRect.width);
-  const pageTop=Math.min(...bounds.map(rect=>rect.top))-readerRect.top;
-  const pageBottom=Math.max(...bounds.map(rect=>rect.bottom))-readerRect.top;
-  const colors={};
-  for(const edge of ['top','bottom']){
-    const canvas=$(edge==='top'?'readerEdgeTop':'readerEdgeBottom');
-    const context=canvas.getContext('2d');
-    if(!context)continue;
-    const height=Math.max(0,Math.ceil(edge==='top'?pageTop:readerRect.height-pageBottom));
-    canvas.width=width+overscan*2;canvas.height=height+overscan*2;
-    context.translate(overscan,0);
-    images.forEach((image,index)=>{
-      const rect=bounds[index];
-      if(!rect.width||!rect.height)return;
-      const left=rect.left-readerRect.left;
-      const clipLeft=index===0?-overscan:(bounds[index-1].right+rect.left)/2-readerRect.left;
-      const clipRight=index===images.length-1?width+overscan:(rect.right+bounds[index+1].left)/2-readerRect.left;
-      // Reflect only the adjacent edge strip (at most 8% of the source page),
-      // never a second complete page. The original image remains untouched.
-      const sourceHeight=Math.min(image.naturalHeight*.08,(height+overscan*2)*image.naturalWidth/rect.width);
-      const sourceTop=edge==='top'?0:image.naturalHeight-sourceHeight;
-      context.save();context.beginPath();
-      context.rect(clipLeft,0,clipRight-clipLeft,height+overscan*2);context.clip();
-      const firstColumn=Math.floor((clipLeft-left)/rect.width);
-      const lastColumn=Math.ceil((clipRight-left)/rect.width);
-      for(let column=firstColumn;column<lastColumn;column++){
-        const flipX=Math.abs(column%2)===1;
-        context.save();
-        context.translate(left+(column+(flipX?1:0))*rect.width,height+overscan*2);
-        context.scale(flipX?-1:1,-1);
-        context.drawImage(image,0,sourceTop,image.naturalWidth,sourceHeight,0,0,rect.width,height+overscan*2);
-        context.restore();
-      }
-      context.restore();
-    });
-    try{
-      const row=edge==='top'?overscan:height+overscan-1;
-      const pixels=context.getImageData(overscan,row,width,1).data;
-      const sum=[0,0,0];let count=0;
-      for(let offset=0;offset<pixels.length;offset+=32){
-        for(let channel=0;channel<3;channel++)sum[channel]+=pixels[offset+channel];
-        count++;
-      }
-      colors[edge]='#'+sum.map(value=>Math.round(value/count*.97).toString(16).padStart(2,'0')).join('');
-    }catch(error){
-      // Cross-origin artwork may taint a canvas; use the reader fallback color.
-      colors[edge]=READER_THEME_COLOR;
-    }
-  }
-  readerEdgeTheme=colors;syncReaderSystemBars();
 }
 async function enterReaderFullscreen(){
   if(document.fullscreenElement===$('reader'))return true;
@@ -1075,7 +1007,6 @@ function showPage(){
   const indexes=spread&&first>0?[first,first+1].filter(i=>i<active.pages.length):[first];
   const images=indexes.map(i=>{let img=document.createElement('img');img.src=active.pages[i];img.alt=active.title+', Seite '+(i+1);img.draggable=false;return img});
   $('sheet').classList.toggle('spread',indexes.length===2);
-  $('reader').classList.remove('has-edge-art');
   $('sheet').replaceChildren(...images);
   images.forEach(img=>img.addEventListener('load',updateReaderControlPositions,{once:true}));
   requestAnimationFrame(updateReaderControlPositions);
