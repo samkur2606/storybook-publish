@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.2.0-test"><meta name="storybook-build-commit" content="88193754c3f359d631382d24d34f03342ead2712"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.2.0-test"><meta name="storybook-build-commit" content="438c6c60c8136f3a0ce27e6de22ebae6267e65c8"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -474,7 +474,7 @@ html.reader-active,body.reader-active{
           <span id="githubConnectionLabel">Noch kein Zugang eingerichtet</span>
         </div>
         <div id="githubTokenEntry">
-          <label class="github-token-label" for="githubToken">Persönlicher Lesetoken</label>
+          <label id="githubTokenLabel" class="github-token-label" for="githubToken">Persönlicher Lesetoken</label>
           <div class="github-token-field">
             <input id="githubToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…" aria-describedby="githubTokenHint" />
             <button id="githubToggleVisibility" type="button" aria-label="Token anzeigen" aria-pressed="false">Anzeigen</button>
@@ -485,6 +485,7 @@ html.reader-active,body.reader-active{
         <div class="github-buttons">
           <button id="githubSave" class="github-save" type="button">Zugang prüfen &amp; speichern</button>
           <button id="githubUseProduction" class="github-remove" type="button" hidden>Produktionszugang für Test übernehmen</button>
+          <button id="githubCopy" class="github-save" type="button" hidden>Token kopieren</button>
           <button id="githubRemove" class="github-remove" type="button">Gespeicherten Zugang entfernen</button>
         </div>
       </div>
@@ -1063,6 +1064,7 @@ function openSettings(sectionId){
   for(const section of settingsDialog.querySelectorAll('.settings-section'))section.open=section.id===sectionId;
   settingsDialog.showModal();
   settingsDialog.scrollTop=0;
+  if(sectionId==='githubSettings')syncCredentialButtons();
   if(sectionId)$(sectionId).querySelector('summary').focus({preventScroll:true});
 }
 $('settingsBtn').onclick=()=>openSettings();
@@ -1194,6 +1196,7 @@ const credentialElements = {
   save:$('githubSave'),
   useProduction:$('githubUseProduction'),
   remove:$('githubRemove'),
+  copy:$('githubCopy'),
   visibility:$('githubToggleVisibility')
 };
 function credentialStatus(message,type='neutral') {
@@ -1202,7 +1205,12 @@ function credentialStatus(message,type='neutral') {
 }
 function syncCredentialButtons() {
   const saved=!!localStorage.getItem(CREDENTIAL_KEY);
-  credentialElements.entry.hidden=saved;
+  credentialElements.entry.hidden=false;
+  credentialElements.token.readOnly=saved;
+  $('githubTokenLabel').textContent=saved?'Gespeicherter Lesetoken':'Persönlicher Lesetoken';
+  credentialElements.copy.hidden=!saved;
+  if(saved)credentialElements.token.value=settingsDialog.open&&$('githubSettings').open?(localStorage.getItem(CREDENTIAL_KEY)||''):'';
+  maskGithubToken();
   credentialElements.save.hidden=saved;
   credentialElements.useProduction.hidden=saved||!APP_IS_TEST||!localStorage.getItem(PRODUCTION_CREDENTIAL_KEY);
   credentialElements.remove.hidden=!saved;
@@ -1210,7 +1218,34 @@ function syncCredentialButtons() {
   credentialElements.connectionLabel.textContent=saved?'Zugang auf diesem Gerät gespeichert':'Noch kein Zugang eingerichtet';
   credentialElements.token.placeholder='github_pat_…';
 }
+function maskGithubToken(){
+  credentialElements.token.type='password';
+  credentialElements.visibility.textContent='Anzeigen';
+  credentialElements.visibility.setAttribute('aria-pressed','false');
+  credentialElements.visibility.setAttribute('aria-label','Token anzeigen');
+}
+function hideSavedGithubToken(){
+  maskGithubToken();
+  if(credentialElements.token.readOnly)credentialElements.token.value='';
+}
+settingsDialog.addEventListener('close',hideSavedGithubToken);
+$('githubSettings').addEventListener('toggle',()=>{
+  if(settingsDialog.open&&$('githubSettings').open)syncCredentialButtons();
+  else hideSavedGithubToken();
+});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)hideSavedGithubToken();else if(settingsDialog.open&&$('githubSettings').open&&credentialElements.token.readOnly)syncCredentialButtons();});
+credentialElements.copy.onclick=async()=>{
+  const token=localStorage.getItem(CREDENTIAL_KEY);
+  if(!token)return;
+  try{
+    await navigator.clipboard.writeText(token);
+    if(settingsDialog.open&&$('githubSettings').open&&localStorage.getItem(CREDENTIAL_KEY)===token)credentialStatus('Token kopiert.','success');
+  }catch{
+    if(settingsDialog.open&&$('githubSettings').open)credentialStatus('Kopieren nicht möglich. Zeige den Token an und kopiere ihn manuell.','error');
+  }
+};
 credentialElements.visibility.onclick=()=>{
+  if(credentialElements.token.readOnly)credentialElements.token.value=localStorage.getItem(CREDENTIAL_KEY)||'';
   const visible=credentialElements.token.type==='password';
   credentialElements.token.type=visible?'text':'password';
   credentialElements.visibility.textContent=visible?'Verbergen':'Anzeigen';
