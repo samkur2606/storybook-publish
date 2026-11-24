@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.158"><meta name="storybook-build-commit" content="650c3bc36e45d63f6a42b38255552766a9377630"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.160"><meta name="storybook-build-commit" content="99a70efd8ac0ce28ab136e97eb96317d75a36fad"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -76,7 +76,7 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
   max-width:680px;margin-inline:auto;
   padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))
 }
-#settingsDialog .settings-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
+#settingsDialog .settings-header{display:flex;align-items:center;justify-content:flex-start;gap:12px;padding-block:12px}
 #settingsDialog h2{font-size:clamp(22px,4vw,28px);margin:0}
 .dialog-close{
   display:grid;place-items:center;flex:none;width:44px;height:44px;
@@ -615,10 +615,10 @@ body.reader-active #shelfDock{visibility:hidden}
 <dialog id="settingsDialog" aria-labelledby="settingsHeading">
   <div class="settings-toolbar">
     <div class="settings-header">
-      <h2 id="settingsHeading">Einstellungen</h2>
       <button type="button" class="dialog-close" id="closeSettings" aria-label="Zurück zum Bücherregal" autofocus>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
       </button>
+      <h2 id="settingsHeading">Einstellungen</h2>
     </div>
   </div>
   <div class="settings-content">
