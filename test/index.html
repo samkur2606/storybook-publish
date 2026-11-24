@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.2.0-test"><meta name="storybook-build-commit" content="b6f80aadfcb80627066382180d88ba2c2bca2080"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.2.0-test"><meta name="storybook-build-commit" content="b17c946690d3d3af4881cae979e94350eb054ec7"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -183,6 +183,9 @@ p,.hint{color:#796b59}
 .skeleton-book{background:#fffaf3;border:1px solid #e0d0ba}
 .skeleton-cover,.skeleton-title,.skeleton-detail{background:#e7d7c1}
 .empty,.search-empty{border-color:#d7bea0;color:#614936;background:#fff8ec}
+.github-onboarding-action{display:inline-flex;align-items:center;justify-content:center;min-height:44px;margin-top:14px;padding:10px 16px;border:1px solid #503824;border-radius:12px;background:#503824;color:#fffaf1;font:inherit;font-size:14px;font-weight:650;cursor:pointer}
+.github-onboarding-action:focus-visible{outline:2px solid #b17c3f;outline-offset:3px}
+.github-onboarding-action:active{background:#795436}
 .btn{background:#f4e6d2;border:1px solid #ceb28e;color:#5a402a}
 .btn.primary{background:#724c2d;border-color:#724c2d;color:#fff9ee}
 #onlineHint{color:#725b42}
@@ -857,7 +860,8 @@ function render(){
     :ordered.length?(ordered.length===1?'1 Buch im Regal':ordered.length+' Bücher im Regal'):'';
   if(!ordered.length){
     if(!sessionToken){
-      grid.innerHTML='<div class="search-empty"><strong>Noch keine Bücher verfügbar</strong><small>Richte deinen GitHub-Zugang in den Einstellungen ein, um Bücher zu entdecken.</small></div>';
+      grid.innerHTML='<div class="search-empty"><strong>Noch keine Bücher verfügbar</strong><small>Richte deinen GitHub-Zugang ein, um Bücher zu entdecken.</small><button type="button" class="github-onboarding-action" id="setupGithubAccess">GitHub-Zugang einrichten</button></div>';
+      $('setupGithubAccess').onclick=()=>openSettings('githubSettings');
     }
     return;
   }
@@ -1055,11 +1059,13 @@ async function saveBook(book){
 }
 $('deleteBook').onclick=()=>{if(active){$('menu').classList.remove('show');askDelete(active.id)}};
 const settingsDialog=$('settingsDialog');
-$('settingsBtn').onclick=()=>{
-  for(const section of settingsDialog.querySelectorAll('.settings-section'))section.open=false;
+function openSettings(sectionId){
+  for(const section of settingsDialog.querySelectorAll('.settings-section'))section.open=section.id===sectionId;
   settingsDialog.showModal();
   settingsDialog.scrollTop=0;
-};
+  if(sectionId)$(sectionId).querySelector('summary').focus({preventScroll:true});
+}
+$('settingsBtn').onclick=()=>openSettings();
 $('closeSettings').onclick=()=>settingsDialog.close();
 $('appEnvironment').addEventListener('toggle',event=>{
   if(APP_IS_TEST&&settingsDialog.open&&event.currentTarget.open&&isTestModeUnlocked())loadCatalogBranches();
@@ -1443,7 +1449,7 @@ if(APP_IS_TEST){
 function renderOnlineCatalog(){
   const hint=$('onlineHint');
   if(!sessionToken){
-    hint.textContent=books.length?'':'In Einstellungen → GitHub-Zugang einmalig einen Lesetoken hinterlegen.';
+    hint.textContent='';
   }else if(onlineCatalog.length){
     hint.textContent='';
   }
