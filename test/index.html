@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.0-test"><meta name="storybook-build-commit" content="b75cb244f84708d9d4ef1da8e47514b00a2e364c"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.0-test"><meta name="storybook-build-commit" content="a79784f2aa3a06fbea75533949d45d2aa341ca4c"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -938,10 +938,6 @@ function syncReaderSystemBars(){
 document.addEventListener('fullscreenchange',()=>{syncReaderSystemBars();requestAnimationFrame(updateReaderControlPositions)});
 document.addEventListener('webkitfullscreenchange',()=>{syncReaderSystemBars();requestAnimationFrame(updateReaderControlPositions)});
 function openBook(id){active=books.find(b=>b.id===id);if(!active)return;$('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');page=0;spreadMode=false;$('spread').setAttribute('aria-pressed','false');readerEdgeTheme=null;$('reader').classList.add('open');syncReaderSystemBars();$('readerTitle').textContent=active.title;showPage();history.pushState({reader:true},'','#lesen');
-  // Native Android system bars cannot be painted with page CSS. Request an
-  // immersive viewport from the opening gesture; unsupported/denied requests
-  // retain the normal reader and its adaptive browser theme.
-  if(window.matchMedia('(pointer:coarse)').matches)enterReaderFullscreen();
 }
 async function closeBook(){if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){console.warn('Vollbild konnte nicht beendet werden',e)}}active=null;$('reader').classList.remove('open');$('reader').classList.remove('has-edge-art');readerEdgeTheme=null;syncReaderSystemBars();$('reader').classList.remove('hide-controls');$('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');if(location.hash==='#lesen')history.replaceState(null,'',location.pathname+location.search)}
 function canSpread(){return spreadMode && window.innerWidth>=700 && window.innerWidth>window.innerHeight}
