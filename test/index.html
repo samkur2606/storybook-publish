@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.160"><meta name="storybook-build-commit" content="99a70efd8ac0ce28ab136e97eb96317d75a36fad"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.164"><meta name="storybook-build-commit" content="8fdff88b3ef76d8b9e05e186b3cdbe7def097ae5"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -576,12 +576,35 @@ body.reader-active #shelfDock{visibility:hidden}
 .shelf-entering .shelf-select-mark{animation:shelfMarkIn .18s ease-out both}
 #shelfTools button:active,#shelfSelection button:active,#shelfOptions button:active{transform:scale(.97)}
 @media(prefers-reduced-motion:reduce){#shelfDock,#shelfTools,#shelfSelection,#shelfOptions{transition:none!important}#settingsDialog[open],#settingsDialog[open].settings-leaving,.shelf-entering .shelf-select-mark{animation:none!important}#shelfTools button:active,#shelfSelection button:active,#shelfOptions button:active{transform:none}}
+/* Semantic line icons accompany visible labels. */
+.action-icon{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#settingsDialog .settings-section>summary{display:flex;align-items:center;gap:10px}
+#settingsDialog .settings-section>summary>span{flex:1;min-width:0}
+#settingsDialog .settings-section>summary::after{flex:none;margin-left:auto}
+#shelfOptions button[data-filter],#shelfOptions button[data-sort]{display:flex;align-items:center;justify-content:center;gap:5px;line-height:1.2;min-width:0}
+#shelfOptions button .action-icon{width:17px;height:17px}
+#shelfOptions button span{min-width:0;overflow-wrap:break-word}
+#shelfFilterOptions button{flex-direction:column;min-height:56px;gap:3px}
+#shelfDock[data-mode="filter"]{height:126px}
+#shelfDock[data-mode="sort"]{height:224px}
+#shelfSortOptions button{min-height:48px}
+body>main.shelf-options-open{padding-bottom:max(var(--shelf-bottom),calc(250px + env(safe-area-inset-bottom)))}
+/* Selection changes update only the affected cards; preserve cover layout and focus. */
+.book{transition:border-color .15s,box-shadow .15s,transform .10s}
+.book:active{transform:scale(.985)}
+.shelf-select-mark{transition:background-color .15s}
+.shelf-select-mark svg{opacity:0;transform:scale(.65);transition:opacity .15s,transform .15s}
+.book[aria-pressed="true"] .shelf-select-mark svg{opacity:1;transform:scale(1)}
+#settingsDialog .settings-section>summary::after{transition:transform .18s ease}
+@keyframes readerMenuIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+#reader #menu.show{animation:readerMenuIn .18s ease-out both}
+@media(prefers-reduced-motion:reduce){.book,.shelf-select-mark,.shelf-select-mark svg,#settingsDialog .settings-section>summary::after{transition:none!important}.book:active{transform:none}#reader #menu.show{animation:none!important}}
 </style></head><body>
 <header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testBuildVersion" hidden></span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div id="shelfMetaRow" class="shelf-action-row"><div class="search-meta" id="searchMeta" aria-live="polite"></div></div></div><section id="shelfActions" aria-label="Bücher verwalten" hidden>
   <div id="shelfDock" aria-label="Werkzeuge">
   <div id="shelfTools"><button type="button" id="shelfSort" aria-label="Sortieren" title="Sortieren" aria-expanded="false" aria-controls="shelfOptions"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v16m-4-4 4 4 4-4M16 20V4m-4 4 4-4 4 4"/></svg></button><button type="button" id="shelfFilter" aria-label="Filtern" title="Filtern" aria-expanded="false" aria-controls="shelfOptions"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2.5" fill="#fff8ed"/><circle cx="15" cy="17" r="2.5" fill="#fff8ed"/></svg></button><button id="shelfToggle" type="button" aria-expanded="false" aria-controls="shelfSelection" aria-label="Bücher auswählen" title="Bücher auswählen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 2 2 4-4M11 6h10M3 12l2 2 4-4M11 12h10M3 18l2 2 4-4M11 18h10"/></svg></button><span class="shelf-tool-divider" aria-hidden="true"></span><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 5 1-2h4l1 2 2 1 2 .2 2 3.5-1.2 1.8v2l1.2 1.8-2 3.5-2-.1-2 1-1 1.8h-4L9 20l-2-1-2 .1-2-3.5 1.2-1.8v-2L3 10l2-3.5L7 6z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
-  <div id="shelfOptions" inert aria-hidden="true"><div class="shelf-action-row"><strong id="shelfOptionsHeading">Filter</strong><button id="shelfOptionsClose" type="button" aria-label="Schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div id="shelfFilterOptions" role="group" aria-label="Verfügbarkeit"><button type="button" data-filter="all">Alle Bücher</button><button type="button" data-filter="offline">Offline</button><button type="button" data-filter="online">Online</button></div><div id="shelfSortOptions" role="group" aria-label="Sortierung" hidden><button type="button" data-sort="az">Titel A–Z</button><button type="button" data-sort="za">Titel Z–A</button><button type="button" data-sort="short">Kürzeste Lesedauer</button><button type="button" data-sort="long">Längste Lesedauer</button><button type="button" data-sort="pagesAsc">Wenigste Seiten</button><button type="button" data-sort="pagesDesc">Meiste Seiten</button></div></div>
+  <div id="shelfOptions" inert aria-hidden="true"><div class="shelf-action-row"><strong id="shelfOptionsHeading">Filter</strong><button id="shelfOptionsClose" type="button" aria-label="Schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div id="shelfFilterOptions" role="group" aria-label="Verfügbarkeit"><button type="button" data-filter="all"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 6C9 4 6 4 3 5v14c3-1 6-1 9 1 3-2 6-2 9-1V5c-3-1-6-1-9 1Zm0 0v14"/></svg><span>Alle Bücher</span></button><button type="button" data-filter="offline"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg><span>Offline</span></button><button type="button" data-filter="online"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 18h12a4 4 0 0 0 1-8 7 7 0 0 0-13-1 4.5 4.5 0 0 0 0 9Z"/></svg><span>Online</span></button></div><div id="shelfSortOptions" role="group" aria-label="Sortierung" hidden><button type="button" data-sort="az"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4v16m-3-3 3 3 3-3M11 10l3-6 3 6m-5-2h4M11 14h7l-7 6h7"/></svg><span>Titel A–Z</span></button><button type="button" data-sort="za"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4v16m-3-13 3-3 3 3M11 10l3-6 3 6m-5-2h4M11 14h7l-7 6h7"/></svg><span>Titel Z–A</span></button><button type="button" data-sort="short"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10" cy="12" r="7"/><path d="M10 8v4l2 1M20 6v12m-3-3 3 3 3-3"/></svg><span>Kürzeste Lesedauer</span></button><button type="button" data-sort="long"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10" cy="12" r="7"/><path d="M10 8v4l2 1M20 18V6m-3 3 3-3 3 3"/></svg><span>Längste Lesedauer</span></button><button type="button" data-sort="pagesAsc"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="12" height="16" rx="2"/><path d="M6 8h6M6 12h6M19 6v12m-3-3 3 3 3-3"/></svg><span>Wenigste Seiten</span></button><button type="button" data-sort="pagesDesc"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="12" height="16" rx="2"/><path d="M6 8h6M6 12h6M19 18V6m-3 3 3-3 3 3"/></svg><span>Meiste Seiten</span></button></div></div>
   <div id="shelfSelection" inert aria-hidden="true">
     <div class="shelf-action-row"><label><input type="checkbox" id="shelfSelectAll"> Alle Bücher auswählen</label><span id="shelfSelectionCount" aria-live="polite"></span><button id="shelfClose" type="button" aria-label="Auswahl abbrechen" title="Auswahl abbrechen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
     <div class="shelf-action-row"><button id="shelfDownload" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg><span id="shelfDownloadText">Laden</span></button><button id="shelfDelete" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6"/></svg><span id="shelfDeleteText">Löschen</span></button></div>
@@ -623,7 +646,7 @@ body.reader-active #shelfDock{visibility:hidden}
   </div>
   <div class="settings-content">
     <details id="appEnvironment" class="settings-section" name="bookshelf-settings" hidden>
-      <summary>App-Modus</summary>
+      <summary><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="6" width="18" height="12" rx="6"/><circle cx="9" cy="12" r="3"/></svg><span>App-Modus</span></summary>
       <div class="settings-section-body">
         <div class="environment-switch" role="group" aria-label="App-Modus auswählen">
           <button type="button" id="modeProduction" aria-pressed="true">Produktion</button>
@@ -650,7 +673,7 @@ body.reader-active #shelfDock{visibility:hidden}
       </div>
     </details>
     <details id="githubSettings" class="settings-section" name="bookshelf-settings">
-      <summary>GitHub-Zugang</summary>
+      <summary><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4"/><path d="m11 12 8-8 3 3-2 2-2-2-2 2 2 2-3 3"/></svg><span>GitHub-Zugang</span></summary>
       <div class="settings-section-body">
         <div class="github-connection" id="githubConnection" role="status">
           <span class="github-connection-dot" aria-hidden="true"></span>
@@ -674,7 +697,7 @@ body.reader-active #shelfDock{visibility:hidden}
       </div>
     </details>
     <details id="offlineSettings" class="settings-section" name="bookshelf-settings">
-      <summary>Offline-Bücher</summary>
+      <summary><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg><span>Offline-Bücher</span></summary>
       <div class="settings-section-body">
         <div id="offlineLoading" role="status" aria-live="polite" hidden><span class="offline-spinner" aria-hidden="true"></span><span>Buchspeicher werden geprüft …</span></div>
         <div id="offlineResults" hidden>
@@ -689,7 +712,7 @@ body.reader-active #shelfDock{visibility:hidden}
       </div>
     </details>
     <details id="appInfo" class="settings-section" name="bookshelf-settings">
-      <summary>App-Info</summary>
+      <summary><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg><span>App-Info</span></summary>
       <div class="settings-section-body">
         <dl>
           <dt>App-Version</dt><dd id="appBuildVersion">Entwicklungsstand</dd>
@@ -1058,7 +1081,9 @@ function syncShelfActions(ordered){
   $('shelfMetaRow').hidden=!ordered.length&&!shelfSelecting;
   $('shelfToggle').setAttribute('aria-expanded',String(shelfSelecting));
 
-  $('shelfSelectionCount').textContent=shelfSelecting?chosen.length+' ausgewählt':'';
+  const visibleIds=new Set([...$('books').querySelectorAll('.book')].map(card=>card.dataset.bookId));
+  const hidden=chosen.filter(item=>!visibleIds.has(String(item.book.id))).length;
+  $('shelfSelectionCount').textContent=shelfSelecting?chosen.length+' ausgewählt'+(hidden?' ('+hidden+' ausgeblendet)':''):'';
   const all=$('shelfSelectAll');all.checked=ordered.length>0&&chosen.length===ordered.length;all.indeterminate=chosen.length>0&&chosen.length<ordered.length;all.disabled=shelfBusy||!ordered.length;
   $('shelfDownload').disabled=shelfBusy||importingBooks||!downloads;
   $('shelfDelete').disabled=shelfBusy||importingBooks||!deletions;
@@ -1116,7 +1141,22 @@ function compareShelfItems(a,b){
   }
   return title();
 }
-$('shelfSelectAll').onchange=()=>{if(shelfBusy)return;shelfSelected=new Set($('shelfSelectAll').checked?shelfItems().map(item=>item.book.id):[]);render()};
+function refreshShelfSelection(){
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const selectedIds=new Set([...shelfSelected].map(String));
+  for(const card of $('books').querySelectorAll('.book[aria-pressed]')){
+    const selected=selectedIds.has(card.dataset.bookId);
+    if(card.getAttribute('aria-pressed')===String(selected))continue;
+    card.setAttribute('aria-pressed',String(selected));
+    const mark=card.querySelector('.shelf-select-mark');
+    if(!reduced&&mark&&typeof mark.animate==='function'){
+      for(const animation of mark.getAnimations?.()||[])animation.cancel();
+      mark.animate([{transform:'scale(0.84)'},{transform:'scale(1.09)',offset:.65},{transform:'scale(1)'}],{duration:180,easing:'ease-out'});
+    }
+  }
+  syncShelfActions(shelfItems());
+}
+$('shelfSelectAll').onchange=()=>{if(shelfBusy)return;shelfSelected=new Set($('shelfSelectAll').checked?shelfItems().map(item=>item.book.id):[]);refreshShelfSelection()};
 $('shelfDownload').onclick=async()=>{
   if(shelfBusy||importingBooks)return;
   const chosen=shelfItems().filter(item=>shelfSelected.has(item.book.id)&&shelfDownloadable(item));
@@ -1202,10 +1242,10 @@ function render(){
     if(shelfSelecting){
       const selected=shelfSelected.has(b.id);card.setAttribute('aria-pressed',String(selected));card.disabled=shelfBusy;
       card.setAttribute('aria-label',b.title+(item.offline?', offline gespeichert':', online'));
-      const mark=document.createElement('span');mark.className='shelf-select-mark';mark.setAttribute('aria-hidden','true');if(selected)mark.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>';coverWrap.append(mark);
+      const mark=document.createElement('span');mark.className='shelf-select-mark';mark.setAttribute('aria-hidden','true');mark.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>';coverWrap.append(mark);
     }
     card.append(coverWrap,title,meta);
-    card.onclick=()=>{if(shelfSelecting){if(shelfBusy)return;if(shelfSelected.has(b.id))shelfSelected.delete(b.id);else shelfSelected.add(b.id);render();[...$('books').querySelectorAll('.book')].find(c=>c.dataset.bookId===b.id)?.focus({preventScroll:true})}else if(!shelfBusy){if(item.offline)openBook(b.id);else downloadOnlineBook(b)}};
+    card.onclick=()=>{if(shelfSelecting){if(shelfBusy)return;if(shelfSelected.has(b.id))shelfSelected.delete(b.id);else shelfSelected.add(b.id);refreshShelfSelection()}else if(!shelfBusy){if(item.offline)openBook(b.id);else downloadOnlineBook(b)}};
     holder.append(card);
     grid.append(holder);
   }
@@ -1325,13 +1365,19 @@ function showPage(){
   $('prev').disabled=first===0;
   $('next').disabled=indexes[indexes.length-1]>=active.pages.length-1;
 }
-function change(n){if(!active)return;
+function change(n){if(!active||readerClosing)return;
+  const previousPage=page;
   if(canSpread()){
     if(page===0 && n>0)page=1;
     else if(page===1 && n<0)page=0;
     else page=Math.max(0,Math.min(active.pages.length-1,page+n*2));
   }else page=Math.max(0,Math.min(active.pages.length-1,page+n));
+  if(page===previousPage)return;
   showPage();
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&typeof $('sheet').animate==='function'){
+    for(const animation of $('sheet').getAnimations?.()||[])animation.cancel();
+    $('sheet').animate([{opacity:.65,transform:'translateX('+(n>0?6:-6)+'px)'},{opacity:1,transform:'translateX(0)'}],{duration:180,easing:'ease-out'});
+  }
 }
 window.addEventListener('resize',()=>{if(active)showPage()});
 $('spread').onclick=()=>{spreadMode=!spreadMode;$('spread').setAttribute('aria-pressed',String(spreadMode));if(active)showPage()};
