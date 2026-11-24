@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.1-test"><meta name="storybook-build-commit" content="0253fa1a092d3a3846ae586fabec7f2361605d6e"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.1-test"><meta name="storybook-build-commit" content="4ddd0c47775654e4201362deacb4b95bd59316e9"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -261,13 +261,6 @@ body{background:#f8f2e7;background-attachment:initial}
 
 /* Library cards are for opening books; infrequent deletion lives in reader options. */
 .book-holder .book{display:flex;flex-direction:column;align-items:stretch;height:100%}
-/* Give the installed bookshelf the same lower edge as the open reader. */
-@media (display-mode: standalone){
-  html:not(.reader-active) main::after{
-    content:"";position:fixed;inset:auto 0 0;height:3px;
-    background:#241a13;z-index:2;pointer-events:none;
-  }
-}
 /* Calm walnut reader: complete pages and control rails share a solid backdrop.
    Keep geometry and styling together; native fullscreen fills its containing block. */
 html.reader-active,body.reader-active{
@@ -940,7 +933,8 @@ function onReaderFullscreenChange(){
 function syncReaderSystemBars(){
   const readerVisible=$('reader').classList.contains('open')||document.fullscreenElement===$('reader');
   const color=readerVisible?READER_THEME_COLOR:APP_THEME_COLOR;
-  document.querySelector('meta[name="theme-color"]').setAttribute('content',color);
+  // Temporary Test-only probe: distinguish runtime theme from document background.
+  document.querySelector('meta[name="theme-color"]').setAttribute('content',APP_IS_TEST?'#00ff00':color);
   // Color both document surfaces, including safe-area/overscroll exposure.
   // Native Android navigation bars still depend on browser/OS support.
   for(const element of [document.documentElement,document.body]){
@@ -949,6 +943,7 @@ function syncReaderSystemBars(){
   document.documentElement.classList.toggle('reader-active',readerVisible);
   document.body.classList.toggle('reader-active',readerVisible);
 }
+if(APP_IS_TEST)syncReaderSystemBars();
 document.addEventListener('fullscreenchange',onReaderFullscreenChange);
 document.addEventListener('webkitfullscreenchange',onReaderFullscreenChange);
 function openBook(id){active=books.find(b=>b.id===id);if(!active)return;$('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');page=0;spreadMode=false;$('spread').setAttribute('aria-pressed','false');$('reader').classList.add('open');syncReaderSystemBars();$('readerTitle').textContent=active.title;showPage();history.pushState({reader:true},'','#lesen');
