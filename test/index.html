@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.1-test"><meta name="storybook-build-commit" content="e8d5003ca801b5cd20256a3617de78fe515f1743"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.1-test"><meta name="storybook-build-commit" content="a831ae4b1d57ec9af1d1c12c2740c4bae6e7f938"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -261,7 +261,7 @@ body{background:#f8f2e7;background-attachment:initial}
 
 /* Library cards are for opening books; infrequent deletion lives in reader options. */
 .book-holder .book{display:flex;flex-direction:column;align-items:stretch;height:100%}
-/* Temporary cream reader trial: complete pages and control rails share a solid backdrop.
+/* Unified cream reader: complete pages and control rails share a solid backdrop.
    Keep geometry and styling together; native fullscreen fills its containing block. */
 html.reader-active,body.reader-active{
   background:#f8f2e7;color-scheme:light;overflow:hidden;overscroll-behavior:none;
