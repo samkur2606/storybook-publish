@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.2.0-test.125"><meta name="storybook-build-commit" content="c008c4c07f8be38e70aac950b940015437ed8bc8"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.2.1-test.127"><meta name="storybook-build-commit" content="cae9ef6d49374e90c0a13ed002afe78c171a0d47"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -105,7 +105,7 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
 .github-token-label{display:block;color:#f5eafa;font-size:14px;font-weight:650;margin-bottom:9px}
 .github-token-field{display:flex;align-items:stretch;width:100%;overflow:hidden;border:1px solid #826e90;border-radius:13px;background:#201627}
 .github-token-field:focus-within{border-color:#d6a9e8;box-shadow:0 0 0 3px #ba83d333}
-.github-token-field input{min-width:0;flex:1;width:100%;border:0;outline:0;background:transparent;color:white;font:inherit;font-size:15px;padding:14px 12px}
+.github-token-field input{min-width:0;flex:1;width:100%;border:0;outline:0;background:transparent;color:white;font:inherit;font-size:16px;padding:14px 12px}
 .github-token-field input::placeholder{color:#a998b4}
 .github-token-field button{flex:none;background:transparent;color:#e4c4f2;border:0;border-left:1px solid #61506d;padding:0 13px;font-size:12px;font-weight:650}
 #settingsDialog .github-token-hint{margin:10px 0 0;font-size:12px;line-height:1.55;color:#bdafc6}
@@ -249,7 +249,7 @@ body{background:#f8f2e7;background-attachment:initial}
   main{padding:9px 14px 75px}
   header h1{font-size:clamp(21px,5.2vw,28px);gap:8px}
   .brand-icon{width:30px;height:30px;border-radius:8px}
-  #settingsBtn{width:40px;height:40px}
+
   .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
   .book,.skeleton-book{padding:6px;border-radius:12px}
   .book img,.skeleton-cover{border-radius:7px}
@@ -265,6 +265,29 @@ body{background:#f8f2e7;background-attachment:initial}
 }
 @media(max-width:320px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
+/* Keep touch controls inside the usable shelf even with a landscape notch. */
+body>header,body>main{
+  --shelf-gutter:20px;--shelf-top:28px;--shelf-bottom:100px;
+  padding-left:max(var(--shelf-gutter),env(safe-area-inset-left));
+  padding-right:max(var(--shelf-gutter),env(safe-area-inset-right));
+}
+@media(max-width:600px){body>header,body>main{--shelf-gutter:14px;--shelf-top:20px;--shelf-bottom:75px}}
+body>header{padding-top:max(var(--shelf-top),env(safe-area-inset-top))}
+body>main{padding-bottom:max(var(--shelf-bottom),env(safe-area-inset-bottom))}
+button{-webkit-appearance:none;appearance:none}
+.clear-search{min-width:44px;min-height:44px}
+#settingsDialog{height:calc(100dvh - var(--keyboard-overlap,0px))}
+html:has(dialog[open]),body:has(dialog[open]){overflow:hidden}
+dialog:not(#settingsDialog){
+  max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--keyboard-overlap,0px) - 24px);
+  inset-block:env(safe-area-inset-top) max(env(safe-area-inset-bottom),var(--keyboard-overlap,0px));
+  overflow:auto;overscroll-behavior:contain;
+}
+#deleteDialog .delete-buttons{flex-wrap:wrap}
+#settingsBtn svg,#reader button svg{
+  display:block;width:22px;height:22px;flex:none;fill:none;stroke:currentColor;
+  stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;
+}
 /* Library cards are for opening books; infrequent deletion lives in reader options. */
 .book-holder .book{display:flex;flex-direction:column;align-items:stretch;height:100%}
 /* Unified cream reader: complete pages and control rails share a solid backdrop.
@@ -275,14 +298,16 @@ html.reader-active,body.reader-active{
 #reader{
   display:none;position:fixed;inset:0;z-index:10;overflow:hidden;
   background:#f8f2e7;color:#503824;
-  --reader-safe-top:env(safe-area-inset-top,0px);
-  --reader-safe-bottom:env(safe-area-inset-bottom,0px);
+  flex-direction:column;height:100dvh;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
-#reader.open{display:block}
+#reader.open{display:flex}
 #reader:fullscreen,#reader:-webkit-full-screen{width:100%;height:100%;margin:0;background:#f8f2e7}
 #reader::backdrop{background:#f8f2e7}
 #reader .viewport{
-  position:absolute;inset:calc(56px + var(--reader-safe-top)) 0 calc(66px + var(--reader-safe-bottom));
+  /* A full-width 9:16 page uses spare height for balanced control rails.
+     In landscape this area shrinks to fit between the controls. */
+  position:relative;flex:0 1 177.7778vw;min-height:0;
   overflow:hidden;display:flex;align-items:center;justify-content:center;
   touch-action:pan-y;overscroll-behavior:contain;
 }
@@ -296,9 +321,8 @@ html.reader-active,body.reader-active{
 }
 #reader .sheet.spread img{max-width:calc((100% - 8px)/2)}
 #reader .reader-top{
-  position:absolute;z-index:13;top:var(--reader-top-control,12px);
-  left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));
-  display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:10px;height:44px;
+  flex:1 0 56px;margin-inline:clamp(10px,4vw,16px);display:grid;
+  grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:10px;
 }
 #reader .reader-title,#reader .toolbar,#reader .exit,#reader .reader-more{
   background:rgba(121,84,54,.10);color:#503824;
@@ -320,27 +344,32 @@ html.reader-active,body.reader-active{
 #reader button:active{background:rgba(121,84,54,.20)}
 #reader button:disabled{opacity:.35;cursor:default}
 #reader .toolbar{
-  position:absolute;z-index:12;left:50%;transform:translateX(-50%);
-  bottom:var(--reader-bottom-control,12px);display:flex;align-items:center;
+  display:flex;align-items:center;
   gap:10px;padding:4px 8px;border-radius:32px;white-space:nowrap;
-  max-width:calc(100% - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));
+  max-width:calc(100% - 20px);
 }
 #reader .toolbar button{background:transparent;backdrop-filter:none;border-color:transparent}
 #reader .toolbar button:active{background:rgba(121,84,54,.20)}
-#reader .toolbar button svg{display:block;width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}
+#reader .reader-nav{flex:1 0 66px;display:flex;align-items:center;justify-content:center}
+#reader #restoreControls{
+  position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:0;background:transparent;
+}
+#reader #restoreControls:focus-visible{outline-offset:-3px}
+#reader button[hidden]{display:none}
+#readerStatus{margin:0;text-align:center;color:var(--walnut);font-size:14px}
+#readerStatus:empty{display:none}
 #reader #hide svg circle:last-child{fill:currentColor;stroke:none}
 #reader #count{font-size:14px;font-variant-numeric:tabular-nums}
 #reader #menu{
-  z-index:14;display:none;top:calc(var(--reader-top-control,12px) + 52px);bottom:auto;
-  left:auto;right:max(16px,env(safe-area-inset-right));transform:none;margin:0;
-  width:max-content;justify-content:center;flex-wrap:wrap;gap:6px;padding:7px 9px;
+  display:none;align-self:center;flex:none;
+  justify-content:center;flex-wrap:wrap;gap:6px;padding:7px 9px;
   background:rgba(255,250,241,.96);
 }
 #reader #menu.show{display:flex}
 #reader #deleteBook{color:#9c4434}
-#reader.hide-controls .reader-top,#reader.hide-controls .toolbar{display:none}
+#reader.hide-controls .reader-top,#reader.hide-controls .reader-nav{visibility:hidden}
 @media(max-width:360px){
-  #reader .reader-top{left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));gap:6px}
+  #reader .reader-top{gap:6px}
   #reader .reader-title{font-size:12px;padding:0 8px}
 }
 
@@ -414,14 +443,20 @@ html.reader-active,body.reader-active{
   #reader .toolbar button[aria-pressed="true"]{outline:2px solid Highlight}
 }
 </style></head><body>
-<header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testBuildVersion" hidden></span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
+<header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testBuildVersion" hidden></span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 5 1-2h4l1 2 2 1 2 .2 2 3.5-1.2 1.8v2l1.2 1.8-2 3.5-2-.1-2 1-1 1.8h-4L9 20l-2-1-2 .1-2-3.5 1.2-1.8v-2L3 10l2-3.5L7 6z"/><circle cx="12" cy="12" r="3"/></svg></button></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><section id="offlineAccessNotice" class="search-empty" aria-labelledby="offlineAccessHeading" hidden><strong id="offlineAccessHeading">Kein GitHub-Zugang eingerichtet</strong><small>Deine gespeicherten Bücher bleiben offline verfügbar.</small><button type="button" class="github-onboarding-action" id="setupOfflineGithubAccess">GitHub-Zugang einrichten</button></section><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
 </div></main>
-<section id="reader"><div class="viewport" id="viewport"><div class="sheet" id="sheet"></div></div><div class="reader-top"><button class="exit" id="close" aria-label="Zur Bibliothek">×</button><div class="reader-title" id="readerTitle"></div><button id="more" class="reader-more" aria-label="Weitere Optionen" aria-expanded="false" aria-controls="menu">⋯</button></div><div class="toolbar"><button id="prev" aria-label="Vorherige Seite">‹</button><span id="count">1 / 3</span><button id="next" aria-label="Nächste Seite">›</button></div><div class="toolbar menu" id="menu"><button id="downloadBook" aria-label="Buch herunterladen" title="Buch herunterladen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></svg></button><button id="spread" title="Doppelseitenansicht (Tablet quer)" aria-label="Doppelseitenansicht umschalten"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="7" height="14" rx="1.4"/><rect x="13.5" y="5" width="7" height="14" rx="1.4"/></svg></button><button id="full" title="Vollbild">⛶</button><button id="hide" title="Bedienung ausblenden" aria-label="Bedienelemente ausblenden"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></button><button id="deleteBook" title="Dieses Buch vom Gerät löschen" aria-label="Gespeichertes Buch löschen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 4h4M7 7l1 13h8l1-13M10 11v6m4-6v6"/></svg></button></div></section>
+<section id="reader">
+<div class="reader-top"><button class="exit" id="close" aria-label="Zur Bibliothek"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg></button><div class="reader-title" id="readerTitle"></div><button id="more" class="reader-more" aria-label="Weitere Optionen" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h.02M12 12h.02M19 12h.02" stroke-width="3.5"/></svg></button></div>
+<div class="toolbar menu" id="menu"><button id="downloadBook" aria-label="Buch herunterladen" title="Buch herunterladen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></svg></button><button id="spread" title="Doppelseitenansicht (Tablet quer)" aria-label="Doppelseitenansicht umschalten"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="7" height="14" rx="1.4"/><rect x="13.5" y="5" width="7" height="14" rx="1.4"/></svg></button><button id="full" title="Vollbild" aria-label="Vollbild" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/></svg></button><button id="hide" title="Bedienung ausblenden" aria-label="Bedienelemente ausblenden"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></button><button id="deleteBook" title="Dieses Buch vom Gerät löschen" aria-label="Gespeichertes Buch löschen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 4h4M7 7l1 13h8l1-13M10 11v6m4-6v6"/></svg></button></div>
+<p id="readerStatus" role="status"></p>
+<div class="viewport" id="viewport"><div class="sheet" id="sheet"></div><button id="restoreControls" aria-label="Bedienelemente einblenden" hidden></button></div>
+<div class="reader-nav"><div class="toolbar"><button id="prev" aria-label="Vorherige Seite"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m15 5-7 7 7 7"/></svg></button><span id="count">1 / 3</span><button id="next" aria-label="Nächste Seite"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg></button></div></div>
+</section>
 <div id="importOverlay" hidden>
   <div class="import-panel" role="dialog" aria-modal="true" aria-labelledby="importTitle" aria-describedby="importStatus">
     <div class="import-heading"><span class="import-spinner" aria-hidden="true"></span><div><h2 id="importTitle">Buch wird geladen</h2><small id="importCounter">Buch 1 von 1</small></div></div>
@@ -879,6 +914,7 @@ function render(){
     const b=item.book;
     const holder=document.createElement('div');holder.className='book-holder';
     const card=document.createElement('button');card.className='book';card.type='button';
+    card.dataset.bookId=b.id;
     card.setAttribute('aria-label',b.title+(b.status==='preview'?', Vorabversion':'')+(item.offline?', auf diesem Gerät gespeichert':', online – zum Laden antippen'));
     const cover=document.createElement('img');
     cover.src=item.offline?(b.cover||b.pages[0]):b.coverDataUri;
@@ -938,7 +974,8 @@ function onReaderFullscreenChange(){
     }
     readerWasFullscreen=fullscreen;
   }
-  syncReaderSystemBars();requestAnimationFrame(updateReaderControlPositions);
+  $('full').setAttribute('aria-pressed',String(fullscreen));
+  syncReaderSystemBars();
 }
 function syncReaderSystemBars(){
   const readerVisible=$('reader').classList.contains('open')||document.fullscreenElement===$('reader');
@@ -951,40 +988,43 @@ function syncReaderSystemBars(){
   }
   document.documentElement.classList.toggle('reader-active',readerVisible);
   document.body.classList.toggle('reader-active',readerVisible);
+  document.querySelector('body>header').inert=readerVisible;
+  document.querySelector('body>main').inert=readerVisible;
 }
 document.addEventListener('fullscreenchange',onReaderFullscreenChange);
 document.addEventListener('webkitfullscreenchange',onReaderFullscreenChange);
-function openBook(id){active=books.find(b=>b.id===id);if(!active)return;$('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');page=0;spreadMode=false;$('spread').setAttribute('aria-pressed','false');$('reader').classList.add('open');syncReaderSystemBars();$('readerTitle').textContent=active.title;showPage();history.pushState({reader:true},'','#lesen');
-  if(readerFullscreenPreferred)enterReaderFullscreen();
+function openBook(id){
+  active=books.find(book=>book.id===id);
+  if(!active)return;
+  setReaderMenu(false);
+  page=0;spreadMode=false;
+  $('spread').setAttribute('aria-pressed','false');
+  $('reader').classList.add('open');
+  $('readerTitle').textContent=active.title;
+  $('full').hidden=document.fullscreenEnabled===false||typeof $('reader').requestFullscreen!=='function';
+  syncReaderSystemBars();
+  showPage();
+  history.pushState({reader:true},'','#lesen');
+  $('close').focus({preventScroll:true});
+  if(readerFullscreenPreferred&&!$('full').hidden)enterReaderFullscreen();
 }
 async function closeBook(){
   if(readerClosing)return;
   readerClosing=true;
   try{
-    if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){console.warn('Vollbild konnte nicht beendet werden',e)}}
+    if(document.fullscreenElement===$('reader')){try{await document.exitFullscreen()}catch(e){console.warn('Vollbild konnte nicht beendet werden',e)}}
+    const bookId=active?.id;
     active=null;$('reader').classList.remove('open');
-    syncReaderSystemBars();$('reader').classList.remove('hide-controls');
-    $('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');
+    syncReaderSystemBars();
+    setReaderControlsHidden(false);
+    const card=Array.from($('books').querySelectorAll('.book')).find(button=>button.dataset.bookId===bookId);
+    card?.focus({preventScroll:true});
+    setReaderMenu(false);
     if(location.hash==='#lesen')history.replaceState(null,'',location.pathname+location.search);
   }finally{readerWasFullscreen=false;readerClosing=false}
 }
-function canSpread(){return spreadMode && window.innerWidth>=700 && window.innerWidth>window.innerHeight}
-function updateReaderControlPositions(){
-  if(!active||!$('reader').classList.contains('open'))return;
-  const readerRect=$('reader').getBoundingClientRect();
-  const images=[...$('sheet').querySelectorAll('img')].filter(img=>img.complete&&img.naturalWidth>0);
-  if(!images.length||!readerRect.height)return;
-  const bounds=images.map(img=>img.getBoundingClientRect());
-  const top=Math.max(0,Math.min(...bounds.map(rect=>rect.top))-readerRect.top);
-  const bottom=Math.min(readerRect.height,Math.max(...bounds.map(rect=>rect.bottom))-readerRect.top);
-  const style=getComputedStyle($('reader'));
-  const safeTop=parseFloat(style.getPropertyValue('--reader-safe-top'))||0;
-  const safeBottom=parseFloat(style.getPropertyValue('--reader-safe-bottom'))||0;
-  const headerHeight=$('reader').querySelector('.reader-top').getBoundingClientRect().height||44;
-  const navigationHeight=$('reader').querySelector('.toolbar').getBoundingClientRect().height||54;
-  $('reader').style.setProperty('--reader-top-control',(safeTop+Math.max(6,(top-safeTop-headerHeight)/2))+'px');
-  $('reader').style.setProperty('--reader-bottom-control',(safeBottom+Math.max(6,(readerRect.height-bottom-safeBottom-navigationHeight)/2))+'px');
-}
+function spreadFits(){return window.innerWidth>=700 && window.innerWidth>window.innerHeight}
+function canSpread(){return spreadMode && spreadFits()}
 async function enterReaderFullscreen(){
   if(document.fullscreenElement===$('reader'))return true;
   if(document.fullscreenElement||!$('reader').requestFullscreen)return false;
@@ -1002,25 +1042,27 @@ async function enterReaderFullscreen(){
   }catch(error){return false}
 }
 async function toggleReaderFullscreen(){
+  $('readerStatus').textContent='';
   try{
     if(document.fullscreenElement===$('reader')){
       await document.exitFullscreen();
       readerWasFullscreen=false;rememberReaderFullscreen(false);
     }else if(!await enterReaderFullscreen())throw Error('Fullscreen unavailable');
-  }catch(error){alert('Dieser Browser unterstützt Vollbild für lokale Dateien möglicherweise nicht.')}
+  }catch(error){$('readerStatus').textContent='Vollbild ist gerade nicht verfügbar. Du kannst hier weiterlesen.'}
 }
 
 function showPage(){
   if(!active)return;
   const spread=canSpread();
+  $('spread').disabled=!spreadFits();
+  $('spread').setAttribute('aria-pressed',String(spread));
   // Cover remains a single page; spreads start at pages 2+3, 4+5, etc.
   const first=spread&&page>0?1+2*Math.floor((page-1)/2):page;
   const indexes=spread&&first>0?[first,first+1].filter(i=>i<active.pages.length):[first];
   const images=indexes.map(i=>{let img=document.createElement('img');img.src=active.pages[i];img.alt=active.title+', Seite '+(i+1);img.draggable=false;return img});
   $('sheet').classList.toggle('spread',indexes.length===2);
   $('sheet').replaceChildren(...images);
-  images.forEach(img=>img.addEventListener('load',updateReaderControlPositions,{once:true}));
-  requestAnimationFrame(updateReaderControlPositions);
+
   $('count').textContent=indexes.length===2?`${first+1}–${indexes[indexes.length-1]+1} / ${active.pages.length}`:`${first+1} / ${active.pages.length}`;
   $('prev').disabled=first===0;
   $('next').disabled=indexes[indexes.length-1]>=active.pages.length-1;
@@ -1034,10 +1076,28 @@ function change(n){if(!active)return;
   showPage();
 }
 window.addEventListener('resize',()=>{if(active)showPage()});
-if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>requestAnimationFrame(updateReaderControlPositions));
 $('spread').onclick=()=>{spreadMode=!spreadMode;$('spread').setAttribute('aria-pressed',String(spreadMode));if(active)showPage()};
 let start=null;$('viewport').addEventListener('touchstart',e=>{start={x:e.changedTouches[0].clientX,y:e.changedTouches[0].clientY}},{passive:true});$('viewport').addEventListener('touchend',e=>{if(!start)return;let dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.4)change(dx<0?1:-1);start=null},{passive:true});
-$('prev').onclick=()=>change(-1);$('next').onclick=()=>change(1);$('close').onclick=closeBook;$('more').onclick=()=>{const expanded=$('menu').classList.toggle('show');$('more').setAttribute('aria-expanded',String(expanded))};$('hide').onclick=()=>{$('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');$('reader').classList.add('hide-controls')};$('sheet').onclick=()=>{if($('reader').classList.contains('hide-controls'))$('reader').classList.remove('hide-controls')};$('full').onclick=toggleReaderFullscreen;
+function setReaderMenu(open){
+  $('menu').classList.toggle('show',open);
+  $('more').setAttribute('aria-expanded',String(open));
+  if(!open)$('readerStatus').textContent='';
+}
+$('prev').onclick=()=>change(-1);
+$('next').onclick=()=>change(1);
+$('close').onclick=closeBook;
+$('more').onclick=()=>setReaderMenu(!$('menu').classList.contains('show'));
+function setReaderControlsHidden(hidden){
+  $('reader').classList.toggle('hide-controls',hidden);
+  $('restoreControls').hidden=!hidden;
+  if(hidden){
+    setReaderMenu(false);
+    $('restoreControls').focus({preventScroll:true});
+  }else if(active)$('more').focus({preventScroll:true});
+}
+$('hide').onclick=()=>setReaderControlsHidden(true);
+$('restoreControls').onclick=()=>setReaderControlsHidden(false);
+$('full').onclick=toggleReaderFullscreen;
 // Die Buchdaten werden ausschließlich in der IndexedDB gespeichert, nicht im HTML-Quelltext.
 const DB_NAME=APP_IS_TEST?'MeinMaerchenregal_Buecher_Test':'MeinMaerchenregal_Buecher', DB_VERSION=1, STORE='books';
 let dbPromise;
@@ -1062,8 +1122,19 @@ async function saveBook(book){
     tx.onabort=()=>reject(tx.error||Error('Speichern abgebrochen.'));
   });
 }
-$('deleteBook').onclick=()=>{if(active){$('menu').classList.remove('show');askDelete(active.id)}};
+$('deleteBook').onclick=()=>{if(active){setReaderMenu(false);askDelete(active.id)}};
 const settingsDialog=$('settingsDialog');
+// Some mobile keyboards reduce only the visual viewport. Keep dialog actions scrollable above them.
+if(window.visualViewport){
+  const viewport=window.visualViewport;
+  const updateDialogViewport=()=>{
+    const overlap=viewport.scale===1?Math.max(0,window.innerHeight-viewport.height-viewport.offsetTop):0;
+    document.documentElement.style.setProperty('--keyboard-overlap',overlap+'px');
+  };
+  viewport.addEventListener('resize',updateDialogViewport);
+  viewport.addEventListener('scroll',updateDialogViewport);
+  updateDialogViewport();
+}
 function openSettings(sectionId){
   for(const section of settingsDialog.querySelectorAll('.settings-section'))section.open=section.id===sectionId;
   settingsDialog.showModal();
@@ -1105,7 +1176,7 @@ function slug(s){return s.normalize('NFKD').replace(/[^a-zA-Z0-9_-]+/g,'_').slic
 function exportJson(){download(new Blob([JSON.stringify(active)],{type:'application/json'}),slug(active.title)+'.json')}
 function standalone(b){let raw=JSON.stringify(b).replace(/<\//g,'<\\/');return `<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${b.title.replaceAll('<','&lt;')}</title><style>html,body{margin:0;background:#18121d;color:white;font:16px system-ui}main{height:100dvh;display:flex;align-items:center;justify-content:center;overflow:hidden}img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}#nav{position:fixed;bottom:calc(10px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#21172ad9;border-radius:30px;padding:8px;display:flex;gap:14px;align-items:center}button{border:0;border-radius:40px;padding:10px 16px;background:#5c4669;color:white}</style><main id="page"></main><div id="nav"><button onclick="go(-1)">‹</button><span id="num"></span><button onclick="go(1)">›</button></div><script>const b=${raw};let n=0;function show(){document.getElementById('page').innerHTML='';let i=new Image;i.src=b.pages[n];document.getElementById('page').append(i);document.getElementById('num').textContent=(n+1)+' / '+b.pages.length;scrollTo(0,0)}function go(x){n=Math.max(0,Math.min(b.pages.length-1,n+x));show()}let sx=0;addEventListener('touchstart',e=>sx=e.changedTouches[0].clientX,{passive:true});addEventListener('touchend',e=>{let d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>70)go(d<0?1:-1)},{passive:true});show();<\/script></html>`}
 function exportHtml(){download(new Blob([standalone(active)],{type:'text/html;charset=utf-8'}),slug(active.title)+'.html')}
-$('downloadBook').onclick=()=>{$('menu').classList.remove('show');$('downloadDialog').showModal()};
+$('downloadBook').onclick=()=>{setReaderMenu(false);$('downloadDialog').showModal()};
 $('chooseHtml').onclick=()=>{$('downloadDialog').close();exportHtml()};
 $('chooseZip').onclick=()=>{$('downloadDialog').close();exportZip()};
 $('cancelDownload').onclick=()=>$('downloadDialog').close();
@@ -1143,7 +1214,7 @@ async function importZip(buffer,onProgress=()=>{}){
   return b;
 }
 
-addEventListener('popstate',()=>{if(active)closeBook()});document.addEventListener('keydown',e=>{if(!active)return;if(e.key==='ArrowRight')change(1);if(e.key==='ArrowLeft')change(-1);if(e.key==='Escape'&&document.fullscreenElement!==$('reader'))closeBook()});
+addEventListener('popstate',()=>{if(active)closeBook()});document.addEventListener('keydown',e=>{if(!active||document.querySelector('dialog[open]'))return;if(e.key==='ArrowRight')change(1);if(e.key==='ArrowLeft')change(-1);if(e.key==='Escape'&&document.fullscreenElement!==$('reader'))closeBook()});
 
 
 // Private GitHub catalog: a locally stored read-only PAT reconnects automatically.
