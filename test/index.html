@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.0-test"><meta name="storybook-build-commit" content="a79784f2aa3a06fbea75533949d45d2aa341ca4c"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.0-test"><meta name="storybook-build-commit" content="a5099d07646adbde52d46a328b805aea28c7e5d5"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -922,6 +922,24 @@ function add(b){if(!valid(b))throw Error('Das Buchpaket enthält keine gültigen
 const APP_THEME_COLOR='#f8f2e7';
 const READER_THEME_COLOR='#241a13';
 let readerEdgeTheme=null;
+const READER_FULLSCREEN_KEY=APP_IS_TEST?'storybook.reader.fullscreen.test.v1':'storybook.reader.fullscreen.v1';
+let readerFullscreenPreferred=false,readerWasFullscreen=false,readerClosing=false;
+try{readerFullscreenPreferred=localStorage.getItem(READER_FULLSCREEN_KEY)==='true'}catch(error){}
+function rememberReaderFullscreen(value){
+  readerFullscreenPreferred=value;
+  try{localStorage.setItem(READER_FULLSCREEN_KEY,String(value))}catch(error){}
+}
+function onReaderFullscreenChange(){
+  const fullscreen=document.fullscreenElement===$('reader');
+  if(fullscreen!==readerWasFullscreen){
+    // Closing a book or backgrounding the app is not a new reading preference.
+    if(active&&$('reader').classList.contains('open')&&!readerClosing&&document.visibilityState!=='hidden'){
+      rememberReaderFullscreen(fullscreen);
+    }
+    readerWasFullscreen=fullscreen;
+  }
+  syncReaderSystemBars();requestAnimationFrame(updateReaderControlPositions);
+}
 function syncReaderSystemBars(){
   const readerVisible=$('reader').classList.contains('open')||document.fullscreenElement===$('reader');
   const topColor=readerEdgeTheme?.top||READER_THEME_COLOR;
@@ -935,11 +953,22 @@ function syncReaderSystemBars(){
   document.documentElement.classList.toggle('reader-active',readerVisible);
   document.body.classList.toggle('reader-active',readerVisible);
 }
-document.addEventListener('fullscreenchange',()=>{syncReaderSystemBars();requestAnimationFrame(updateReaderControlPositions)});
-document.addEventListener('webkitfullscreenchange',()=>{syncReaderSystemBars();requestAnimationFrame(updateReaderControlPositions)});
+document.addEventListener('fullscreenchange',onReaderFullscreenChange);
+document.addEventListener('webkitfullscreenchange',onReaderFullscreenChange);
 function openBook(id){active=books.find(b=>b.id===id);if(!active)return;$('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');page=0;spreadMode=false;$('spread').setAttribute('aria-pressed','false');readerEdgeTheme=null;$('reader').classList.add('open');syncReaderSystemBars();$('readerTitle').textContent=active.title;showPage();history.pushState({reader:true},'','#lesen');
+  if(readerFullscreenPreferred)enterReaderFullscreen();
 }
-async function closeBook(){if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){console.warn('Vollbild konnte nicht beendet werden',e)}}active=null;$('reader').classList.remove('open');$('reader').classList.remove('has-edge-art');readerEdgeTheme=null;syncReaderSystemBars();$('reader').classList.remove('hide-controls');$('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');if(location.hash==='#lesen')history.replaceState(null,'',location.pathname+location.search)}
+async function closeBook(){
+  if(readerClosing)return;
+  readerClosing=true;
+  try{
+    if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){console.warn('Vollbild konnte nicht beendet werden',e)}}
+    active=null;$('reader').classList.remove('open');$('reader').classList.remove('has-edge-art');
+    readerEdgeTheme=null;syncReaderSystemBars();$('reader').classList.remove('hide-controls');
+    $('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');
+    if(location.hash==='#lesen')history.replaceState(null,'',location.pathname+location.search);
+  }finally{readerWasFullscreen=false;readerClosing=false}
+}
 function canSpread(){return spreadMode && window.innerWidth>=700 && window.innerWidth>window.innerHeight}
 function updateReaderControlPositions(){
   if(!active||!$('reader').classList.contains('open'))return;
@@ -1014,13 +1043,28 @@ function paintReaderEdgeArt(images,bounds,readerRect){
   readerEdgeTheme=colors;syncReaderSystemBars();
 }
 async function enterReaderFullscreen(){
+  if(document.fullscreenElement===$('reader'))return true;
   if(document.fullscreenElement||!$('reader').requestFullscreen)return false;
   try{
     await $('reader').requestFullscreen({navigationUI:'hide'});
     // A pending native transition may finish after the reader was closed.
-    if(!$('reader').classList.contains('open')&&document.fullscreenElement===$('reader'))await document.exitFullscreen();
+    if(!$('reader').classList.contains('open')||readerClosing){
+      if(document.fullscreenElement===$('reader'))await document.exitFullscreen();
+      return false;
+    }
+    if(document.fullscreenElement===$('reader')){
+      readerWasFullscreen=true;rememberReaderFullscreen(true);
+    }
     return true;
   }catch(error){return false}
+}
+async function toggleReaderFullscreen(){
+  try{
+    if(document.fullscreenElement===$('reader')){
+      await document.exitFullscreen();
+      readerWasFullscreen=false;rememberReaderFullscreen(false);
+    }else if(!await enterReaderFullscreen())throw Error('Fullscreen unavailable');
+  }catch(error){alert('Dieser Browser unterstützt Vollbild für lokale Dateien möglicherweise nicht.')}
 }
 
 function showPage(){
@@ -1051,7 +1095,7 @@ window.addEventListener('resize',()=>{if(active)showPage()});
 if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>requestAnimationFrame(updateReaderControlPositions));
 $('spread').onclick=()=>{spreadMode=!spreadMode;$('spread').setAttribute('aria-pressed',String(spreadMode));if(active)showPage()};
 let start=null;$('viewport').addEventListener('touchstart',e=>{start={x:e.changedTouches[0].clientX,y:e.changedTouches[0].clientY}},{passive:true});$('viewport').addEventListener('touchend',e=>{if(!start)return;let dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.4)change(dx<0?1:-1);start=null},{passive:true});
-$('prev').onclick=()=>change(-1);$('next').onclick=()=>change(1);$('close').onclick=closeBook;$('more').onclick=()=>{const expanded=$('menu').classList.toggle('show');$('more').setAttribute('aria-expanded',String(expanded))};$('hide').onclick=()=>{$('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');$('reader').classList.add('hide-controls')};$('sheet').onclick=()=>{if($('reader').classList.contains('hide-controls'))$('reader').classList.remove('hide-controls')};$('full').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(!await enterReaderFullscreen())throw Error('Fullscreen unavailable')}catch(e){alert('Dieser Browser unterstützt Vollbild für lokale Dateien möglicherweise nicht.')}};
+$('prev').onclick=()=>change(-1);$('next').onclick=()=>change(1);$('close').onclick=closeBook;$('more').onclick=()=>{const expanded=$('menu').classList.toggle('show');$('more').setAttribute('aria-expanded',String(expanded))};$('hide').onclick=()=>{$('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');$('reader').classList.add('hide-controls')};$('sheet').onclick=()=>{if($('reader').classList.contains('hide-controls'))$('reader').classList.remove('hide-controls')};$('full').onclick=toggleReaderFullscreen;
 // Die Buchdaten werden ausschließlich in der IndexedDB gespeichert, nicht im HTML-Quelltext.
 const DB_NAME=APP_IS_TEST?'MeinMaerchenregal_Buecher_Test':'MeinMaerchenregal_Buecher', DB_VERSION=1, STORE='books';
 let dbPromise;
@@ -1154,7 +1198,7 @@ async function importZip(buffer,onProgress=()=>{}){
   return b;
 }
 
-addEventListener('popstate',()=>{if(active)closeBook()});document.addEventListener('keydown',e=>{if(!active)return;if(e.key==='ArrowRight')change(1);if(e.key==='ArrowLeft')change(-1);if(e.key==='Escape')closeBook()});
+addEventListener('popstate',()=>{if(active)closeBook()});document.addEventListener('keydown',e=>{if(!active)return;if(e.key==='ArrowRight')change(1);if(e.key==='ArrowLeft')change(-1);if(e.key==='Escape'&&document.fullscreenElement!==$('reader'))closeBook()});
 
 
 // Private GitHub catalog: a locally stored read-only PAT reconnects automatically.
