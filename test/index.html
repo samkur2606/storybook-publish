@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.0-test"><meta name="storybook-build-commit" content="79d97ed495227273775f10f65f6c7c506b31d061"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.0-test"><meta name="storybook-build-commit" content="1a115f860ad32d241fdd7872a99b1796cb7dd79a"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -223,14 +223,15 @@ p,.hint{color:#796b59}
 #importProgress::-moz-progress-bar{background:#a47744}
 .import-foot{color:#78634b}
 #importPercent{color:#704729}
-/* Compact flat library cards: preserve the full 9:16 portrait cover at any size. */
+/* Compact flat library cards: preserve full 9:16 covers. Grid row height follows
+   the tallest actual title/metadata; do not reserve empty title lines. */
 body{background:#f8f2e7;background-attachment:initial}
 .grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
 .book{padding:8px;border-radius:14px;box-shadow:0 1px 3px #65472a0e;border-color:#dfd0bb}
 .book:active{box-shadow:0 1px 4px #65472a16}
 .book img{width:100%;height:100%;aspect-ratio:9/16;object-fit:contain;border-radius:8px}
 .book-cover-wrap{width:100%;aspect-ratio:9/16;flex:none}
-.book strong{padding:7px 1px 1px;font-size:14px;line-height:1.32;min-height:calc(3 * 1.32em + 8px);overflow-wrap:anywhere}
+.book strong{padding:7px 1px 1px;font-size:14px;line-height:1.32;overflow-wrap:anywhere}
 .book-meta{margin-top:auto;padding:4px 1px 0;gap:7px;font-size:11px}
 .skeleton-book{padding:8px;border-radius:14px}
 .skeleton-cover{border-radius:8px}
@@ -246,7 +247,7 @@ body{background:#f8f2e7;background-attachment:initial}
   .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
   .book,.skeleton-book{padding:6px;border-radius:12px}
   .book img,.skeleton-cover{border-radius:7px}
-  .book strong{font-size:12px;line-height:1.25;padding:6px 1px 0;min-height:calc(3 * 1.25em + 6px)}
+  .book strong{font-size:12px;line-height:1.25;padding:6px 1px 0}
   .book-meta{font-size:10px;gap:3px 6px;padding:4px 0 1px;line-height:1.3}
   .book-meta-item{gap:3px}
   .book-meta-item svg{width:11px;height:11px}
