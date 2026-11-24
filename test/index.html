@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.2.0-test.122"><meta name="storybook-build-commit" content="52f75e1272ef6a2fe016fe3e866d58defcad8271"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.2.0-test.123"><meta name="storybook-build-commit" content="54094e3ead7b4d2f2a60f8a659ebf70b8a318021"><title>Mein Bücherregal</title><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -186,6 +186,8 @@ p,.hint{color:#796b59}
 .github-onboarding-action{display:inline-flex;align-items:center;justify-content:center;min-height:44px;margin-top:14px;padding:10px 16px;border:1px solid #503824;border-radius:12px;background:#503824;color:#fffaf1;font:inherit;font-size:14px;font-weight:650;cursor:pointer}
 .github-onboarding-action:focus-visible{outline:2px solid #b17c3f;outline-offset:3px}
 .github-onboarding-action:active{background:#795436}
+#offlineAccessNotice{margin:0 0 14px;padding:16px;text-align:center}
+#offlineAccessNotice[hidden],main.library-loading #offlineAccessNotice{display:none}
 .btn{background:#f4e6d2;border:1px solid #ceb28e;color:#5a402a}
 .btn.primary{background:#724c2d;border-color:#724c2d;color:#fff9ee}
 #onlineHint{color:#725b42}
@@ -413,7 +415,7 @@ html.reader-active,body.reader-active{
 }
 </style></head><body>
 <header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testBuildVersion" hidden></span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen">⚙</button></div></header>
-<main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
+<main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><section id="offlineAccessNotice" class="search-empty" aria-labelledby="offlineAccessHeading" hidden><strong id="offlineAccessHeading">Kein GitHub-Zugang eingerichtet</strong><small>Deine gespeicherten Bücher bleiben offline verfügbar.</small><button type="button" class="github-onboarding-action" id="setupOfflineGithubAccess">GitHub-Zugang einrichten</button></section><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
@@ -854,6 +856,7 @@ function render(){
   // Merge local books and online catalog into one stable alphabetic shelf.
   const ordered=mergeShelfBooks(onlineCatalog,books).sort((a,b)=>
     titleSorter.compare(a.book.title,b.book.title)||String(a.book.id).localeCompare(String(b.book.id)));
+  $('offlineAccessNotice').hidden=!!sessionToken||!books.length;
   const visible=ordered.filter(item=>
     (item.book.title+' '+(item.book.subtitle||'')).toLocaleLowerCase('de').includes(query));
   $('searchMeta').textContent=query
@@ -913,6 +916,7 @@ function render(){
     grid.append(holder);
   }
 }
+$('setupOfflineGithubAccess').onclick=()=>openSettings('githubSettings');
 $('search').addEventListener('input',render);
 $('clearSearch').addEventListener('click',()=>{$('search').value='';render();$('search').focus()});
 function add(b){if(!valid(b))throw Error('Das Buchpaket enthält keine gültigen Seiten.');b.id=b.id||b.title;const idx=books.findIndex(x=>x.id===b.id);if(idx>=0)books[idx]=b;else books.push(b);render();if(typeof renderOnlineCatalog==='function')renderOnlineCatalog()}
