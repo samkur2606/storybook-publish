@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.152"><meta name="storybook-build-commit" content="dd6e1cb37dc6f8b861dc2627b908ddd4306c1900"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.154"><meta name="storybook-build-commit" content="bac5035544321b5164b8be0f69c053a2a3e2aa9a"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -145,10 +145,10 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
 /* Shelf selection is opt-in; normal reading cards remain unchanged. */
 #shelfActions{display:grid;gap:8px;margin:0}
 #shelfActions[hidden],#shelfSelection[hidden],#shelfToggle[hidden],#shelfMetaRow[hidden]{display:none}
-#shelfMetaRow{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px}
-#shelfMetaRow .search-meta{padding:0 3px;flex:1}
-#shelfToggle{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;border:1px solid #cdb091;border-radius:10px;padding:6px 8px;background:#fffaf2;color:#795436;font-size:13px;font-weight:650}
-#shelfToggle svg,#shelfSelection button svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#shelfMetaRow{display:block}
+#shelfMetaRow .search-meta{padding:8px 3px 0}
+#shelfToggle{display:grid;place-items:center;width:44px;height:44px;flex:none;border-radius:14px;border:1px solid #d8c4a5;background:#fff8ed;color:#624529;box-shadow:0 2px 8px #79543612;padding:0}
+#shelfSelection button svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 #shelfToggle:disabled,#shelfSelection button:disabled{opacity:.45}
 #shelfSelection{display:grid;gap:4px;position:fixed;z-index:5;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom));width:calc(100% - 28px);max-width:872px;padding:8px 10px;background:#fffaf2;border:1px solid #dfcbb1;border-radius:16px;box-shadow:0 4px 20px #79543626}
 .shelf-action-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -204,7 +204,7 @@ header .header-title{min-width:0}
 #testCatalogBranch{min-width:0;overflow-wrap:anywhere;border-color:#d8c4a5;background:#fff8ed;color:#624529;font-weight:600}
 p,.hint{color:#796b59}
 #settingsBtn{background:#fff8ed;border:1px solid #d8c4a5;color:#624529;box-shadow:0 2px 8px #79543612}
-#settingsBtn:focus-visible,.book:focus-visible,.btn:focus-visible,.search-wrap:focus-within{outline:2px solid #b17c3f;outline-offset:2px}
+#shelfToggle:focus-visible,#settingsBtn:focus-visible,.book:focus-visible,.btn:focus-visible,.search-wrap:focus-within{outline:2px solid #b17c3f;outline-offset:2px}
 .search-wrap{background:#fffaf2;border:1px solid #ddcbb5;box-shadow:0 2px 10px #7354330b}
 .search-wrap:focus-within{border-color:#b68b5c;box-shadow:0 0 0 3px #cda77735}
 .search-wrap svg,.clear-search{color:#896c4f}
@@ -327,7 +327,7 @@ dialog:not(#settingsDialog){
   overflow:auto;overscroll-behavior:contain;
 }
 #deleteDialog .delete-buttons{flex-wrap:wrap}
-#settingsBtn svg,#reader button svg{
+#shelfToggle svg,#settingsBtn svg,#reader button svg{
   display:block;width:22px;height:22px;flex:none;fill:none;stroke:currentColor;
   stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;
 }
@@ -538,8 +538,8 @@ html.reader-active,body.reader-active{
   #reader .toolbar button[aria-pressed="true"]{outline:2px solid Highlight}
 }
 </style></head><body>
-<header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testBuildVersion" hidden></span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 5 1-2h4l1 2 2 1 2 .2 2 3.5-1.2 1.8v2l1.2 1.8-2 3.5-2-.1-2 1-1 1.8h-4L9 20l-2-1-2 .1-2-3.5 1.2-1.8v-2L3 10l2-3.5L7 6z"/><circle cx="12" cy="12" r="3"/></svg></button></div></header>
-<main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div id="shelfMetaRow" class="shelf-action-row"><div class="search-meta" id="searchMeta" aria-live="polite"></div><button id="shelfToggle" type="button" aria-expanded="false" aria-controls="shelfSelection" aria-label="Bücher auswählen" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 2 2 4-4M11 6h10M3 12l2 2 4-4M11 12h10M3 18l2 2 4-4M11 18h10"/></svg><span id="shelfToggleText">Auswählen</span></button></div></div><section id="shelfActions" aria-label="Bücher verwalten" hidden>
+<header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testBuildVersion" hidden></span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div><div class="header-actions"><button id="shelfToggle" type="button" aria-expanded="false" aria-controls="shelfSelection" aria-label="Bücher auswählen" title="Bücher auswählen" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 2 2 4-4M11 6h10M3 12l2 2 4-4M11 12h10M3 18l2 2 4-4M11 18h10"/></svg></button><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 5 1-2h4l1 2 2 1 2 .2 2 3.5-1.2 1.8v2l1.2 1.8-2 3.5-2-.1-2 1-1 1.8h-4L9 20l-2-1-2 .1-2-3.5 1.2-1.8v-2L3 10l2-3.5L7 6z"/><circle cx="12" cy="12" r="3"/></svg></button></div></header>
+<main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div id="shelfMetaRow" class="shelf-action-row"><div class="search-meta" id="searchMeta" aria-live="polite"></div></div></div><section id="shelfActions" aria-label="Bücher verwalten" hidden>
   <div id="shelfSelection" hidden>
     <div class="shelf-action-row"><label><input type="checkbox" id="shelfSelectAll"> Alle auswählen</label><span id="shelfSelectionCount" aria-live="polite"></span></div>
     <div class="shelf-action-row"><button id="shelfDownload" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg><span id="shelfDownloadText">Laden</span></button><button id="shelfDelete" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6"/></svg><span id="shelfDeleteText">Löschen</span></button></div>
@@ -1012,8 +1012,9 @@ function syncShelfActions(ordered){
   $('shelfActions').hidden=!ordered.length&&!shelfBusy&&!$('shelfFeedback').textContent;
   $('shelfToggle').hidden=!ordered.length&&!shelfSelecting;
   $('shelfToggle').disabled=shelfBusy||importingBooks;
-  $('shelfToggle').innerHTML=shelfSelecting?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 2 2 4-4M11 6h10M3 12l2 2 4-4M11 12h10M3 18l2 2 4-4M11 18h10"/></svg><span>Auswählen</span>';
+  $('shelfToggle').innerHTML=shelfSelecting?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 2 2 4-4M11 6h10M3 12l2 2 4-4M11 12h10M3 18l2 2 4-4M11 18h10"/></svg>';
   $('shelfToggle').setAttribute('aria-label',shelfSelecting?'Auswahl abbrechen':'Bücher auswählen');
+  $('shelfToggle').title=shelfSelecting?'Auswahl abbrechen':'Bücher auswählen';
   document.querySelector('main').classList.toggle('shelf-selecting',shelfSelecting);
   $('shelfMetaRow').hidden=!ordered.length&&!shelfSelecting;
   $('shelfToggle').setAttribute('aria-expanded',String(shelfSelecting));
