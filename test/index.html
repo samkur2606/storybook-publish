@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.2.2-test.130"><meta name="storybook-build-commit" content="f983df69124d2a1f20abc229adc14cd640c967d5"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.2.2-test.132"><meta name="storybook-build-commit" content="98f0937eb41e53ae6883e01c8160267f2ec4c5d4"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -299,7 +299,7 @@ html.reader-active,body.reader-active{
   display:none;position:fixed;inset:0;z-index:10;overflow:hidden;
   background:#f8f2e7;color:#503824;
   flex-direction:column;height:100dvh;
-  --reader-overlay-tint:rgba(255,250,241,.25);
+  --reader-overlay-tint:rgba(248,242,231,.88);
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 #reader.open{display:flex}
@@ -373,12 +373,15 @@ html.reader-active,body.reader-active{
   display:none;flex:none;
   justify-content:center;flex-wrap:wrap;gap:6px;padding:7px 9px;
   background:var(--reader-overlay-tint);
+  border-color:rgba(121,84,54,.28);
+  box-shadow:0 2px 8px rgba(80,56,36,.10);
 }
+#reader #menu button{background:rgba(121,84,54,.08);border-color:rgba(121,84,54,.16)}
+#reader #menu button:active{background:rgba(121,84,54,.20)}
 #reader #menu.show{display:flex}
 @media(forced-colors:none){
-  /* Edge only the foreground so fine artwork remains visible between controls. */
-  #reader #menu svg{filter:drop-shadow(0 0 1px #fffaf1) drop-shadow(0 0 1px #fffaf1)}
-  #readerStatus{text-shadow:0 1px 1px #fffaf1,0 -1px 1px #fffaf1,1px 0 1px #fffaf1,-1px 0 1px #fffaf1}
+  #reader #menu svg{filter:none}
+  #readerStatus{text-shadow:none}
 }
 #reader #deleteBook{color:#9c4434}
 #reader.hide-controls .reader-top,#reader.hide-controls .reader-nav{visibility:hidden}
