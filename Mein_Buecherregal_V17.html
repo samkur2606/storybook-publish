@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.2.2"><meta name="storybook-build-commit" content="92e98a6f03ff54a9247ba4b97d012950568a8568"><title>Mein Bücherregal</title><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.3.0"><meta name="storybook-build-commit" content="c16baadc8072495ac5673753de6619c00cda3938"><title>Mein Bücherregal</title><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -95,6 +95,8 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
   content:"";flex:none;width:8px;height:8px;margin-inline:4px;
   border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg)
 }
+/* The header silhouette follows the current disclosure state, including during a press. */
+#settingsDialog .settings-section[open]>summary{border-radius:15px 15px 0 0}
 #settingsDialog .settings-section[open]>summary::after{transform:rotate(225deg)}
 #settingsDialog .settings-section>summary:focus-visible,.dialog-close:focus-visible{outline:2px solid #8b6038;outline-offset:2px}
 #settingsDialog .settings-section-body{padding:12px 16px 16px;border-top:1px solid #eadbc7}
@@ -122,6 +124,24 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
 #githubTokenEntry[hidden]{display:none}
 .github-buttons button[hidden]{display:none}
 
+#offlineSettings .offline-total{display:grid;gap:5px;padding:14px;background:#f0e2cb;border:1px solid #dec9ae;border-radius:12px;color:#503824}
+#offlineSize{font-size:27px}
+#offlineLoading{display:flex;align-items:center;justify-content:center;gap:10px;min-height:96px;color:#795436;font-size:14px}
+#offlineLoading[hidden],#offlineResults[hidden]{display:none}
+.offline-spinner{width:23px;height:23px;flex:none;border-radius:50%;border:3px solid #e5d3bb;border-top-color:#896039;animation:import-spin .85s linear infinite}
+@media(prefers-reduced-motion:reduce){.offline-spinner{animation:none}}
+#offlineSettings .offline-hint,#offlineFeedback{font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+#offlineList{display:grid;gap:12px;margin:12px 0}
+.offline-group{border:1px solid #dec9ae;border-radius:12px;padding:10px;min-width:0}
+.offline-choice{display:flex;gap:12px;align-items:center;min-height:44px;color:#503824;overflow-wrap:anywhere}
+.offline-choice input{width:20px;height:20px;flex:none;accent-color:#795436}
+.offline-choice span{min-width:0;display:grid;gap:4px}
+.offline-choice small{font-size:12px;color:#796b59}
+.offline-group .offline-choice+.offline-choice{border-top:1px solid #eadbc7}
+#offlineSettings button{width:100%;min-height:46px;border-radius:12px;font-weight:650;margin-top:8px}
+#offlineSettings .offline-delete{background:#795436;color:white;border:1px solid #795436}
+#offlineSettings .offline-refresh{background:#fffaf1;color:#503824;border:1px solid #dec9ae}
+#offlineSettings button:disabled{opacity:.5}
 /* Noninteractive book-card placeholders shown only while the initial catalog is loading. */
 #shelfSkeleton[hidden]{display:none!important}
 #shelfSkeleton{margin:0}
@@ -450,9 +470,44 @@ html.reader-active,body.reader-active{
 #catalogSettings :is(button,select):focus-visible{outline:2px solid #8b6038;outline-offset:2px}
 /* Keep touch, selection and keyboard feedback visible in the warm bookshelf palette. */
 :root{--interaction-ring:#895829;--interaction-tap:rgba(151,101,49,.20)}
-:where(button,a,select,input,textarea,summary,.book){-webkit-tap-highlight-color:var(--interaction-tap)}
+:where(button,a,select,input,textarea,summary,label,.book){-webkit-tap-highlight-color:transparent}
 ::selection{background:#dfbd8a;color:#382519}
-:where(button,a,select,input,textarea,summary,.book):focus-visible{outline:2px solid var(--interaction-ring);outline-offset:3px}
+/* Draw feedback on the visible rounded surface, not its rectangular native hit area. */
+@media(forced-colors:none){
+  :is(button,a,select,input,textarea,summary,.book):focus-visible{
+    outline:none;box-shadow:0 0 0 2px var(--interaction-ring)
+  }
+  :is(button,a,select,input,textarea,summary,.book):active:not(:disabled){
+    box-shadow:inset 0 0 0 100vmax var(--interaction-tap)
+  }
+  .search-wrap:focus-within,.search-wrap:active,.github-token-field:focus-within{
+    outline:none;box-shadow:0 0 0 3px var(--interaction-tap),0 0 0 1px var(--interaction-ring)
+  }
+  /* Treat the shelf search as one surface, including its icon and clear button. */
+  .search-wrap:active{
+    box-shadow:0 0 0 3px var(--interaction-tap),0 0 0 1px var(--interaction-ring),inset 0 0 0 100vmax var(--interaction-tap)
+  }
+  .search-wrap #search,.search-wrap #search:is(:focus,:active,:focus-visible){
+    -webkit-appearance:none;appearance:none;background:transparent;border:0;outline:none;box-shadow:none
+  }
+  .search-wrap .clear-search:active{box-shadow:none}
+  .github-token-field input:is(:focus,:active){
+    outline:none;box-shadow:none
+  }
+  #testUnlockDialog #testUnlockCode:focus{
+    outline:none;border-color:var(--interaction-ring);box-shadow:0 0 0 3px var(--interaction-tap)
+  }
+  #reader button:focus-visible,#settingsDialog .settings-section>summary:focus-visible,
+  #appEnvironment .environment-switch button:focus-visible,#catalogSettings :is(button,select):focus-visible,
+  #settingsBtn:focus-visible,.book:focus-visible,.btn:focus-visible,.github-onboarding-action:focus-visible{
+    outline:none;box-shadow:0 0 0 2px var(--interaction-ring)
+  }
+}
+.clear-search,.test-settings-link,.book-actions button{border-radius:8px}
+.github-token-field button{border-radius:0 12px 12px 0}
+.offline-choice{border-radius:8px}
+.offline-choice input{border-radius:4px}
+#appInfo dd a{border-radius:4px}
 #reader :where(button,a):focus-visible{outline-color:#a47744}
 #reader .toolbar button[aria-pressed="true"]{background:rgba(154,103,54,.34);border-color:rgba(109,67,32,.75);color:#392318}
 @media(forced-colors:active){
@@ -543,6 +598,21 @@ html.reader-active,body.reader-active{
           <button id="githubUseProduction" class="github-remove" type="button" hidden>Produktionszugang für Test übernehmen</button>
           <button id="githubCopy" class="github-save" type="button" hidden>Token kopieren</button>
           <button id="githubRemove" class="github-remove" type="button">Gespeicherten Zugang entfernen</button>
+        </div>
+      </div>
+    </details>
+    <details id="offlineSettings" class="settings-section" name="bookshelf-settings">
+      <summary>Offline-Bücher</summary>
+      <div class="settings-section-body">
+        <div id="offlineLoading" role="status" aria-live="polite" hidden><span class="offline-spinner" aria-hidden="true"></span><span>Buchspeicher werden geprüft …</span></div>
+        <div id="offlineResults" hidden>
+        <div class="offline-total"><small>Gespeicherte Bücher</small><strong id="offlineSize">–</strong><span id="offlineCount"></span></div>
+        <p class="offline-hint">Alle erreichbaren Buchspeicher auf diesem Gerät. Größen sind Schätzwerte. Andere Domains und Browserprofile sind nicht zugänglich.</p>
+        <label class="offline-choice"><input id="offlineSelectAll" type="checkbox" disabled> Alle auswählen</label>
+        <div id="offlineList"></div>
+        <p id="offlineFeedback" role="status" aria-live="polite"></p>
+        <button id="offlineDelete" class="offline-delete" type="button" disabled>Auswahl löschen</button>
+        <button id="offlineRefresh" class="offline-refresh" type="button">Aktualisieren</button>
         </div>
       </div>
     </details>
@@ -1166,6 +1236,88 @@ $('closeSettings').onclick=()=>settingsDialog.close();
 $('appEnvironment').addEventListener('toggle',event=>{
   if(APP_IS_TEST&&settingsDialog.open&&event.currentTarget.open&&isTestModeUnlocked())loadCatalogBranches();
 });
+// Enumerate only app-owned book databases; never open unrelated browser stores.
+const OFFLINE_DB_NAMES=['MeinMaerchenregal_Buecher','MeinMaerchenregal_Buecher_Test'];
+let offlineRows=[],offlineSelected=new Set(),offlineBusy=false;
+function offlineMode(name){return name===OFFLINE_DB_NAMES[0]?'Produktion':name===OFFLINE_DB_NAMES[1]?'Test':'Älterer Speicher: '+name}
+function offlineBytes(value){try{return new Blob([JSON.stringify(value)]).size}catch{return null}}
+function offlineFormat(bytes){return (bytes/1000000).toLocaleString('de-DE',{maximumFractionDigits:1})+' MB'}
+async function offlineNames(){
+  if(typeof indexedDB.databases!=='function')return {names:OFFLINE_DB_NAMES,limited:true};
+  try{const entries=await indexedDB.databases();return {names:[...new Set([...OFFLINE_DB_NAMES,...entries.map(d=>d.name).filter(n=>typeof n==='string'&&/^MeinMaerchenregal_Buecher(?:_[A-Za-z0-9-]+)*$/.test(n))])],limited:false}}
+  catch{return {names:OFFLINE_DB_NAMES,limited:true}}
+}
+function openOfflineExisting(name){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(name);let missing=false,blocked=false;
+    req.onupgradeneeded=()=>{missing=true;req.transaction.abort()};
+    req.onblocked=()=>{blocked=true;reject(Error('Speicher ist blockiert.'))};
+    req.onerror=()=>missing?resolve(null):reject(req.error||Error('Speicher nicht erreichbar.'));
+    req.onsuccess=()=>{const db=req.result;if(blocked){db.close();return}if(!db.objectStoreNames.contains(STORE)){db.close();resolve(null);return}db.onversionchange=()=>db.close();resolve(db)};
+  });
+}
+async function readOfflineRows(name){
+  const db=await openOfflineExisting(name);if(!db)return [];
+  try{return await new Promise((resolve,reject)=>{
+    const rows=[],tx=db.transaction(STORE,'readonly'),req=tx.objectStore(STORE).openCursor();
+    req.onsuccess=()=>{const cursor=req.result;if(!cursor)return;const v=cursor.value;rows.push({name,key:cursor.primaryKey,title:typeof v?.title==='string'&&v.title.trim()?v.title:String(cursor.primaryKey),bytes:offlineBytes(v),invalid:!valid(v)});cursor.continue()};
+    tx.oncomplete=()=>resolve(rows);tx.onabort=tx.onerror=()=>reject(tx.error||Error('Lesen fehlgeschlagen.'));
+  })}finally{db.close()}
+}
+function syncOfflineSelection(){
+  const all=$('offlineSelectAll');all.checked=offlineRows.length>0&&offlineSelected.size===offlineRows.length;all.indeterminate=offlineSelected.size>0&&offlineSelected.size<offlineRows.length;all.disabled=offlineBusy||!offlineRows.length;
+  $('offlineDelete').disabled=offlineBusy||!offlineSelected.size;$('offlineDelete').textContent=offlineSelected.size?offlineSelected.size+' Bücher löschen':'Auswahl löschen';
+  $('offlineRefresh').disabled=offlineBusy;
+}
+function renderOfflineRows(){
+  const list=$('offlineList');list.replaceChildren();
+  const total=offlineRows.reduce((sum,row)=>sum+(row.bytes??0),0);
+  $('offlineSize').textContent=offlineFormat(total)+(offlineRows.some(r=>r.bytes===null)?' + unbekannt':'');
+  $('offlineCount').textContent=offlineRows.length+' Bücher';
+  for(const name of [...new Set([...OFFLINE_DB_NAMES,...offlineRows.map(r=>r.name)])]){
+    const group=document.createElement('div');group.className='offline-group';
+    const heading=document.createElement('strong');heading.textContent=offlineMode(name);group.append(heading);
+    const rows=offlineRows.filter(r=>r.name===name);
+    if(!rows.length){const p=document.createElement('p');p.textContent='Keine gespeicherten Bücher gefunden.';group.append(p)}
+    for(const row of rows){
+      const label=document.createElement('label');label.className='offline-choice';
+      const check=document.createElement('input');check.type='checkbox';check.checked=offlineSelected.has(row);check.disabled=offlineBusy;
+      check.onchange=()=>{if(check.checked)offlineSelected.add(row);else offlineSelected.delete(row);syncOfflineSelection()};
+      const info=document.createElement('span'),title=document.createElement('span'),size=document.createElement('small');
+      title.textContent=row.title;size.textContent=(row.bytes===null?'Größe unbekannt':offlineFormat(row.bytes))+(row.invalid?' · Nicht lesbar':'');
+      info.append(title,size);label.append(check,info);group.append(label);
+    }
+    list.append(group);
+  }
+  syncOfflineSelection();
+}
+async function refreshOffline(message=''){
+  if(offlineBusy)return;offlineBusy=true;offlineRows=[];offlineSelected.clear();
+  $('offlineResults').hidden=true;$('offlineLoading').hidden=false;renderOfflineRows();
+  // Let the loading state paint before cursor reads and size estimation.
+  await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));
+  const errors=[];
+  try{const {names,limited}=await offlineNames();for(const name of names){try{offlineRows.push(...await readOfflineRows(name))}catch(e){errors.push(offlineMode(name)+': '+e.message)}}if(limited)errors.push('Dieser Browser erlaubt nur die Prüfung bekannter Speicher.')}
+  catch(e){errors.push(e.message)}
+  finally{offlineBusy=false;renderOfflineRows();$('offlineFeedback').textContent=[message,...errors].filter(Boolean).join(' ');$('offlineLoading').hidden=true;$('offlineResults').hidden=false}
+}
+$('offlineSettings').addEventListener('toggle',()=>{if($('offlineSettings').open&&settingsDialog.open)refreshOffline()});
+$('offlineRefresh').onclick=()=>refreshOffline();
+$('offlineSelectAll').onchange=()=>{offlineSelected=new Set($('offlineSelectAll').checked?offlineRows:[]);renderOfflineRows()};
+async function removeOfflineRows(name,rows){
+  const db=await openOfflineExisting(name);if(!db)throw Error('Speicher nicht mehr vorhanden.');
+  try{await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite'),store=tx.objectStore(STORE);for(const row of rows)store.delete(row.key);tx.oncomplete=resolve;tx.onabort=tx.onerror=()=>reject(tx.error||Error('Löschen fehlgeschlagen.'))})}
+  finally{db.close()}
+}
+$('offlineDelete').onclick=async()=>{
+  if(offlineBusy||!offlineSelected.size)return;
+  if(importingBooks){$('offlineFeedback').textContent='Bitte warte, bis der Buchdownload beendet ist.';return}
+  const rows=[...offlineSelected],names=[...new Set(rows.map(r=>r.name))];
+  if(!confirm((rows.length===1?'„'+rows[0].title+'“':rows.length+' Bücher')+' aus '+names.map(offlineMode).join(', ')+' löschen? Nur lokale Buchkopien werden entfernt.'))return;
+  offlineBusy=true;renderOfflineRows();const results=[];
+  try{for(const name of names){const group=rows.filter(r=>r.name===name);try{await removeOfflineRows(name,group);results.push(offlineMode(name)+': '+group.length+' gelöscht.');if(name===DB_NAME){if(active&&group.some(r=>indexedDB.cmp(r.key,active.id)===0))await closeBook();books=books.filter(book=>!group.some(r=>indexedDB.cmp(r.key,book.id)===0));render();renderOnlineCatalog()}}catch(e){results.push(offlineMode(name)+': '+e.message)}}}
+  finally{offlineBusy=false;await refreshOffline(results.join(' '))}
+};
 let pendingDeleteId=null;
 function askDelete(id){let b=books.find(x=>x.id===id);if(!b)return;pendingDeleteId=id;$('deleteBookLabel').textContent='Möchtest du „'+b.title+'“ wirklich aus deinem Bücherregal entfernen?';$('deleteDialog').showModal()}
 $('cancelDelete').onclick=()=>{$('deleteDialog').close();pendingDeleteId=null};
