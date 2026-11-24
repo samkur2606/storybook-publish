@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.1"><meta name="storybook-build-commit" content="da60797bc73c8bd7115ffb90fde6e0aa5e028937"><title>Mein Bücherregal</title><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.5.0"><meta name="storybook-build-commit" content="96848053a02510b808e312e9f785b08f3ee1282f"><title>Mein Bücherregal</title><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -444,6 +444,19 @@ html.reader-active,body.reader-active{
 #appInfo dt{color:#796a56}
 #appInfo dd{margin:0;color:#543820;overflow-wrap:anywhere}
 #appInfo dd a{color:inherit;text-underline-offset:2px}
+#appInfo .app-link-section{display:grid;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid #dfd0bc;color:#543820}
+#appInfo .app-link-url{display:block;padding:10px 12px;border:1px solid #d8c4a5;border-radius:10px;background:#fffaf3;font-size:13px;overflow-wrap:anywhere;user-select:all}
+#appInfo .app-link-actions{display:flex;gap:8px;flex-wrap:wrap}
+#appInfo .app-link-actions button{flex:1 1 130px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:8px 12px;border:1px solid #b69a79;border-radius:10px;background:#fffaf3;color:#795436;font:inherit;font-size:13px;font-weight:650}
+#appInfo .app-link-actions button[hidden]{display:none}
+#appInfo #copyAppLink{background:#795436;color:#fffaf3;border-color:#795436;transition:background-color .18s ease,transform .18s ease}
+#appInfo #copyAppLink[data-copied="true"]{background:#60462e;animation:appLinkCopied .24s ease-out}
+#appInfo .app-link-actions svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#appInfo .app-link-actions button:focus-visible{outline:2px solid #8b6038;outline-offset:2px}
+#appInfo .app-link-actions button:active{transform:scale(.97)}
+#appInfo #appLinkFeedback{margin:0;color:#796a56;font-size:12px;line-height:1.4;min-height:1.4em}
+@keyframes appLinkCopied{0%{transform:scale(.96)}65%{transform:scale(1.025)}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){#appInfo #copyAppLink{animation:none!important;transition:none!important}#appInfo .app-link-actions button:active{transform:none}}
 .test-settings-link{min-height:44px;padding:0;border:0;background:transparent;color:#704c2b;font-size:13px;text-align:left;text-decoration:underline;text-underline-offset:3px}
 #appEnvironment .test-settings-actions{display:flex;flex-wrap:wrap;column-gap:16px}
 #testUnlockDialog{width:min(390px,calc(100vw - 32px));padding:22px;border:1px solid #d9c1a4;border-radius:20px;background:#fffaf0;color:#4b321f}
@@ -745,6 +758,15 @@ body>main.shelf-options-open{padding-bottom:max(var(--shelf-bottom),calc(250px +
           <dt id="appBuildCommitLabel" hidden>Commit</dt>
           <dd id="appBuildCommitValue" hidden><a id="appBuildCommitLink" target="_blank" rel="noopener"></a></dd>
         </dl>
+        <div class="app-link-section">
+          <strong>App-Link</strong>
+          <span class="app-link-url" id="productionAppLink">https://samkur2606.github.io/storybook-publish/</span>
+          <div class="app-link-actions">
+            <button id="copyAppLink" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="copyAppLinkIcon" d="M9 9h11v11H9zM15 9V4H4v11h5"/></svg><span id="copyAppLinkLabel">Link kopieren</span></button>
+            <button id="shareAppLink" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m9 10 6-3m-6 7 6 3"/></svg>App teilen</button>
+          </div>
+          <p id="appLinkFeedback" role="status" aria-live="polite"></p>
+        </div>
         <button id="openTestUnlock" class="test-settings-link" type="button">Testmodus freischalten</button>
       </div>
     </details>
@@ -802,6 +824,54 @@ if(appBuildCommit){
   $('appBuildCommitLabel').hidden=false;
   $('appBuildCommitValue').hidden=false;
 }
+
+const productionAppUrl=$('productionAppLink').textContent.trim();
+const appLinkShareData={title:'Mein Bücherregal',url:productionAppUrl};
+let appLinkFeedbackTimer;
+function resetAppLinkFeedback(){
+  clearTimeout(appLinkFeedbackTimer);
+  $('copyAppLink').removeAttribute('data-copied');
+  $('copyAppLinkIcon').setAttribute('d','M9 9h11v11H9zM15 9V4H4v11h5');
+  $('copyAppLinkLabel').textContent='Link kopieren';
+  $('appLinkFeedback').textContent='';
+}
+async function copyProductionAppLink(){
+  resetAppLinkFeedback();
+  try{
+    try{
+      if(!navigator.clipboard?.writeText)throw new Error('Clipboard API unavailable');
+      await navigator.clipboard.writeText(productionAppUrl);
+    }catch{
+      const field=document.createElement('textarea');
+      field.value=productionAppUrl;
+      field.readOnly=true;
+      field.style.cssText='position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+      const focus=document.activeElement;
+      $('appInfo').append(field);
+      try{
+        field.focus();field.select();field.setSelectionRange(0,field.value.length);
+        if(!document.execCommand('copy'))throw new Error('Clipboard fallback failed');
+      }finally{field.remove();focus?.focus({preventScroll:true})}
+    }
+    $('copyAppLink').setAttribute('data-copied','true');
+    $('copyAppLinkIcon').setAttribute('d','m5 12 4 4L19 6');
+    $('copyAppLinkLabel').textContent='Kopiert';
+    $('appLinkFeedback').textContent='App-Link kopiert.';
+    appLinkFeedbackTimer=setTimeout(resetAppLinkFeedback,2200);
+  }catch{
+    $('appLinkFeedback').textContent='Kopieren nicht möglich. Du kannst den Link manuell markieren und kopieren.';
+  }
+}
+$('copyAppLink').addEventListener('click',copyProductionAppLink);
+if(typeof navigator.share==='function'&&(!navigator.canShare||navigator.canShare(appLinkShareData))){
+  $('shareAppLink').hidden=false;
+  $('shareAppLink').addEventListener('click',async()=>{
+    resetAppLinkFeedback();
+    try{await navigator.share(appLinkShareData)}
+    catch(error){if(error.name!=='AbortError')$('appLinkFeedback').textContent='Teilen nicht möglich. Bitte kopiere den Link.'}
+  });
+}
+$('appInfo').addEventListener('toggle',()=>{if(!$('appInfo').open)resetAppLinkFeedback()});
 
 const expectedTestCodeHash=globalThis.storybookTestModeCodeHash;
 const hasTestCodeHash=/^[0-9a-f]{64}$/.test(expectedTestCodeHash);
