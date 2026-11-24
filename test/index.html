@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.3.0-test.142"><meta name="storybook-build-commit" content="07ba337d60e2809dd2a3799fe56366e07ddc1a58"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.3.0-test.144"><meta name="storybook-build-commit" content="b9c3da7984097797dc0ef0ffa6d7ea074219489e"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -480,10 +480,18 @@ html.reader-active,body.reader-active{
   :is(button,a,select,input,textarea,summary,.book):active:not(:disabled){
     box-shadow:inset 0 0 0 100vmax var(--interaction-tap)
   }
-  .search-wrap:focus-within,.github-token-field:focus-within{
+  .search-wrap:focus-within,.search-wrap:active,.github-token-field:focus-within{
     outline:none;box-shadow:0 0 0 3px var(--interaction-tap),0 0 0 1px var(--interaction-ring)
   }
-  .search-wrap input:is(:focus,:active),.github-token-field input:is(:focus,:active){
+  /* Treat the shelf search as one surface, including its icon and clear button. */
+  .search-wrap:active{
+    box-shadow:0 0 0 3px var(--interaction-tap),0 0 0 1px var(--interaction-ring),inset 0 0 0 100vmax var(--interaction-tap)
+  }
+  .search-wrap #search,.search-wrap #search:is(:focus,:active,:focus-visible){
+    -webkit-appearance:none;appearance:none;background:transparent;border:0;outline:none;box-shadow:none
+  }
+  .search-wrap .clear-search:active{box-shadow:none}
+  .github-token-field input:is(:focus,:active){
     outline:none;box-shadow:none
   }
   #testUnlockDialog #testUnlockCode:focus{
