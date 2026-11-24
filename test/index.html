@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.168"><meta name="storybook-build-commit" content="c510cd17e7418d8039bd6d99cbb246c62c466c40"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.170"><meta name="storybook-build-commit" content="81b58a89c5d584045e93e1579b1e3fdc2e2f3181"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -587,7 +587,9 @@ body.reader-active #shelfDock{visibility:hidden}
 #shelfFilterOptions button{flex-direction:column;min-height:56px;gap:3px}
 #shelfDock[data-mode="filter"]{height:126px}
 #shelfDock[data-mode="sort"]{height:224px}
-#shelfSortOptions button{min-height:48px}
+#shelfOptions #shelfSortOptions button[data-sort]{display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:center;gap:7px;min-height:48px;text-align:left}
+#shelfOptions #shelfSortOptions button[data-sort]>.action-icon{flex:0 0 17px}
+#shelfOptions #shelfSortOptions button[data-sort]>span{flex:0 1 auto;min-width:0}
 body>main.shelf-options-open{padding-bottom:max(var(--shelf-bottom),calc(250px + env(safe-area-inset-bottom)))}
 /* Selection changes update only the affected cards; preserve cover layout and focus. */
 .book{transition:border-color .15s,box-shadow .15s,transform .10s}
