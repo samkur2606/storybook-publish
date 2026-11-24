@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.0"><meta name="storybook-build-commit" content="ad72e2bf3614315a368be03b66e6057870c59e66"><title>Mein Bücherregal</title><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.1"><meta name="storybook-build-commit" content="1d9c3322d2230226895b99e5c65a3cfd1f19c175"><title>Mein Bücherregal</title><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -261,20 +261,20 @@ body{background:#f8f2e7;background-attachment:initial}
 
 /* Library cards are for opening books; infrequent deletion lives in reader options. */
 .book-holder .book{display:flex;flex-direction:column;align-items:stretch;height:100%}
-/* Calm walnut reader: complete pages and control rails share a solid backdrop.
+/* Unified cream reader: complete pages and control rails share a solid backdrop.
    Keep geometry and styling together; native fullscreen fills its containing block. */
 html.reader-active,body.reader-active{
-  background:#241a13;color-scheme:dark;overflow:hidden;overscroll-behavior:none;
+  background:#f8f2e7;color-scheme:light;overflow:hidden;overscroll-behavior:none;
 }
 #reader{
   display:none;position:fixed;inset:0;z-index:10;overflow:hidden;
-  background:#241a13;color:#fff5e7;
+  background:#f8f2e7;color:#503824;
   --reader-safe-top:env(safe-area-inset-top,0px);
   --reader-safe-bottom:env(safe-area-inset-bottom,0px);
 }
 #reader.open{display:block}
-#reader:fullscreen,#reader:-webkit-full-screen{width:100%;height:100%;margin:0;background:#241a13}
-#reader::backdrop{background:#241a13}
+#reader:fullscreen,#reader:-webkit-full-screen{width:100%;height:100%;margin:0;background:#f8f2e7}
+#reader::backdrop{background:#f8f2e7}
 #reader .viewport{
   position:absolute;inset:calc(56px + var(--reader-safe-top)) 0 calc(66px + var(--reader-safe-bottom));
   overflow:hidden;display:flex;align-items:center;justify-content:center;
@@ -295,10 +295,10 @@ html.reader-active,body.reader-active{
   display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:10px;height:44px;
 }
 #reader .reader-title,#reader .toolbar,#reader .exit,#reader .reader-more{
-  background:rgba(36,26,19,.34);color:#fff5e7;
-  border:1px solid rgba(255,243,218,.09);box-shadow:none;
+  background:rgba(121,84,54,.10);color:#503824;
+  border:1px solid rgba(121,84,54,.22);box-shadow:none;
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
-  text-shadow:0 1px 3px #241a13;
+  text-shadow:none;
 }
 #reader .reader-title{
   min-width:0;padding:0 12px;text-align:center;line-height:42px;
@@ -307,11 +307,11 @@ html.reader-active,body.reader-active{
 #reader button{
   display:inline-flex;align-items:center;justify-content:center;
   flex:0 0 44px;width:44px;height:44px;padding:0;margin:0;border-radius:50%;
-  color:#fff1dc;border:1px solid rgba(255,243,218,.09);font:23px/1 system-ui,sans-serif;
+  color:#503824;border:1px solid rgba(121,84,54,.22);font:23px/1 system-ui,sans-serif;
 }
 #reader .reader-more{font-size:26px}
-#reader button:focus-visible{outline:2px solid #eac8aa;outline-offset:2px}
-#reader button:active{background:rgba(110,78,47,.55)}
+#reader button:focus-visible{outline:2px solid #a47744;outline-offset:2px}
+#reader button:active{background:rgba(121,84,54,.20)}
 #reader button:disabled{opacity:.35;cursor:default}
 #reader .toolbar{
   position:absolute;z-index:12;left:50%;transform:translateX(-50%);
@@ -320,7 +320,7 @@ html.reader-active,body.reader-active{
   max-width:calc(100% - 24px - env(safe-area-inset-left) - env(safe-area-inset-right));
 }
 #reader .toolbar button{background:transparent;backdrop-filter:none;border-color:transparent}
-#reader .toolbar button:active{background:rgba(110,78,47,.55)}
+#reader .toolbar button:active{background:rgba(121,84,54,.20)}
 #reader .toolbar button svg{display:block;width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}
 #reader #hide svg circle:last-child{fill:currentColor;stroke:none}
 #reader #count{font-size:14px;font-variant-numeric:tabular-nums}
@@ -328,10 +328,10 @@ html.reader-active,body.reader-active{
   z-index:14;display:none;top:calc(var(--reader-top-control,12px) + 52px);bottom:auto;
   left:auto;right:max(16px,env(safe-area-inset-right));transform:none;margin:0;
   width:max-content;justify-content:center;flex-wrap:wrap;gap:6px;padding:7px 9px;
-  background:rgba(36,26,19,.65);
+  background:rgba(255,250,241,.96);
 }
 #reader #menu.show{display:flex}
-#reader #deleteBook{color:#ffded2}
+#reader #deleteBook{color:#9c4434}
 #reader.hide-controls .reader-top,#reader.hide-controls .toolbar{display:none}
 @media(max-width:360px){
   #reader .reader-top{left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));gap:6px}
@@ -401,7 +401,7 @@ html.reader-active,body.reader-active{
 :where(button,a,select,input,textarea,summary,.book){-webkit-tap-highlight-color:var(--interaction-tap)}
 ::selection{background:#dfbd8a;color:#382519}
 :where(button,a,select,input,textarea,summary,.book):focus-visible{outline:2px solid var(--interaction-ring);outline-offset:3px}
-#reader :where(button,a):focus-visible{outline-color:#f0cc92}
+#reader :where(button,a):focus-visible{outline-color:#a47744}
 #reader .toolbar button[aria-pressed="true"]{background:rgba(154,103,54,.34);border-color:rgba(109,67,32,.75);color:#392318}
 @media(forced-colors:active){
   :where(button,a,select,input,textarea,summary,.book):focus-visible{outline:2px solid Highlight}
@@ -911,7 +911,7 @@ $('search').addEventListener('input',render);
 $('clearSearch').addEventListener('click',()=>{$('search').value='';render();$('search').focus()});
 function add(b){if(!valid(b))throw Error('Das Buchpaket enthält keine gültigen Seiten.');b.id=b.id||b.title;const idx=books.findIndex(x=>x.id===b.id);if(idx>=0)books[idx]=b;else books.push(b);render();if(typeof renderOnlineCatalog==='function')renderOnlineCatalog()}
 const APP_THEME_COLOR='#f8f2e7';
-const READER_THEME_COLOR='#241a13';
+const READER_THEME_COLOR='#f8f2e7';
 const READER_FULLSCREEN_KEY=APP_IS_TEST?'storybook.reader.fullscreen.test.v1':'storybook.reader.fullscreen.v1';
 let readerFullscreenPreferred=false,readerWasFullscreen=false,readerClosing=false;
 try{readerFullscreenPreferred=localStorage.getItem(READER_FULLSCREEN_KEY)==='true'}catch(error){}
