@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.2.2-test.129"><meta name="storybook-build-commit" content="7b231619d22841710fbe619854fe6c265a597aca"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.2.2-test.130"><meta name="storybook-build-commit" content="f983df69124d2a1f20abc229adc14cd640c967d5"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -299,6 +299,7 @@ html.reader-active,body.reader-active{
   display:none;position:fixed;inset:0;z-index:10;overflow:hidden;
   background:#f8f2e7;color:#503824;
   flex-direction:column;height:100dvh;
+  --reader-overlay-tint:rgba(255,250,241,.25);
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 #reader.open{display:flex}
@@ -327,7 +328,6 @@ html.reader-active,body.reader-active{
 #reader .reader-title,#reader .toolbar,#reader .exit,#reader .reader-more{
   background:rgba(121,84,54,.10);color:#503824;
   border:1px solid rgba(121,84,54,.22);box-shadow:none;
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   text-shadow:none;
 }
 #reader .reader-title{
@@ -363,7 +363,7 @@ html.reader-active,body.reader-active{
 }
 #reader .reader-options-overlay #menu{pointer-events:auto;max-width:100%}
 #readerStatus{
-  margin:0;padding:4px 10px;border-radius:12px;background:var(--paper);
+  margin:0;padding:4px 10px;border-radius:12px;background:var(--reader-overlay-tint);
   text-align:center;color:var(--walnut);font-size:14px;
 }
 #readerStatus:empty{display:none}
@@ -372,9 +372,14 @@ html.reader-active,body.reader-active{
 #reader #menu{
   display:none;flex:none;
   justify-content:center;flex-wrap:wrap;gap:6px;padding:7px 9px;
-  background:rgba(255,250,241,.90);
+  background:var(--reader-overlay-tint);
 }
 #reader #menu.show{display:flex}
+@media(forced-colors:none){
+  /* Edge only the foreground so fine artwork remains visible between controls. */
+  #reader #menu svg{filter:drop-shadow(0 0 1px #fffaf1) drop-shadow(0 0 1px #fffaf1)}
+  #readerStatus{text-shadow:0 1px 1px #fffaf1,0 -1px 1px #fffaf1,1px 0 1px #fffaf1,-1px 0 1px #fffaf1}
+}
 #reader #deleteBook{color:#9c4434}
 #reader.hide-controls .reader-top,#reader.hide-controls .reader-nav{visibility:hidden}
 @media(max-width:360px){
