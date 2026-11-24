@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.3"><meta name="storybook-build-commit" content="f14cc1ca8ead9f646cf6562db67d763ea6b343a2"><title>Mein Bücherregal</title><link rel="manifest" href="./manifest.webmanifest"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.0.4"><meta name="storybook-build-commit" content="3f78a30f1ca1886f76bd6369469ac26d62d20fd1"><title>Mein Bücherregal</title><link rel="manifest" href="./manifest.webmanifest"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -343,6 +343,7 @@ body{background:#f8f2e7;background-attachment:initial}
 
 /* Immersive reader: softer dark espresso rails and unobtrusive translucent controls. */
 #reader{background:#241a13;color:#f7eedf}
+#reader:fullscreen,#reader:-webkit-full-screen{background:#241a13}
 #reader .toolbar,#reader .reader-title,#reader #menu{
   background:rgba(60,43,30,.42);
   color:#fff5e7;
@@ -951,8 +952,17 @@ function render(){
 $('search').addEventListener('input',render);
 $('clearSearch').addEventListener('click',()=>{$('search').value='';render();$('search').focus()});
 function add(b){if(!valid(b))throw Error('Das Buchpaket enthält keine gültigen Seiten.');b.id=b.id||b.title;const idx=books.findIndex(x=>x.id===b.id);if(idx>=0)books[idx]=b;else books.push(b);render();if(typeof renderOnlineCatalog==='function')renderOnlineCatalog()}
-function openBook(id){active=books.find(b=>b.id===id);if(!active)return;$('menu').classList.remove('show');page=0;spreadMode=false;$('spread').setAttribute('aria-pressed','false');$('reader').classList.add('open');$('readerTitle').textContent=active.title;showPage();history.pushState({reader:true},'','#lesen')}
-async function closeBook(){if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){console.warn('Vollbild konnte nicht beendet werden',e)}}active=null;$('reader').classList.remove('open');$('reader').classList.remove('hide-controls');$('menu').classList.remove('show');if(location.hash==='#lesen')history.replaceState(null,'',location.pathname+location.search)}
+const APP_THEME_COLOR='#f8f2e7';
+const READER_THEME_COLOR='#241a13';
+function syncReaderSystemBars(){
+  const readerVisible=$('reader').classList.contains('open')||document.fullscreenElement===$('reader');
+  document.querySelector('meta[name="theme-color"]').setAttribute('content',readerVisible?READER_THEME_COLOR:APP_THEME_COLOR);
+  document.documentElement.style.backgroundColor=readerVisible?READER_THEME_COLOR:APP_THEME_COLOR;
+}
+document.addEventListener('fullscreenchange',syncReaderSystemBars);
+document.addEventListener('webkitfullscreenchange',syncReaderSystemBars);
+function openBook(id){active=books.find(b=>b.id===id);if(!active)return;$('menu').classList.remove('show');page=0;spreadMode=false;$('spread').setAttribute('aria-pressed','false');$('reader').classList.add('open');syncReaderSystemBars();$('readerTitle').textContent=active.title;showPage();history.pushState({reader:true},'','#lesen')}
+async function closeBook(){if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){console.warn('Vollbild konnte nicht beendet werden',e)}}active=null;$('reader').classList.remove('open');syncReaderSystemBars();$('reader').classList.remove('hide-controls');$('menu').classList.remove('show');if(location.hash==='#lesen')history.replaceState(null,'',location.pathname+location.search)}
 function canSpread(){return spreadMode && window.innerWidth>=700 && window.innerWidth>window.innerHeight}
 function showPage(){
   if(!active)return;
