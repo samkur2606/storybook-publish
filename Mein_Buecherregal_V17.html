@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.3.0"><meta name="storybook-build-commit" content="c16baadc8072495ac5673753de6619c00cda3938"><title>Mein Bücherregal</title><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0"><meta name="storybook-build-commit" content="5ee974ffd499d43ac5bd3950f45f42f77e102031"><title>Mein Bücherregal</title><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -76,7 +76,7 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
   max-width:680px;margin-inline:auto;
   padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))
 }
-#settingsDialog .settings-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
+#settingsDialog .settings-header{display:flex;align-items:center;justify-content:flex-start;gap:12px;padding-block:12px}
 #settingsDialog h2{font-size:clamp(22px,4vw,28px);margin:0}
 .dialog-close{
   display:grid;place-items:center;flex:none;width:44px;height:44px;
@@ -142,6 +142,29 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
 #offlineSettings .offline-delete{background:#795436;color:white;border:1px solid #795436}
 #offlineSettings .offline-refresh{background:#fffaf1;color:#503824;border:1px solid #dec9ae}
 #offlineSettings button:disabled{opacity:.5}
+/* Shelf selection is opt-in; normal reading cards remain unchanged. */
+#shelfActions{display:grid;gap:8px;margin:0}
+#shelfActions[hidden],#shelfSelection[hidden],#shelfToggle[hidden],#shelfMetaRow[hidden]{display:none}
+#shelfMetaRow{display:block}
+#shelfMetaRow .search-meta{padding:8px 3px 0}
+#shelfToggle{display:grid;place-items:center;width:44px;height:44px;flex:none;border-radius:14px;border:1px solid #d8c4a5;background:#fff8ed;color:#624529;box-shadow:0 2px 8px #79543612;padding:0}
+#shelfSelection button svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#shelfToggle:disabled,#shelfSelection button:disabled{opacity:.45}
+#shelfSelection{display:grid;gap:4px;position:fixed;z-index:5;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom));width:calc(100% - 28px);max-width:872px;padding:8px 10px;background:#fffaf2;border:1px solid #dfcbb1;border-radius:16px;box-shadow:0 4px 20px #79543626}
+.shelf-action-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#shelfSelection label{display:flex;align-items:center;gap:7px;min-height:36px;font-size:13px;color:#503824}
+#shelfSelection input{width:18px;height:18px;accent-color:#795436;border-radius:4px}
+#shelfSelection button{display:flex;align-items:center;justify-content:center;gap:6px;flex:1;min-height:44px;border-radius:11px;padding:8px;border:1px solid #d4bc9e;background:#fffaf0;color:#503824;font-size:13px;font-weight:650}
+#shelfSelection #shelfDownload{background:#795436;color:white;border-color:#795436}
+#shelfSelection #shelfDelete{color:#9c4434}
+#shelfSelectionCount,#shelfFeedback{font-size:12px;color:#795436;overflow-wrap:anywhere;margin:0}
+#shelfFeedback:not(:empty){margin:0 0 10px}
+#shelfFeedback:empty{display:none}
+body>main.shelf-selecting{padding-bottom:max(var(--shelf-bottom),calc(130px + env(safe-area-inset-bottom)))}
+.book[aria-pressed="true"]{border-color:#795436;box-shadow:0 0 0 2px #795436}
+.shelf-select-mark{position:absolute;top:7px;right:7px;display:grid;place-items:center;width:27px;height:27px;border:2px solid #fffaf0;background:#503824b3;color:white;border-radius:50%}
+.shelf-select-mark svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.book[aria-pressed="true"] .shelf-select-mark{background:#795436}
 /* Noninteractive book-card placeholders shown only while the initial catalog is loading. */
 #shelfSkeleton[hidden]{display:none!important}
 #shelfSkeleton{margin:0}
@@ -181,7 +204,7 @@ header .header-title{min-width:0}
 #testCatalogBranch{min-width:0;overflow-wrap:anywhere;border-color:#d8c4a5;background:#fff8ed;color:#624529;font-weight:600}
 p,.hint{color:#796b59}
 #settingsBtn{background:#fff8ed;border:1px solid #d8c4a5;color:#624529;box-shadow:0 2px 8px #79543612}
-#settingsBtn:focus-visible,.book:focus-visible,.btn:focus-visible,.search-wrap:focus-within{outline:2px solid #b17c3f;outline-offset:2px}
+#shelfToggle:focus-visible,#settingsBtn:focus-visible,.book:focus-visible,.btn:focus-visible,.search-wrap:focus-within{outline:2px solid #b17c3f;outline-offset:2px}
 .search-wrap{background:#fffaf2;border:1px solid #ddcbb5;box-shadow:0 2px 10px #7354330b}
 .search-wrap:focus-within{border-color:#b68b5c;box-shadow:0 0 0 3px #cda77735}
 .search-wrap svg,.clear-search{color:#896c4f}
@@ -304,7 +327,7 @@ dialog:not(#settingsDialog){
   overflow:auto;overscroll-behavior:contain;
 }
 #deleteDialog .delete-buttons{flex-wrap:wrap}
-#settingsBtn svg,#reader button svg{
+#shelfToggle svg,#settingsBtn svg,#reader button svg{
   display:block;width:22px;height:22px;flex:none;fill:none;stroke:currentColor;
   stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;
 }
@@ -514,9 +537,106 @@ html.reader-active,body.reader-active{
   :where(button,a,select,input,textarea,summary,.book):focus-visible{outline:2px solid Highlight}
   #reader .toolbar button[aria-pressed="true"]{outline:2px solid Highlight}
 }
+
+/* Shared motion: keep the originating action and its expanded tools in one surface. */
+#shelfDock{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:calc(12px + env(safe-area-inset-bottom));z-index:5;width:202px;height:56px;max-width:calc(100% - 28px);background:#fff8ed;border:1px solid #d8c4a5;border-radius:28px;box-shadow:0 5px 22px #50382426;overflow:hidden;transition:width .30s cubic-bezier(.22,.8,.25,1),height .30s cubic-bezier(.22,.8,.25,1),border-radius .30s}
+#shelfDock[data-mode="selection"],#shelfDock[data-mode="filter"],#shelfDock[data-mode="sort"]{width:min(872px,calc(100% - 28px));border-radius:16px}
+#shelfDock[data-mode="selection"]{height:122px}
+#shelfDock[data-mode="filter"]{height:110px}
+#shelfDock[data-mode="sort"]{height:208px}
+#shelfTools{display:flex;align-items:center;justify-content:center;height:54px;gap:0;transition:opacity .14s,transform .2s}
+#shelfTools button,#shelfOptionsClose,#shelfSelection #shelfClose{display:grid;place-items:center;flex:none;width:48px;height:48px;min-height:44px;padding:0;border:0;background:transparent;border-radius:24px;color:#624529;box-shadow:none}
+#shelfTools button svg,#shelfOptionsClose svg,#shelfClose svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#shelfTools button:disabled{opacity:.4}
+#shelfTools .shelf-active-tool{background:#ecdbc1}
+.shelf-tool-divider{width:1px;height:26px;background:#d8c4a5;flex:none}
+#shelfDock:is([data-mode="selection"],[data-mode="filter"],[data-mode="sort"]) #shelfTools{opacity:0;transform:translateY(8px);pointer-events:none}
+#shelfSelection,#shelfOptions{position:absolute;inset:7px 9px;width:auto;max-width:none;transform:translateY(10px);background:transparent;border:0;border-radius:0;box-shadow:none;padding:0;opacity:0;pointer-events:none;transition:opacity .15s,transform .25s;display:grid;align-content:start;gap:4px}
+#shelfDock[data-mode="selection"] #shelfSelection,#shelfDock[data-mode="filter"] #shelfOptions,#shelfDock[data-mode="sort"] #shelfOptions{opacity:1;transform:none;pointer-events:auto;transition-delay:.12s}
+#shelfSelection #shelfClose,#shelfOptionsClose{width:44px;height:44px;min-height:44px;flex:none}
+#shelfSelectionCount{text-align:right;min-width:0}
+#shelfSelection label{flex:1;min-width:0}
+#shelfSelection label input{flex:none}
+#shelfOptionsHeading{color:#503824;font-size:15px;padding-inline-start:10px}
+#shelfFilterOptions,#shelfSortOptions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+#shelfFilterOptions{grid-template-columns:repeat(3,minmax(0,1fr))}
+#shelfFilterOptions[hidden],#shelfSortOptions[hidden]{display:none}
+#shelfOptions button[data-filter],#shelfOptions button[data-sort]{min-height:43px;border:1px solid #d4bc9e;border-radius:10px;background:#fffaf2;color:#624529;font-size:12px;font-weight:600;padding:5px}
+#shelfOptions button[aria-pressed="true"]{background:#795436;color:#fff;border-color:#795436}
+body>main{padding-bottom:max(var(--shelf-bottom),calc(84px + env(safe-area-inset-bottom)))}
+body>main.shelf-selecting{padding-bottom:max(var(--shelf-bottom),calc(138px + env(safe-area-inset-bottom)))}
+body>main.shelf-options-open{padding-bottom:max(var(--shelf-bottom),calc(226px + env(safe-area-inset-bottom)))}
+body.reader-active #shelfDock{visibility:hidden}
+@keyframes shelfMarkIn{from{opacity:0;transform:scale(.75)}to{opacity:1;transform:scale(1)}}
+@keyframes settingsPageIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes settingsPageOut{from{transform:translateX(0)}to{transform:translateX(100%)}}
+#settingsDialog[open]{animation:settingsPageIn .32s cubic-bezier(.22,.8,.25,1) both}
+#settingsDialog[open].settings-leaving{animation:settingsPageOut .28s cubic-bezier(.4,0,.8,.2) both}
+#settingsDialog::backdrop{background:transparent}
+.shelf-entering .shelf-select-mark{animation:shelfMarkIn .18s ease-out both}
+#shelfTools button:active,#shelfSelection button:active,#shelfOptions button:active{transform:scale(.97)}
+@media(prefers-reduced-motion:reduce){#shelfDock,#shelfTools,#shelfSelection,#shelfOptions{transition:none!important}#settingsDialog[open],#settingsDialog[open].settings-leaving,.shelf-entering .shelf-select-mark{animation:none!important}#shelfTools button:active,#shelfSelection button:active,#shelfOptions button:active{transform:none}}
+/* Semantic line icons accompany visible labels. */
+.action-icon{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#settingsDialog .settings-section>summary{display:flex;align-items:center;gap:10px}
+#settingsDialog .settings-section>summary>span{flex:1;min-width:0}
+#settingsDialog .settings-section>summary::after{flex:none;margin-left:auto}
+#shelfOptions button[data-filter],#shelfOptions button[data-sort]{display:flex;align-items:center;justify-content:center;gap:5px;line-height:1.2;min-width:0}
+#shelfOptions button .action-icon{width:17px;height:17px}
+#shelfOptions button span{min-width:0;overflow-wrap:break-word}
+#shelfOptions #shelfFilterOptions button[data-filter]{display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:center;gap:5px;min-height:48px;text-align:left}
+#shelfOptions #shelfFilterOptions button[data-filter]>.action-icon{flex:0 0 17px}
+#shelfOptions #shelfFilterOptions button[data-filter]>span{flex:0 1 auto;min-width:0}
+#shelfDock[data-mode="filter"]{height:126px}
+#shelfDock[data-mode="sort"]{height:224px}
+#shelfOptions #shelfSortOptions button[data-sort]{display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:center;gap:7px;min-height:48px;text-align:left}
+#shelfOptions #shelfSortOptions button[data-sort]>.action-icon{flex:0 0 17px}
+#shelfOptions #shelfSortOptions button[data-sort]>span{flex:0 1 auto;min-width:0}
+body>main.shelf-options-open{padding-bottom:max(var(--shelf-bottom),calc(250px + env(safe-area-inset-bottom)))}
+/* Selection changes update only the affected cards; preserve cover layout and focus. */
+.book{transition:border-color .15s,box-shadow .15s,transform .10s}
+.book:active{transform:scale(.985)}
+.shelf-select-mark{transition:background-color .15s}
+.shelf-select-mark svg{opacity:0;transform:scale(.65);transition:opacity .15s,transform .15s}
+.book[aria-pressed="true"] .shelf-select-mark svg{opacity:1;transform:scale(1)}
+#settingsDialog .settings-section>summary::after{transition:transform .18s ease}
+@keyframes readerMenuIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+#reader #menu.show{animation:readerMenuIn .18s ease-out both}
+@media(prefers-reduced-motion:reduce){.book,.shelf-select-mark,.shelf-select-mark svg,#settingsDialog .settings-section>summary::after{transition:none!important}.book:active{transform:none}#reader #menu.show{animation:none!important}}
+/* Short transitions preserve the natural page aspect ratio and final layout. */
+.turn-paper{position:absolute;z-index:2;object-fit:contain;pointer-events:none;backface-visibility:hidden;user-select:none}
+/* Animate native disclosure size in both directions on current Android Chrome.
+   Older engines retain the native accessible details behavior. */
+#settingsDialog .settings-section>summary::after{transition:transform .32s cubic-bezier(.22,.8,.25,1)}
+@keyframes settingsContentIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+#settingsDialog .settings-section[open]>.settings-section-body{animation:settingsContentIn .32s ease-out both}
+@supports (interpolate-size: allow-keywords) and selector(details::details-content){
+  #settingsDialog .settings-section{interpolate-size:allow-keywords}
+  #settingsDialog .settings-section::details-content{block-size:0;opacity:0;overflow:clip;transition:block-size .36s cubic-bezier(.22,.8,.25,1),opacity .24s ease,content-visibility .36s allow-discrete}
+  #settingsDialog .settings-section[open]::details-content{block-size:auto;opacity:1}
+  #settingsDialog .settings-section[open]>.settings-section-body{animation:none}
+  #settingsDialog .settings-section[open]::details-content{overflow:visible;transition: block-size .36s cubic-bezier(.22,.8,.25,1),opacity .24s ease,content-visibility .36s allow-discrete,overflow .36s allow-discrete}
+  @starting-style{#settingsDialog .settings-section[open]::details-content{overflow:clip}}
+  #settingsDialog .settings-section::details-content{transition-behavior:allow-discrete}
+}
+@media(prefers-reduced-motion:reduce){
+  #settingsDialog .settings-section[open]>.settings-section-body{animation:none!important}
+  #settingsDialog .settings-section>summary::after{transition:none!important}
+  #settingsDialog .settings-section::details-content{transition:none!important}
+}
 </style></head><body>
-<header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testBuildVersion" hidden></span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div><div class="header-actions"><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 5 1-2h4l1 2 2 1 2 .2 2 3.5-1.2 1.8v2l1.2 1.8-2 3.5-2-.1-2 1-1 1.8h-4L9 20l-2-1-2 .1-2-3.5 1.2-1.8v-2L3 10l2-3.5L7 6z"/><circle cx="12" cy="12" r="3"/></svg></button></div></header>
-<main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div class="search-meta" id="searchMeta" aria-live="polite"></div></div><section id="offlineAccessNotice" class="search-empty" aria-labelledby="offlineAccessHeading" hidden><strong id="offlineAccessHeading">Kein GitHub-Zugang eingerichtet</strong><small>Deine gespeicherten Bücher bleiben offline verfügbar.</small><button type="button" class="github-onboarding-action" id="setupOfflineGithubAccess">GitHub-Zugang einrichten</button></section><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
+<header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testBuildVersion" hidden></span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div></header>
+<main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div id="shelfMetaRow" class="shelf-action-row"><div class="search-meta" id="searchMeta" aria-live="polite"></div></div></div><section id="shelfActions" aria-label="Bücher verwalten" hidden>
+  <div id="shelfDock" aria-label="Werkzeuge">
+  <div id="shelfTools"><button type="button" id="shelfSort" aria-label="Sortieren" title="Sortieren" aria-expanded="false" aria-controls="shelfOptions"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v16m-4-4 4 4 4-4M16 20V4m-4 4 4-4 4 4"/></svg></button><button type="button" id="shelfFilter" aria-label="Filtern" title="Filtern" aria-expanded="false" aria-controls="shelfOptions"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2.5" fill="#fff8ed"/><circle cx="15" cy="17" r="2.5" fill="#fff8ed"/></svg></button><button id="shelfToggle" type="button" aria-expanded="false" aria-controls="shelfSelection" aria-label="Bücher auswählen" title="Bücher auswählen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 2 2 4-4M11 6h10M3 12l2 2 4-4M11 12h10M3 18l2 2 4-4M11 18h10"/></svg></button><span class="shelf-tool-divider" aria-hidden="true"></span><button id="settingsBtn" title="Einstellungen" aria-label="Einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 5 1-2h4l1 2 2 1 2 .2 2 3.5-1.2 1.8v2l1.2 1.8-2 3.5-2-.1-2 1-1 1.8h-4L9 20l-2-1-2 .1-2-3.5 1.2-1.8v-2L3 10l2-3.5L7 6z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+  <div id="shelfOptions" inert aria-hidden="true"><div class="shelf-action-row"><strong id="shelfOptionsHeading">Filter</strong><button id="shelfOptionsClose" type="button" aria-label="Schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div id="shelfFilterOptions" role="group" aria-label="Verfügbarkeit"><button type="button" data-filter="all"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 6C9 4 6 4 3 5v14c3-1 6-1 9 1 3-2 6-2 9-1V5c-3-1-6-1-9 1Zm0 0v14"/></svg><span>Alle Bücher</span></button><button type="button" data-filter="offline"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg><span>Offline</span></button><button type="button" data-filter="online"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 18h12a4 4 0 0 0 1-8 7 7 0 0 0-13-1 4.5 4.5 0 0 0 0 9Z"/></svg><span>Online</span></button></div><div id="shelfSortOptions" role="group" aria-label="Sortierung" hidden><button type="button" data-sort="az"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4v16m-3-3 3 3 3-3M11 10l3-6 3 6m-5-2h4M11 14h7l-7 6h7"/></svg><span>Titel A–Z</span></button><button type="button" data-sort="za"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4v16m-3-13 3-3 3 3M11 10l3-6 3 6m-5-2h4M11 14h7l-7 6h7"/></svg><span>Titel Z–A</span></button><button type="button" data-sort="short"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10" cy="12" r="7"/><path d="M10 8v4l2 1M20 6v12m-3-3 3 3 3-3"/></svg><span>Kürzeste Lesedauer</span></button><button type="button" data-sort="long"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10" cy="12" r="7"/><path d="M10 8v4l2 1M20 18V6m-3 3 3-3 3 3"/></svg><span>Längste Lesedauer</span></button><button type="button" data-sort="pagesAsc"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="12" height="16" rx="2"/><path d="M6 8h6M6 12h6M19 6v12m-3-3 3 3 3-3"/></svg><span>Wenigste Seiten</span></button><button type="button" data-sort="pagesDesc"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="12" height="16" rx="2"/><path d="M6 8h6M6 12h6M19 18V6m-3 3 3-3 3 3"/></svg><span>Meiste Seiten</span></button></div></div>
+  <div id="shelfSelection" inert aria-hidden="true">
+    <div class="shelf-action-row"><label><input type="checkbox" id="shelfSelectAll"> Alle Bücher auswählen</label><span id="shelfSelectionCount" aria-live="polite"></span><button id="shelfClose" type="button" aria-label="Auswahl abbrechen" title="Auswahl abbrechen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+    <div class="shelf-action-row"><button id="shelfDownload" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg><span id="shelfDownloadText">Laden</span></button><button id="shelfDelete" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6"/></svg><span id="shelfDeleteText">Löschen</span></button></div>
+  </div>
+  </div>
+  <p id="shelfFeedback" role="status"></p>
+</section><section id="offlineAccessNotice" class="search-empty" aria-labelledby="offlineAccessHeading" hidden><strong id="offlineAccessHeading">Kein GitHub-Zugang eingerichtet</strong><small>Deine gespeicherten Bücher bleiben offline verfügbar.</small><button type="button" class="github-onboarding-action" id="setupOfflineGithubAccess">GitHub-Zugang einrichten</button></section><div class="grid" id="books"></div><div class="grid" id="shelfSkeleton" role="status" aria-label="Bücher werden geladen">
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
   <div class="skeleton-book" aria-hidden="true"><span class="skeleton-cover"></span><span class="skeleton-title"></span><span class="skeleton-detail"></span></div>
@@ -543,15 +663,15 @@ html.reader-active,body.reader-active{
 <dialog id="settingsDialog" aria-labelledby="settingsHeading">
   <div class="settings-toolbar">
     <div class="settings-header">
-      <h2 id="settingsHeading">Einstellungen</h2>
-      <button type="button" class="dialog-close" id="closeSettings" aria-label="Einstellungen schließen" autofocus>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      <button type="button" class="dialog-close" id="closeSettings" aria-label="Zurück zum Bücherregal" autofocus>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
       </button>
+      <h2 id="settingsHeading">Einstellungen</h2>
     </div>
   </div>
   <div class="settings-content">
     <details id="appEnvironment" class="settings-section" name="bookshelf-settings" hidden>
-      <summary>App-Modus</summary>
+      <summary><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="6" width="18" height="12" rx="6"/><circle cx="9" cy="12" r="3"/></svg><span>App-Modus</span></summary>
       <div class="settings-section-body">
         <div class="environment-switch" role="group" aria-label="App-Modus auswählen">
           <button type="button" id="modeProduction" aria-pressed="true">Produktion</button>
@@ -578,7 +698,7 @@ html.reader-active,body.reader-active{
       </div>
     </details>
     <details id="githubSettings" class="settings-section" name="bookshelf-settings">
-      <summary>GitHub-Zugang</summary>
+      <summary><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="8" cy="15" r="4"/><path d="m11 12 8-8 3 3-2 2-2-2-2 2 2 2-3 3"/></svg><span>GitHub-Zugang</span></summary>
       <div class="settings-section-body">
         <div class="github-connection" id="githubConnection" role="status">
           <span class="github-connection-dot" aria-hidden="true"></span>
@@ -602,7 +722,7 @@ html.reader-active,body.reader-active{
       </div>
     </details>
     <details id="offlineSettings" class="settings-section" name="bookshelf-settings">
-      <summary>Offline-Bücher</summary>
+      <summary><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg><span>Offline-Bücher</span></summary>
       <div class="settings-section-body">
         <div id="offlineLoading" role="status" aria-live="polite" hidden><span class="offline-spinner" aria-hidden="true"></span><span>Buchspeicher werden geprüft …</span></div>
         <div id="offlineResults" hidden>
@@ -617,7 +737,7 @@ html.reader-active,body.reader-active{
       </div>
     </details>
     <details id="appInfo" class="settings-section" name="bookshelf-settings">
-      <summary>App-Info</summary>
+      <summary><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg><span>App-Info</span></summary>
       <div class="settings-section-body">
         <dl>
           <dt>App-Version</dt><dd id="appBuildVersion">Entwicklungsstand</dd>
@@ -971,6 +1091,133 @@ function mergeShelfBooks(catalog,offlineBooks){
   }
   return [...entries.values()];
 }
+let shelfSelecting=false,shelfSelected=new Set(),shelfBusy=false;
+function shelfItems(){return mergeShelfBooks(onlineCatalog,books)}
+function shelfDownloadable(item){return !item.offline&&!!sessionToken}
+function shelfDeletable(item){return books.some(b=>b.id===item.book.id)}
+function syncShelfActions(ordered){
+  const ids=new Set(ordered.map(item=>item.book.id));
+  shelfSelected=new Set([...shelfSelected].filter(id=>ids.has(id)));
+  const chosen=ordered.filter(item=>shelfSelected.has(item.book.id));
+  const downloads=chosen.filter(shelfDownloadable).length,deletions=chosen.filter(shelfDeletable).length;
+  $('shelfActions').hidden=false;
+  $('shelfToggle').disabled=!ordered.length||shelfBusy||importingBooks;
+  syncShelfDock();
+  $('shelfMetaRow').hidden=!ordered.length&&!shelfSelecting;
+  $('shelfToggle').setAttribute('aria-expanded',String(shelfSelecting));
+
+  const visibleIds=new Set([...$('books').querySelectorAll('.book')].map(card=>card.dataset.bookId));
+  const hidden=chosen.filter(item=>!visibleIds.has(String(item.book.id))).length;
+  $('shelfSelectionCount').textContent=shelfSelecting?chosen.length+' ausgewählt'+(hidden?' ('+hidden+' ausgeblendet)':''):'';
+  const all=$('shelfSelectAll');all.checked=ordered.length>0&&chosen.length===ordered.length;all.indeterminate=chosen.length>0&&chosen.length<ordered.length;all.disabled=shelfBusy||!ordered.length;
+  $('shelfDownload').disabled=shelfBusy||importingBooks||!downloads;
+  $('shelfDelete').disabled=shelfBusy||importingBooks||!deletions;
+  $('shelfDownloadText').textContent='Laden'+(downloads?' ('+downloads+')':'');
+  $('shelfDeleteText').textContent='Löschen'+(deletions?' ('+deletions+')':'');
+}
+let shelfFilterValue='all',shelfSortValue='az',shelfPanel='';
+function syncShelfDock(){
+  const mode=shelfSelecting?'selection':shelfPanel;
+  const dock=$('shelfDock'),previous=dock.dataset.mode||'';
+  dock.dataset.mode=mode;
+  const main=document.querySelector('main');
+  main.classList.toggle('shelf-selecting',shelfSelecting);
+  if(previous!==mode){main.classList.toggle('shelf-entering',mode==='selection');if(mode==='selection')setTimeout(()=>main.classList.remove('shelf-entering'),200)}
+  main.classList.toggle('shelf-options-open',!!shelfPanel);
+  for(const [id,visible] of [['shelfTools',!mode],['shelfSelection',mode==='selection'],['shelfOptions',mode==='filter'||mode==='sort']]){
+    const el=$(id);el.inert=!visible;el.setAttribute('aria-hidden',String(!visible));
+  }
+  $('shelfFilter').setAttribute('aria-expanded',String(mode==='filter'));
+  $('shelfSort').setAttribute('aria-expanded',String(mode==='sort'));
+  $('shelfFilter').classList.toggle('shelf-active-tool',shelfFilterValue!=='all');
+  $('shelfSort').classList.toggle('shelf-active-tool',shelfSortValue!=='az');
+  $('shelfOptionsHeading').textContent=mode==='sort'?'Sortieren':'Filtern';
+  $('shelfFilterOptions').hidden=mode==='sort';
+  $('shelfSortOptions').hidden=mode!=='sort';
+  for(const button of $('shelfOptions').querySelectorAll('[data-filter],[data-sort]'))button.setAttribute('aria-pressed',String(button.dataset.filter===shelfFilterValue||button.dataset.sort===shelfSortValue));
+  $('shelfClose').disabled=shelfBusy||importingBooks;
+  if(previous!==mode&&mode==='selection')$('shelfClose').focus({preventScroll:true});
+  if(previous!==mode&&(mode==='filter'||mode==='sort'))$('shelfOptionsClose').focus({preventScroll:true});
+  if(previous&& !mode)$(previous==='selection'?'shelfToggle':previous==='filter'?'shelfFilter':'shelfSort').focus({preventScroll:true});
+}
+function endShelfSelection(){if(shelfBusy||importingBooks)return;shelfSelecting=false;shelfSelected.clear();$('shelfFeedback').textContent='';render()}
+$('shelfToggle').onclick=()=>{if(shelfBusy||importingBooks)return;shelfPanel='';shelfSelecting=true;shelfSelected.clear();$('shelfFeedback').textContent='';render()};
+$('shelfClose').onclick=endShelfSelection;
+$('shelfFilter').onclick=()=>{shelfPanel='filter';syncShelfDock()};
+$('shelfSort').onclick=()=>{shelfPanel='sort';syncShelfDock()};
+$('shelfOptionsClose').onclick=()=>{shelfPanel='';syncShelfDock()};
+$('shelfOptions').addEventListener('click',event=>{
+  const button=event.target.closest('button[data-filter],button[data-sort]');if(!button)return;
+  if(button.dataset.filter)shelfFilterValue=button.dataset.filter;
+  if(button.dataset.sort)shelfSortValue=button.dataset.sort;
+  shelfPanel='';animateShelfReorder();
+});
+function motionAllowed(){return !matchMedia('(prefers-reduced-motion: reduce)').matches&&typeof Element.prototype.animate==='function'}
+function shelfCardMap(){return new Map([...$('books').querySelectorAll('.book')].map(card=>[card.dataset.bookId,card]))}
+function animateShelfReorder(){
+  if(!motionAllowed()){render();return}
+  const before=new Map([...shelfCardMap()].map(([id,card])=>[id,{rect:card.getBoundingClientRect(),clone:card.cloneNode(true)}]));
+  render();
+  const after=shelfCardMap();
+  for(const [id,card] of after){
+    const old=before.get(id),rect=card.getBoundingClientRect();
+    if(old){const x=old.rect.left-rect.left,y=old.rect.top-rect.top;if(x||y)card.animate([{transform:'translate('+x+'px,'+y+'px)'},{transform:'none'}],{duration:260,easing:'cubic-bezier(.2,.8,.2,1)'})}
+    else card.animate([{opacity:0,transform:'scale(.96)'},{opacity:1,transform:'none'}],{duration:220,easing:'ease-out'});
+  }
+  for(const [id,{rect,clone}] of before)if(!after.has(id)&&rect.bottom>0&&rect.top<innerHeight){
+    clone.removeAttribute('id');clone.setAttribute('aria-hidden','true');clone.inert=true;
+    Object.assign(clone.style,{position:'fixed',left:rect.left+'px',top:rect.top+'px',width:rect.width+'px',height:rect.height+'px',margin:'0',zIndex:'4',pointerEvents:'none'});
+    document.body.append(clone);
+    const animation=clone.animate([{opacity:1},{opacity:0,transform:'scale(.96)'}],{duration:160,fill:'forwards'});
+    animation.finished.catch(()=>{}).finally(()=>clone.remove());
+  }
+}
+function compareShelfItems(a,b){
+  const title=()=>titleSorter.compare(a.book.title,b.book.title)||String(a.book.id).localeCompare(String(b.book.id));
+  if(shelfSortValue==='za')return -title();
+  if(shelfSortValue==='short'||shelfSortValue==='long'){
+    const x=readingMinutes(a.book),y=readingMinutes(b.book);
+    if(x===null||y===null)return x===y?title():x===null?1:-1;
+    return (shelfSortValue==='long'?y-x:x-y)||title();
+  }
+  if(shelfSortValue==='pagesAsc'||shelfSortValue==='pagesDesc'){
+    const x=a.offline?a.book.pages.length:a.book.pageCount,y=b.offline?b.book.pages.length:b.book.pageCount;
+    return (shelfSortValue==='pagesDesc'?y-x:x-y)||title();
+  }
+  return title();
+}
+function refreshShelfSelection(){
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const selectedIds=new Set([...shelfSelected].map(String));
+  for(const card of $('books').querySelectorAll('.book[aria-pressed]')){
+    const selected=selectedIds.has(card.dataset.bookId);
+    if(card.getAttribute('aria-pressed')===String(selected))continue;
+    card.setAttribute('aria-pressed',String(selected));
+    const mark=card.querySelector('.shelf-select-mark');
+    if(!reduced&&mark&&typeof mark.animate==='function'){
+      for(const animation of mark.getAnimations?.()||[])animation.cancel();
+      mark.animate([{transform:'scale(0.84)'},{transform:'scale(1.09)',offset:.65},{transform:'scale(1)'}],{duration:180,easing:'ease-out'});
+    }
+  }
+  syncShelfActions(shelfItems());
+}
+$('shelfSelectAll').onchange=()=>{if(shelfBusy)return;shelfSelected=new Set($('shelfSelectAll').checked?shelfItems().map(item=>item.book.id):[]);refreshShelfSelection()};
+$('shelfDownload').onclick=async()=>{
+  if(shelfBusy||importingBooks)return;
+  const chosen=shelfItems().filter(item=>shelfSelected.has(item.book.id)&&shelfDownloadable(item));
+  if(!chosen.length)return;
+  shelfBusy=true;render();let succeeded=0;const errors=[];
+  try{for(let i=0;i<chosen.length;i++){const entry=chosen[i].book;try{await downloadOnlineBook(entry,{open:false,index:i+1,total:chosen.length,propagate:true});succeeded++;shelfSelected.delete(entry.id)}catch(e){errors.push(entry.title+': '+e.message)}}}
+  finally{shelfBusy=false;$('shelfFeedback').textContent=succeeded+' heruntergeladen.'+(errors.length?' Fehlgeschlagen: '+errors.join('; '):'');render()}
+};
+$('shelfDelete').onclick=async()=>{
+  if(shelfBusy||importingBooks)return;
+  const chosen=shelfItems().filter(item=>shelfSelected.has(item.book.id)&&shelfDeletable(item));
+  if(!chosen.length||!confirm((chosen.length===1?'„'+chosen[0].book.title+'“':chosen.length+' Bücher')+' aus '+(APP_IS_TEST?'Test':'Produktion')+' löschen? Nur lokale Kopien werden entfernt.'))return;
+  shelfBusy=true;render();let succeeded=0;const errors=[];
+  try{for(const item of chosen){try{await deleteStoredBook(item.book.id);books=books.filter(b=>b.id!==item.book.id);shelfSelected.delete(item.book.id);succeeded++}catch(e){errors.push(item.book.title+': '+e.message)}}}
+  finally{shelfBusy=false;$('shelfFeedback').textContent=succeeded+' lokale Bücher gelöscht.'+(errors.length?' Fehlgeschlagen: '+errors.join('; '):'');renderOnlineCatalog()}
+};
 function render(){
   if(!startupReady)return;
   const grid=$('books');
@@ -978,12 +1225,14 @@ function render(){
   const query=$('search').value.trim().toLocaleLowerCase('de');
   $('clearSearch').hidden=!query;
   // Merge local books and online catalog into one stable alphabetic shelf.
-  const ordered=mergeShelfBooks(onlineCatalog,books).sort((a,b)=>
-    titleSorter.compare(a.book.title,b.book.title)||String(a.book.id).localeCompare(String(b.book.id)));
+  const ordered=shelfItems().sort(compareShelfItems);
+  syncShelfActions(ordered);
   $('offlineAccessNotice').hidden=!!sessionToken||!books.length;
   const visible=ordered.filter(item=>
+    (shelfFilterValue==='all'||(shelfFilterValue==='offline'?item.offline:!item.offline))&&
     (item.book.title+' '+(item.book.subtitle||'')).toLocaleLowerCase('de').includes(query));
-  $('searchMeta').textContent=query
+  if(shelfSelecting){const visibleIds=new Set(visible.map(item=>item.book.id));const hidden=[...shelfSelected].filter(id=>!visibleIds.has(id)).length;$('shelfSelectionCount').textContent=shelfSelected.size+' ausgewählt'+(hidden?' ('+hidden+' ausgeblendet)':'')}
+  $('searchMeta').textContent=query||shelfFilterValue!=='all'
     ?visible.length+' von '+ordered.length+' Büchern gefunden'
     :ordered.length?(ordered.length===1?'1 Buch im Regal':ordered.length+' Bücher im Regal'):'';
   if(!ordered.length){
@@ -996,7 +1245,7 @@ function render(){
   if(!visible.length){
     const empty=document.createElement('div');empty.className='search-empty';
     const heading=document.createElement('strong');heading.textContent='Kein passendes Buch gefunden';
-    const hint=document.createElement('small');hint.textContent='Versuche einen anderen Suchbegriff.';
+    const hint=document.createElement('small');hint.textContent='Ändere den Suchbegriff oder den Filter.';
     empty.append(heading,hint);grid.append(empty);return;
   }
   for(const item of visible){
@@ -1035,8 +1284,13 @@ function render(){
       availability.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 12 3 3 7-7"/></svg>';
       coverWrap.append(availability);
     }
+    if(shelfSelecting){
+      const selected=shelfSelected.has(b.id);card.setAttribute('aria-pressed',String(selected));card.disabled=shelfBusy;
+      card.setAttribute('aria-label',b.title+(item.offline?', offline gespeichert':', online'));
+      const mark=document.createElement('span');mark.className='shelf-select-mark';mark.setAttribute('aria-hidden','true');mark.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>';coverWrap.append(mark);
+    }
     card.append(coverWrap,title,meta);
-    card.onclick=()=>item.offline?openBook(b.id):downloadOnlineBook(b);
+    card.onclick=()=>{if(shelfSelecting){if(shelfBusy)return;if(shelfSelected.has(b.id))shelfSelected.delete(b.id);else shelfSelected.add(b.id);refreshShelfSelection()}else if(!shelfBusy){if(item.offline)openBook(b.id);else downloadOnlineBook(b)}};
     holder.append(card);
     grid.append(holder);
   }
@@ -1082,7 +1336,18 @@ function syncReaderSystemBars(){
 }
 document.addEventListener('fullscreenchange',onReaderFullscreenChange);
 document.addEventListener('webkitfullscreenchange',onReaderFullscreenChange);
+function shelfCover(id){return shelfCardMap().get(String(id))?.querySelector('.book-cover-wrap img')}
+function coverFlight(src,from,to){
+  if(!motionAllowed()||!src||!from||!to||!from.width||!to.width||from.bottom<=0||from.top>=innerHeight||to.bottom<=0||to.top>=innerHeight)return null;
+  const image=document.createElement('img');image.src=src;image.alt='';image.setAttribute('aria-hidden','true');
+  Object.assign(image.style,{position:'fixed',left:from.left+'px',top:from.top+'px',width:from.width+'px',height:from.height+'px',objectFit:'contain',pointerEvents:'none',zIndex:'950',transformOrigin:'top left'});
+  document.body.append(image);
+  const animation=image.animate([{transform:'none',borderRadius:'6px'},{transform:'translate('+(to.left-from.left)+'px,'+(to.top-from.top)+'px) scale('+(to.width/from.width)+','+(to.height/from.height)+')',borderRadius:'0px'}],{duration:240,easing:'cubic-bezier(.22,.8,.25,1)',fill:'forwards'});
+  return {image,animation};
+}
 function openBook(id){
+  if(readerClosing||active)return;
+  const cover=shelfCover(id),from=cover?.getBoundingClientRect();
   active=books.find(book=>book.id===id);
   if(!active)return;
   setReaderMenu(false);
@@ -1095,7 +1360,43 @@ function openBook(id){
   showPage();
   history.pushState({reader:true},'','#lesen');
   $('close').focus({preventScroll:true});
-  if(readerFullscreenPreferred&&!$('full').hidden)enterReaderFullscreen();
+  if(readerFullscreenPreferred&&!$('full').hidden){enterReaderFullscreen();return}
+  // Reverse the closing motion using the already-painted shelf cover.
+  const reader=$('reader'),target=$('sheet').querySelector('img');
+  if(!motionAllowed()||!target)return;
+  const src=cover?.currentSrc||cover?.src;
+  const bookAtOpen=active;
+  const fallback=()=>reader.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});
+  if(!src||!from||!from.width||!from.height){fallback();return}
+  // Compute the final 9:16 cover rectangle from the viewport, not an undecoded image.
+  const bounds=$('sheet').getBoundingClientRect();
+  const ratio=cover.naturalWidth&&cover.naturalHeight?cover.naturalWidth/cover.naturalHeight:9/16;
+  const width=Math.min(bounds.width,bounds.height*ratio),height=width/ratio;
+  const left=bounds.left+(bounds.width-width)/2,top=bounds.top+(bounds.height-height)/2;
+  const to={left,top,width,height,bottom:top+height};
+  // Rasterize at the destination size; animate only composited transforms and opacity.
+  const layer=cover.cloneNode(false);
+  layer.removeAttribute('loading');layer.removeAttribute('id');layer.alt='';layer.setAttribute('aria-hidden','true');
+  Object.assign(layer.style,{position:'fixed',left:left+'px',top:top+'px',width:width+'px',height:height+'px',maxWidth:'none',maxHeight:'none',objectFit:'contain',pointerEvents:'none',zIndex:'950',transformOrigin:'top left',willChange:'transform',borderRadius:'0',margin:'0'});
+  const initial='translate3d('+(from.left-left)+'px,'+(from.top-top)+'px,0) scale('+(from.width/width)+','+(from.height/height)+')';
+  if(!width||!height||from.bottom<=0||from.top>=innerHeight){fallback();return}
+  layer.style.transform=initial;
+  target.style.visibility='hidden';reader.style.opacity='0';
+  document.body.append(layer);
+  const clear=()=>{layer.remove();target.style.visibility='';reader.style.opacity='';reader.style.willChange=''};
+  reader.style.willChange='opacity';
+  requestAnimationFrame(()=>{
+    if(active!==bookAtOpen||readerClosing||!target.isConnected){clear();return}
+    const timing={duration:300,easing:'cubic-bezier(.22,.8,.25,1)',fill:'both'};
+    const flight=layer.animate([{transform:initial},{transform:'translate3d(0,0,0) scale(1)'}],timing);
+    const fade=reader.animate([{opacity:0},{opacity:1}],timing);
+    flight.finished.catch(()=>{}).finally(()=>{
+      if(active!==bookAtOpen||readerClosing){fade.cancel();clear();return}
+      // Reveal the decoded page only after the moving cover reaches its destination.
+      const ready=target.complete&&target.naturalWidth?Promise.resolve():typeof target.decode==='function'?target.decode().catch(()=>{}):Promise.resolve();
+      Promise.race([ready,new Promise(resolve=>setTimeout(resolve,120))]).finally(()=>{clear();fade.cancel()});
+    });
+  });
 }
 async function closeBook(){
   if(readerClosing)return;
@@ -1103,6 +1404,18 @@ async function closeBook(){
   try{
     if(document.fullscreenElement===$('reader')){try{await document.exitFullscreen()}catch(e){console.warn('Vollbild konnte nicht beendet werden',e)}}
     const bookId=active?.id;
+    const cover=shelfCover(bookId),pageImage=$('sheet').querySelector('img');
+    const from=pageImage?.getBoundingClientRect(),to=cover?.getBoundingClientRect();
+    const flight=coverFlight(cover?.src,from,to);
+    if(flight){
+      $('reader').animate([{opacity:1},{opacity:0}],{duration:240,fill:'forwards'});
+      await flight.animation.finished.catch(()=>{});
+      flight.image.remove();
+      for(const animation of $('reader').getAnimations?.()||[])animation.cancel();
+    }else if(motionAllowed()){
+      const fade=$('reader').animate([{opacity:1},{opacity:0}],{duration:145,fill:'forwards'});
+      await fade.finished.catch(()=>{});fade.cancel();
+    }
     active=null;$('reader').classList.remove('open');
     syncReaderSystemBars();
     setReaderControlsHidden(false);
@@ -1156,13 +1469,26 @@ function showPage(){
   $('prev').disabled=first===0;
   $('next').disabled=indexes[indexes.length-1]>=active.pages.length-1;
 }
-function change(n){if(!active)return;
+function change(n){if(!active||readerClosing)return;
+  const previousPage=page;
+  const sheet=$('sheet'),viewport=$('viewport');
+  const oldImages=motionAllowed()?[...sheet.querySelectorAll('img')].map(img=>({src:img.src,rect:img.getBoundingClientRect()})):[];
   if(canSpread()){
     if(page===0 && n>0)page=1;
     else if(page===1 && n<0)page=0;
     else page=Math.max(0,Math.min(active.pages.length-1,page+n*2));
   }else page=Math.max(0,Math.min(active.pages.length-1,page+n));
+  if(page===previousPage)return;
   showPage();
+  for(const overlay of viewport.querySelectorAll('.turn-paper'))overlay.remove();
+  if(oldImages.length){
+    const bounds=viewport.getBoundingClientRect(),old=oldImages[n>0?oldImages.length-1:0];
+    const paper=document.createElement('img');paper.className='turn-paper';paper.src=old.src;paper.alt='';paper.setAttribute('aria-hidden','true');
+    Object.assign(paper.style,{left:old.rect.left-bounds.left+'px',top:old.rect.top-bounds.top+'px',width:old.rect.width+'px',height:old.rect.height+'px',transformOrigin:n>0?'left center':'right center'});
+    viewport.append(paper);
+    const flip=paper.animate([{transform:'perspective(1100px) rotateY(0deg)',opacity:1},{transform:'perspective(1100px) rotateY('+(n>0?-88:88)+'deg)',opacity:.95,offset:.72},{transform:'perspective(1100px) rotateY('+(n>0?-98:98)+'deg)',opacity:0}],{duration:300,easing:'ease-in-out',fill:'forwards'});
+    flip.finished.catch(()=>{}).finally(()=>paper.remove());
+  }
 }
 window.addEventListener('resize',()=>{if(active)showPage()});
 $('spread').onclick=()=>{spreadMode=!spreadMode;$('spread').setAttribute('aria-pressed',String(spreadMode));if(active)showPage()};
@@ -1225,6 +1551,8 @@ if(window.visualViewport){
   updateDialogViewport();
 }
 function openSettings(sectionId){
+  if(settingsDialog.open)return;
+  settingsDialog.classList.remove('settings-leaving');
   for(const section of settingsDialog.querySelectorAll('.settings-section'))section.open=section.id===sectionId;
   settingsDialog.showModal();
   settingsDialog.scrollTop=0;
@@ -1232,7 +1560,15 @@ function openSettings(sectionId){
   if(sectionId)$(sectionId).querySelector('summary').focus({preventScroll:true});
 }
 $('settingsBtn').onclick=()=>openSettings();
-$('closeSettings').onclick=()=>settingsDialog.close();
+function closeSettingsAnimated(){
+  if(!settingsDialog.open||settingsDialog.classList.contains('settings-leaving'))return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){settingsDialog.close();return}
+  settingsDialog.classList.add('settings-leaving');
+  const finish=()=>{if(settingsDialog.classList.contains('settings-leaving')){settingsDialog.close();settingsDialog.classList.remove('settings-leaving')}};
+  setTimeout(finish,280);
+}
+$('closeSettings').onclick=closeSettingsAnimated;
+settingsDialog.addEventListener('cancel',event=>{event.preventDefault();closeSettingsAnimated()});
 $('appEnvironment').addEventListener('toggle',event=>{
   if(APP_IS_TEST&&settingsDialog.open&&event.currentTarget.open&&isTestModeUnlocked())loadCatalogBranches();
 });
@@ -1803,11 +2139,11 @@ async function downloadGitBlobs(entry){
   if(hash!==entry.zipSha256)throw Error('Die Integritätsprüfung des Buchdownloads ist fehlgeschlagen.');
   return zip.buffer;
 }
-async function downloadOnlineBook(entry){
-  if(importingBooks||!sessionToken||!visibleBookStatus(entry.status))return;
+async function downloadOnlineBook(entry,options={}){
+  if(importingBooks||!sessionToken||!visibleBookStatus(entry.status)){if(options.propagate)throw Error('Download nicht verfügbar.');return}
   importingBooks=true;
   $('importOverlay').hidden=false;
-  $('importFile').textContent=entry.title;$('importCounter').textContent='Privater GitHub-Download';
+  $('importFile').textContent=entry.title;$('importCounter').textContent=options.total?'Buch '+options.index+' von '+options.total:'Privater GitHub-Download';
   $('importProgress').value=0;$('importPercent').textContent='0 %';
   $('importStatus').textContent='Buchdaten werden von GitHub geladen …';
   try{
@@ -1824,10 +2160,17 @@ async function downloadOnlineBook(entry){
     book.status=entry.status??'released';
     book.catalogZipSha256=entry.zipSha256;
     await saveBook(book);
-    add(book);renderOnlineCatalog();openBook(book.id);
+    add(book);renderOnlineCatalog();
+    $('importProgress').value=100;$('importPercent').textContent='100 %';
+    $('importStatus').textContent='✓ Buch erfolgreich gespeichert.';
+    const panel=$('importOverlay').querySelector('.import-panel');
+    if(motionAllowed()){const success=panel.animate([{transform:'scale(1)'},{transform:'scale(1.025)',offset:.45},{transform:'scale(1)'}],{duration:260,easing:'ease-out'});await success.finished.catch(()=>{})}
+    $('importOverlay').hidden=true;
+    if(options.open!==false)openBook(book.id);
   }catch(e){
+    if(options.propagate)throw e;
     alert('Online-Buch konnte nicht geladen werden: '+e.message);
-  }finally{$('importOverlay').hidden=true;importingBooks=false}
+  }finally{$('importOverlay').hidden=true;importingBooks=false;render()}
 }
 $('search').addEventListener('input',renderOnlineCatalog);
 if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
