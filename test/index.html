@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.178"><meta name="storybook-build-commit" content="dca0b6d308c199369654ffc530a6628e84fc0192"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.180"><meta name="storybook-build-commit" content="32d84092b58d0ac465bbdd51f537d7536703d94a"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -1342,7 +1342,7 @@ function coverFlight(src,from,to){
   const image=document.createElement('img');image.src=src;image.alt='';image.setAttribute('aria-hidden','true');
   Object.assign(image.style,{position:'fixed',left:from.left+'px',top:from.top+'px',width:from.width+'px',height:from.height+'px',objectFit:'contain',pointerEvents:'none',zIndex:'950',transformOrigin:'top left'});
   document.body.append(image);
-  const animation=image.animate([{transform:'none',borderRadius:'6px'},{transform:'translate('+(to.left-from.left)+'px,'+(to.top-from.top)+'px) scale('+(to.width/from.width)+','+(to.height/from.height)+')',borderRadius:'0px'}],{duration:300,easing:'cubic-bezier(.22,.8,.25,1)',fill:'forwards'});
+  const animation=image.animate([{transform:'none',borderRadius:'6px'},{transform:'translate('+(to.left-from.left)+'px,'+(to.top-from.top)+'px) scale('+(to.width/from.width)+','+(to.height/from.height)+')',borderRadius:'0px'}],{duration:240,easing:'cubic-bezier(.22,.8,.25,1)',fill:'forwards'});
   return {image,animation};
 }
 function openBook(id){
@@ -1408,12 +1408,12 @@ async function closeBook(){
     const from=pageImage?.getBoundingClientRect(),to=cover?.getBoundingClientRect();
     const flight=coverFlight(cover?.src,from,to);
     if(flight){
-      $('reader').animate([{opacity:1},{opacity:0}],{duration:300,fill:'forwards'});
+      $('reader').animate([{opacity:1},{opacity:0}],{duration:240,fill:'forwards'});
       await flight.animation.finished.catch(()=>{});
       flight.image.remove();
       for(const animation of $('reader').getAnimations?.()||[])animation.cancel();
     }else if(motionAllowed()){
-      const fade=$('reader').animate([{opacity:1},{opacity:0}],{duration:180,fill:'forwards'});
+      const fade=$('reader').animate([{opacity:1},{opacity:0}],{duration:145,fill:'forwards'});
       await fade.finished.catch(()=>{});fade.cancel();
     }
     active=null;$('reader').classList.remove('open');
