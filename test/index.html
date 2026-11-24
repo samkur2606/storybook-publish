@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.0-test"><meta name="storybook-build-commit" content="6aa287c6896a1845538fa91da1208ea7fe01195b"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.0-test"><meta name="storybook-build-commit" content="509dd3d7a7a3e2dbef91b6f49297985184f76607"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -420,9 +420,7 @@ html.reader-active,body.reader-active{
 }
 #reader .reader-top{
   position:fixed;z-index:13;
-  top:clamp(calc(12px + env(safe-area-inset-top)),
-            calc((var(--reader-page-top,90px) - 42px)/2),
-            calc(100% - 58px));
+  top:max(calc(12px + env(safe-area-inset-top)),var(--reader-top-control,24px));
   left:16px;right:16px;
   display:grid;grid-template-columns:42px minmax(0,1fr) 42px;
   align-items:center;gap:10px;height:42px;
@@ -458,15 +456,13 @@ html.reader-active,body.reader-active{
 #reader:fullscreen .toolbar:not(.menu),
 #reader:-webkit-full-screen .toolbar:not(.menu){
   top:auto;
-  bottom:clamp(calc(12px + env(safe-area-inset-bottom)),
-               calc((100% - var(--reader-page-bottom,100%) - 56px)/2),
-               calc(100% - 64px));
+  bottom:max(calc(12px + env(safe-area-inset-bottom)),var(--reader-bottom-control,12px));
   gap:10px;padding:6px 9px;
   background:rgba(36,26,19,.78);
 }
 #reader #menu{
   position:fixed;z-index:14;
-  top:calc(68px + env(safe-area-inset-top));bottom:auto;
+  top:calc(var(--reader-top-control,24px) + 50px);bottom:auto;
   left:auto;right:16px;transform:none;
   max-width:calc(100vw - 32px);
 }
@@ -1074,6 +1070,8 @@ function updateReaderControlPositions(){
   const bottom=Math.max(top,Math.min(readerRect.height,Math.max(...bounds.map(rect=>rect.bottom))-readerRect.top));
   $('reader').style.setProperty('--reader-page-top',top+'px');
   $('reader').style.setProperty('--reader-page-bottom',bottom+'px');
+  $('reader').style.setProperty('--reader-top-control',Math.max(12,(top-42)/2)+'px');
+  $('reader').style.setProperty('--reader-bottom-control',Math.max(12,(readerRect.height-bottom-56)/2)+'px');
   const artwork=images[0].currentSrc||images[0].src;
   for(const edge of $('reader').querySelectorAll('.reader-edge img')){
     if(edge.src!==artwork)edge.src=artwork;
