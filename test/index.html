@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.0-test"><meta name="storybook-build-commit" content="fc64c0d49c25a481546efdda15d5466d786aaf94"><title>Mein Bücherregal</title><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.1.0-test"><meta name="storybook-build-commit" content="8dcf943c5a8e94c83b837f13b9e9fa066fc1888f"><title>Mein Bücherregal</title><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -382,21 +382,26 @@ body{background:#f8f2e7;background-attachment:initial}
 }
 
 
-/* Reader design preview: flat matching rails and aligned controls.
+/* Reader design preview: controls straddle the measured image edges.
    Keep the page fully visible and never crop the book illustration. */
+html.reader-active,body.reader-active{
+  background:#241a13!important;
+  background-image:none!important;
+  color-scheme:dark;
+}
 #reader,#reader:fullscreen,#reader:-webkit-full-screen{
   background:#241a13;
 }
 #reader .reader-top{
   position:fixed;z-index:13;
-  top:calc(16px + env(safe-area-inset-top));
+  top:clamp(calc(16px + env(safe-area-inset-top)),calc(var(--reader-page-top, 86px) - 21px),calc(100% - 58px));
   left:16px;right:16px;
   display:grid;grid-template-columns:42px minmax(0,1fr) 42px;
   align-items:center;gap:10px;
   height:42px;
 }
 #reader:fullscreen .reader-top,#reader:-webkit-full-screen .reader-top{
-  top:max(16px,env(safe-area-inset-top));
+  top:clamp(calc(16px + env(safe-area-inset-top)),calc(var(--reader-page-top, 86px) - 21px),calc(100% - 58px));
 }
 #reader .reader-top .exit,
 #reader .reader-top .reader-title,
@@ -425,8 +430,11 @@ body{background:#f8f2e7;background-attachment:initial}
   font:26px/1 system-ui,sans-serif;
 }
 #reader .reader-more:focus-visible{outline:2px solid #936a43;outline-offset:2px}
-#reader .toolbar:not(.menu){
-  bottom:calc(16px + env(safe-area-inset-bottom));
+#reader .toolbar:not(.menu),
+#reader:fullscreen .toolbar:not(.menu),
+#reader:-webkit-full-screen .toolbar:not(.menu){
+  top:clamp(0px,calc(var(--reader-page-bottom, 100%) - 28px),calc(100% - 60px - env(safe-area-inset-bottom)));
+  bottom:auto;
   gap:10px;padding:6px 9px;
 }
 #reader #menu{
@@ -1021,12 +1029,25 @@ function syncReaderSystemBars(){
   const readerVisible=$('reader').classList.contains('open')||document.fullscreenElement===$('reader');
   document.querySelector('meta[name="theme-color"]').setAttribute('content',readerVisible?READER_THEME_COLOR:APP_THEME_COLOR);
   document.documentElement.style.backgroundColor=readerVisible?READER_THEME_COLOR:APP_THEME_COLOR;
+  document.documentElement.classList.toggle('reader-active',readerVisible);
+  document.body.classList.toggle('reader-active',readerVisible);
 }
-document.addEventListener('fullscreenchange',syncReaderSystemBars);
-document.addEventListener('webkitfullscreenchange',syncReaderSystemBars);
+document.addEventListener('fullscreenchange',()=>{syncReaderSystemBars();requestAnimationFrame(updateReaderControlPositions)});
+document.addEventListener('webkitfullscreenchange',()=>{syncReaderSystemBars();requestAnimationFrame(updateReaderControlPositions)});
 function openBook(id){active=books.find(b=>b.id===id);if(!active)return;$('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');page=0;spreadMode=false;$('spread').setAttribute('aria-pressed','false');$('reader').classList.add('open');syncReaderSystemBars();$('readerTitle').textContent=active.title;showPage();history.pushState({reader:true},'','#lesen')}
 async function closeBook(){if(document.fullscreenElement){try{await document.exitFullscreen()}catch(e){console.warn('Vollbild konnte nicht beendet werden',e)}}active=null;$('reader').classList.remove('open');syncReaderSystemBars();$('reader').classList.remove('hide-controls');$('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');if(location.hash==='#lesen')history.replaceState(null,'',location.pathname+location.search)}
 function canSpread(){return spreadMode && window.innerWidth>=700 && window.innerWidth>window.innerHeight}
+function updateReaderControlPositions(){
+  if(!active||!$('reader').classList.contains('open'))return;
+  const readerRect=$('reader').getBoundingClientRect();
+  const images=[...$('sheet').querySelectorAll('img')].filter(img=>img.complete&&img.naturalWidth>0);
+  if(!images.length||!readerRect.height)return;
+  const bounds=images.map(img=>img.getBoundingClientRect());
+  const top=Math.min(...bounds.map(rect=>rect.top))-readerRect.top;
+  const bottom=Math.max(...bounds.map(rect=>rect.bottom))-readerRect.top;
+  $('reader').style.setProperty('--reader-page-top',top+'px');
+  $('reader').style.setProperty('--reader-page-bottom',bottom+'px');
+}
 function showPage(){
   if(!active)return;
   const spread=canSpread();
@@ -1036,6 +1057,8 @@ function showPage(){
   const images=indexes.map(i=>{let img=document.createElement('img');img.src=active.pages[i];img.alt=active.title+', Seite '+(i+1);img.draggable=false;return img});
   $('sheet').classList.toggle('spread',indexes.length===2);
   $('sheet').replaceChildren(...images);
+  images.forEach(img=>img.addEventListener('load',updateReaderControlPositions,{once:true}));
+  requestAnimationFrame(updateReaderControlPositions);
   $('count').textContent=indexes.length===2?`${first+1}–${indexes[indexes.length-1]+1} / ${active.pages.length}`:`${first+1} / ${active.pages.length}`;
   $('prev').disabled=first===0;
   $('next').disabled=indexes[indexes.length-1]>=active.pages.length-1;
@@ -1048,7 +1071,7 @@ function change(n){if(!active)return;
   }else page=Math.max(0,Math.min(active.pages.length-1,page+n));
   showPage();
 }
-window.addEventListener('resize',()=>{if(active)showPage()});
+window.addEventListener('resize',()=>{if(active){showPage();requestAnimationFrame(updateReaderControlPositions)}});
 $('spread').onclick=()=>{spreadMode=!spreadMode;$('spread').setAttribute('aria-pressed',String(spreadMode));if(active)showPage()};
 let start=null;$('viewport').addEventListener('touchstart',e=>{start={x:e.changedTouches[0].clientX,y:e.changedTouches[0].clientY}},{passive:true});$('viewport').addEventListener('touchend',e=>{if(!start)return;let dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.4)change(dx<0?1:-1);start=null},{passive:true});
 $('prev').onclick=()=>change(-1);$('next').onclick=()=>change(1);$('close').onclick=closeBook;$('more').onclick=()=>{const expanded=$('menu').classList.toggle('show');$('more').setAttribute('aria-expanded',String(expanded))};$('hide').onclick=()=>{$('menu').classList.remove('show');$('more').setAttribute('aria-expanded','false');$('reader').classList.add('hide-controls')};$('sheet').onclick=()=>{if($('reader').classList.contains('hide-controls'))$('reader').classList.remove('hide-controls')};$('full').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('reader').requestFullscreen()}catch(e){alert('Dieser Browser unterstützt Vollbild für lokale Dateien möglicherweise nicht.')}};
