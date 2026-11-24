@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.164"><meta name="storybook-build-commit" content="8fdff88b3ef76d8b9e05e186b3cdbe7def097ae5"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.4.0-test.166"><meta name="storybook-build-commit" content="796b515f540f028d4d3da2616e16f5b991789172"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -599,6 +599,11 @@ body>main.shelf-options-open{padding-bottom:max(var(--shelf-bottom),calc(250px +
 @keyframes readerMenuIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
 #reader #menu.show{animation:readerMenuIn .18s ease-out both}
 @media(prefers-reduced-motion:reduce){.book,.shelf-select-mark,.shelf-select-mark svg,#settingsDialog .settings-section>summary::after{transition:none!important}.book:active{transform:none}#reader #menu.show{animation:none!important}}
+/* Short transitions preserve the natural page aspect ratio and final layout. */
+.turn-paper{position:absolute;z-index:2;object-fit:contain;pointer-events:none;backface-visibility:hidden;user-select:none}
+@keyframes settingsContentIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+#settingsDialog .settings-section[open]>.settings-section-body{animation:settingsContentIn .22s ease-out both}
+@media(prefers-reduced-motion:reduce){#settingsDialog .settings-section[open]>.settings-section-body{animation:none!important}}
 </style></head><body>
 <header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testBuildVersion" hidden></span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div id="shelfMetaRow" class="shelf-action-row"><div class="search-meta" id="searchMeta" aria-live="polite"></div></div></div><section id="shelfActions" aria-label="Bücher verwalten" hidden>
@@ -1125,8 +1130,28 @@ $('shelfOptions').addEventListener('click',event=>{
   const button=event.target.closest('button[data-filter],button[data-sort]');if(!button)return;
   if(button.dataset.filter)shelfFilterValue=button.dataset.filter;
   if(button.dataset.sort)shelfSortValue=button.dataset.sort;
-  shelfPanel='';render();
+  shelfPanel='';animateShelfReorder();
 });
+function motionAllowed(){return !matchMedia('(prefers-reduced-motion: reduce)').matches&&typeof Element.prototype.animate==='function'}
+function shelfCardMap(){return new Map([...$('books').querySelectorAll('.book')].map(card=>[card.dataset.bookId,card]))}
+function animateShelfReorder(){
+  if(!motionAllowed()){render();return}
+  const before=new Map([...shelfCardMap()].map(([id,card])=>[id,{rect:card.getBoundingClientRect(),clone:card.cloneNode(true)}]));
+  render();
+  const after=shelfCardMap();
+  for(const [id,card] of after){
+    const old=before.get(id),rect=card.getBoundingClientRect();
+    if(old){const x=old.rect.left-rect.left,y=old.rect.top-rect.top;if(x||y)card.animate([{transform:'translate('+x+'px,'+y+'px)'},{transform:'none'}],{duration:260,easing:'cubic-bezier(.2,.8,.2,1)'})}
+    else card.animate([{opacity:0,transform:'scale(.96)'},{opacity:1,transform:'none'}],{duration:220,easing:'ease-out'});
+  }
+  for(const [id,{rect,clone}] of before)if(!after.has(id)&&rect.bottom>0&&rect.top<innerHeight){
+    clone.removeAttribute('id');clone.setAttribute('aria-hidden','true');clone.inert=true;
+    Object.assign(clone.style,{position:'fixed',left:rect.left+'px',top:rect.top+'px',width:rect.width+'px',height:rect.height+'px',margin:'0',zIndex:'4',pointerEvents:'none'});
+    document.body.append(clone);
+    const animation=clone.animate([{opacity:1},{opacity:0,transform:'scale(.96)'}],{duration:160,fill:'forwards'});
+    animation.finished.catch(()=>{}).finally(()=>clone.remove());
+  }
+}
 function compareShelfItems(a,b){
   const title=()=>titleSorter.compare(a.book.title,b.book.title)||String(a.book.id).localeCompare(String(b.book.id));
   if(shelfSortValue==='za')return -title();
@@ -1291,7 +1316,18 @@ function syncReaderSystemBars(){
 }
 document.addEventListener('fullscreenchange',onReaderFullscreenChange);
 document.addEventListener('webkitfullscreenchange',onReaderFullscreenChange);
+function shelfCover(id){return shelfCardMap().get(String(id))?.querySelector('.book-cover-wrap img')}
+function coverFlight(src,from,to){
+  if(!motionAllowed()||!src||!from||!to||!from.width||!to.width||from.bottom<=0||from.top>=innerHeight||to.bottom<=0||to.top>=innerHeight)return null;
+  const image=document.createElement('img');image.src=src;image.alt='';image.setAttribute('aria-hidden','true');
+  Object.assign(image.style,{position:'fixed',left:from.left+'px',top:from.top+'px',width:from.width+'px',height:from.height+'px',objectFit:'contain',pointerEvents:'none',zIndex:'950',transformOrigin:'top left'});
+  document.body.append(image);
+  const animation=image.animate([{transform:'none',borderRadius:'6px'},{transform:'translate('+(to.left-from.left)+'px,'+(to.top-from.top)+'px) scale('+(to.width/from.width)+','+(to.height/from.height)+')',borderRadius:'0px'}],{duration:300,easing:'cubic-bezier(.22,.8,.25,1)',fill:'forwards'});
+  return {image,animation};
+}
 function openBook(id){
+  if(readerClosing||active)return;
+  const cover=shelfCover(id),from=cover?.getBoundingClientRect();
   active=books.find(book=>book.id===id);
   if(!active)return;
   setReaderMenu(false);
@@ -1304,7 +1340,11 @@ function openBook(id){
   showPage();
   history.pushState({reader:true},'','#lesen');
   $('close').focus({preventScroll:true});
-  if(readerFullscreenPreferred&&!$('full').hidden)enterReaderFullscreen();
+  if(readerFullscreenPreferred&&!$('full').hidden){enterReaderFullscreen();return}
+  const target=$('sheet').querySelector('img');
+  const flight=coverFlight(cover?.src,from,target?.getBoundingClientRect());
+  if(flight){target.style.opacity='0';flight.animation.finished.catch(()=>{}).finally(()=>{target.style.opacity='';flight.image.remove()})}
+  else if(motionAllowed())$('reader').animate([{opacity:.7},{opacity:1}],{duration:180});
 }
 async function closeBook(){
   if(readerClosing)return;
@@ -1312,6 +1352,18 @@ async function closeBook(){
   try{
     if(document.fullscreenElement===$('reader')){try{await document.exitFullscreen()}catch(e){console.warn('Vollbild konnte nicht beendet werden',e)}}
     const bookId=active?.id;
+    const cover=shelfCover(bookId),pageImage=$('sheet').querySelector('img');
+    const from=pageImage?.getBoundingClientRect(),to=cover?.getBoundingClientRect();
+    const flight=coverFlight(cover?.src,from,to);
+    if(flight){
+      $('reader').animate([{opacity:1},{opacity:0}],{duration:300,fill:'forwards'});
+      await flight.animation.finished.catch(()=>{});
+      flight.image.remove();
+      for(const animation of $('reader').getAnimations?.()||[])animation.cancel();
+    }else if(motionAllowed()){
+      const fade=$('reader').animate([{opacity:1},{opacity:0}],{duration:180,fill:'forwards'});
+      await fade.finished.catch(()=>{});fade.cancel();
+    }
     active=null;$('reader').classList.remove('open');
     syncReaderSystemBars();
     setReaderControlsHidden(false);
@@ -1367,6 +1419,8 @@ function showPage(){
 }
 function change(n){if(!active||readerClosing)return;
   const previousPage=page;
+  const sheet=$('sheet'),viewport=$('viewport');
+  const oldImages=motionAllowed()?[...sheet.querySelectorAll('img')].map(img=>({src:img.src,rect:img.getBoundingClientRect()})):[];
   if(canSpread()){
     if(page===0 && n>0)page=1;
     else if(page===1 && n<0)page=0;
@@ -1374,9 +1428,14 @@ function change(n){if(!active||readerClosing)return;
   }else page=Math.max(0,Math.min(active.pages.length-1,page+n));
   if(page===previousPage)return;
   showPage();
-  if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&typeof $('sheet').animate==='function'){
-    for(const animation of $('sheet').getAnimations?.()||[])animation.cancel();
-    $('sheet').animate([{opacity:.65,transform:'translateX('+(n>0?6:-6)+'px)'},{opacity:1,transform:'translateX(0)'}],{duration:180,easing:'ease-out'});
+  for(const overlay of viewport.querySelectorAll('.turn-paper'))overlay.remove();
+  if(oldImages.length){
+    const bounds=viewport.getBoundingClientRect(),old=oldImages[n>0?oldImages.length-1:0];
+    const paper=document.createElement('img');paper.className='turn-paper';paper.src=old.src;paper.alt='';paper.setAttribute('aria-hidden','true');
+    Object.assign(paper.style,{left:old.rect.left-bounds.left+'px',top:old.rect.top-bounds.top+'px',width:old.rect.width+'px',height:old.rect.height+'px',transformOrigin:n>0?'left center':'right center'});
+    viewport.append(paper);
+    const flip=paper.animate([{transform:'perspective(1100px) rotateY(0deg)',opacity:1},{transform:'perspective(1100px) rotateY('+(n>0?-88:88)+'deg)',opacity:.95,offset:.72},{transform:'perspective(1100px) rotateY('+(n>0?-98:98)+'deg)',opacity:0}],{duration:300,easing:'ease-in-out',fill:'forwards'});
+    flip.finished.catch(()=>{}).finally(()=>paper.remove());
   }
 }
 window.addEventListener('resize',()=>{if(active)showPage()});
@@ -2049,7 +2108,13 @@ async function downloadOnlineBook(entry,options={}){
     book.status=entry.status??'released';
     book.catalogZipSha256=entry.zipSha256;
     await saveBook(book);
-    add(book);renderOnlineCatalog();if(options.open!==false)openBook(book.id);
+    add(book);renderOnlineCatalog();
+    $('importProgress').value=100;$('importPercent').textContent='100 %';
+    $('importStatus').textContent='✓ Buch erfolgreich gespeichert.';
+    const panel=$('importOverlay').querySelector('.import-panel');
+    if(motionAllowed()){const success=panel.animate([{transform:'scale(1)'},{transform:'scale(1.025)',offset:.45},{transform:'scale(1)'}],{duration:260,easing:'ease-out'});await success.finished.catch(()=>{})}
+    $('importOverlay').hidden=true;
+    if(options.open!==false)openBook(book.id);
   }catch(e){
     if(options.propagate)throw e;
     alert('Online-Buch konnte nicht geladen werden: '+e.message);
