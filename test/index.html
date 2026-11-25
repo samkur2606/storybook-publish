@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.6.0-test.197"><meta name="storybook-build-commit" content="de4197b3af463dccff7d09b40347feff7a20be40"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.6.0-test.198"><meta name="storybook-build-commit" content="c311532f3612ac8476c8079aa1da312cf1e82e64"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -592,6 +592,15 @@ html.reader-active,body.reader-active{
 @media(max-width:280px){#shelfTools button,#shelfTools #quickAppMode{width:44px}}
 #modeTransition{position:fixed;inset:0;z-index:2147483647;background:#f8f2e7;pointer-events:auto}
 #modeTransition[hidden]{display:none}
+/* Native cross-document snapshots keep both shelves together without a staging screen. */
+@view-transition{navigation:auto}
+::view-transition-group(root){animation-duration:420ms;animation-timing-function:cubic-bezier(.32,0,.24,1)}
+::view-transition-old(root),::view-transition-new(root){animation-duration:420ms;animation-timing-function:cubic-bezier(.32,0,.24,1);animation-fill-mode:both;mix-blend-mode:normal}
+html[data-mode-card="true"]::view-transition-old(root){animation-name:modeCardBack;z-index:1}
+html[data-mode-card="true"]::view-transition-new(root){animation-name:modeCardFront;z-index:2}
+@keyframes modeCardBack{from{transform:none;opacity:1}to{transform:scale(.94);opacity:.65}}
+@keyframes modeCardFront{from{transform:translateX(var(--mode-card-direction,100%)) scale(.97);border-radius:18px;box-shadow:0 0 24px #50382430}to{transform:none;border-radius:0;box-shadow:none}}
+@media(prefers-reduced-motion:reduce){@view-transition{navigation:none}::view-transition-group(root),::view-transition-old(root),::view-transition-new(root){animation:none!important}}
 @media(prefers-reduced-motion:reduce){#modeTransition{display:none!important}}
 .shelf-tool-divider{width:1px;height:26px;background:#d8c4a5;flex:none}
 #shelfDock:is([data-mode="selection"],[data-mode="filter"],[data-mode="sort"]) #shelfTools{opacity:0;transform:translateY(8px);pointer-events:none}
@@ -1173,8 +1182,33 @@ $('confirmHideTestMode').onclick=async()=>{
   $('openTestUnlock').focus();
 };
 let modeSwitchPending=false,modeTransitionAnimation=null;
+let nativeModeTransition=false;
+function setModeCard(mode){
+  document.documentElement.dataset.modeCard='true';
+  document.documentElement.style.setProperty('--mode-card-direction',mode==='test'?'100%':'-100%');
+}
+function resetModeCard(){
+  delete document.documentElement.dataset.modeCard;
+  document.documentElement.style.removeProperty('--mode-card-direction');
+}
+addEventListener('pageswap',event=>{
+  if(!event.viewTransition)return;
+  if(!nativeModeTransition){event.viewTransition.skipTransition();return}
+  event.viewTransition.finished.catch(()=>{}).finally(resetModeCard);
+});
+addEventListener('pagereveal',event=>{
+  if(!event.viewTransition)return;
+  let marker;
+  try{marker=JSON.parse(sessionStorage.getItem(MODE_TRANSITION_KEY)||'null')}catch{}
+  if(!marker||!marker.native||marker.mode!==(APP_IS_TEST?'test':'production')||Math.abs(Date.now()-marker.at)>15000||!isTestModeUnlocked()||!motionAllowed()){
+    event.viewTransition.skipTransition();return;
+  }
+  setModeCard(marker.mode);
+  event.viewTransition.finished.catch(()=>{}).finally(resetModeCard);
+});
 function clearModeTransition(){
   modeTransitionAnimation?.cancel();modeTransitionAnimation=null;
+  nativeModeTransition=false;resetModeCard();
   $('modeTransition').hidden=true;
   modeSwitchPending=false;
   $('quickAppMode').disabled=false;
@@ -1183,6 +1217,7 @@ function showModeArrival(){
   let marker;
   try{const raw=sessionStorage.getItem(MODE_TRANSITION_KEY);sessionStorage.removeItem(MODE_TRANSITION_KEY);marker=JSON.parse(raw||'null')}catch{}
   if(!marker||marker.mode!==(APP_IS_TEST?'test':'production')||Date.now()-marker.at>15000||Date.now()<marker.at||!isTestModeUnlocked()||!motionAllowed())return;
+  if(marker.native)return;
   const overlay=$('modeTransition');
   overlay.hidden=false;
   modeSwitchPending=true;$('quickAppMode').disabled=true;
@@ -1195,12 +1230,18 @@ async function switchAppMode(mode,animated=false){
   const target=new URL(mode==='test'?'./test/':'./?mode=production',APP_BASE);
   if(animated&&isTestModeUnlocked()&&motionAllowed()){
     modeSwitchPending=true;$('quickAppMode').disabled=true;
+    nativeModeTransition='onpageswap' in window&&'onpagereveal' in window&&typeof CSSViewTransitionRule!=='undefined';
+    if(nativeModeTransition){
+      setModeCard(mode);
+      try{sessionStorage.setItem(MODE_TRANSITION_KEY,JSON.stringify({mode,at:Date.now(),native:true}))}catch{}
+    }else{
     const overlay=$('modeTransition');
     overlay.hidden=false;
     modeTransitionAnimation=overlay.animate([{opacity:0},{opacity:1}],{duration:140,easing:'ease-in-out',fill:'both'});
     await Promise.race([modeTransitionAnimation.finished.catch(()=>{}),new Promise(resolve=>setTimeout(resolve,220))]);
     if(!isTestModeUnlocked()){clearModeTransition();renderTestModeSettings();return}
     try{sessionStorage.setItem(MODE_TRANSITION_KEY,JSON.stringify({mode,at:Date.now()}))}catch{}
+    }
   }
   try{localStorage.setItem(APP_MODE_KEY,mode);location.assign(target.href)}
   catch{try{sessionStorage.removeItem(MODE_TRANSITION_KEY)}catch{}clearModeTransition();$('shelfFeedback').textContent='Moduswechsel nicht möglich.'}
