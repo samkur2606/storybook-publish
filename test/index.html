@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.6.0-test.193"><meta name="storybook-build-commit" content="54c9eb3f40662c746d3f9e2242ccc14730137c03"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.6.0-test.194"><meta name="storybook-build-commit" content="2766628fcd203652d43016df72e75c4d78060f42"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -1453,6 +1453,7 @@ document.addEventListener('fullscreenchange',onReaderFullscreenChange);
 document.addEventListener('webkitfullscreenchange',onReaderFullscreenChange);
 function shelfCover(id){return shelfCardMap().get(String(id))?.querySelector('.book-cover-wrap img')}
 const BOOK_CLOSE_DURATION=360,BOOK_CLOSE_EASING='cubic-bezier(.32,0,.24,1)';
+const BOOK_OPEN_DURATION=360,BOOK_OPEN_EASING=BOOK_CLOSE_EASING;
 function coverFlight(src,from,to){
   if(!motionAllowed()||!src||!from||!to||!from.width||!to.width||from.bottom<=0||from.top>=innerHeight||to.bottom<=0||to.top>=innerHeight)return null;
   const image=document.createElement('img');image.src=src;image.alt='';image.setAttribute('aria-hidden','true');
@@ -1482,7 +1483,7 @@ function openBook(id){
   if(!motionAllowed()||!target)return;
   const src=cover?.currentSrc||cover?.src;
   const bookAtOpen=active;
-  const fallback=()=>reader.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});
+  const fallback=()=>reader.animate([{opacity:0},{opacity:1}],{duration:240,easing:BOOK_OPEN_EASING});
   if(!src||!from||!from.width||!from.height){fallback();return}
   // Compute the final 9:16 cover rectangle from the viewport, not an undecoded image.
   const bounds=$('sheet').getBoundingClientRect();
@@ -1503,7 +1504,7 @@ function openBook(id){
   reader.style.willChange='opacity';
   requestAnimationFrame(()=>{
     if(active!==bookAtOpen||readerClosing||!target.isConnected){clear();return}
-    const timing={duration:300,easing:'cubic-bezier(.22,.8,.25,1)',fill:'both'};
+    const timing={duration:BOOK_OPEN_DURATION,easing:BOOK_OPEN_EASING,fill:'both'};
     const flight=layer.animate([{transform:initial},{transform:'translate3d(0,0,0) scale(1)'}],timing);
     const fade=reader.animate([{opacity:0},{opacity:1}],timing);
     flight.finished.catch(()=>{}).finally(()=>{
