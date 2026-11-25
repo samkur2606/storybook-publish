@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.6.0-test.196"><meta name="storybook-build-commit" content="277d4ae63f2ee9034a9d2cc1246943a84c4f8f54"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.6.0-test.197"><meta name="storybook-build-commit" content="de4197b3af463dccff7d09b40347feff7a20be40"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -590,12 +590,8 @@ html.reader-active,body.reader-active{
 @media(prefers-reduced-motion:reduce){#shelfTools #quickAppMode{transition:none}}
 #shelfTools #quickAppMode:focus-visible{outline:2px solid #b17c3f;outline-offset:-3px}
 @media(max-width:280px){#shelfTools button,#shelfTools #quickAppMode{width:44px}}
-#modeTransition{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;background:#f8f2e7;color:#624529;overflow:hidden;pointer-events:auto}
+#modeTransition{position:fixed;inset:0;z-index:2147483647;background:#f8f2e7;pointer-events:auto}
 #modeTransition[hidden]{display:none}
-#modeTransition .mode-transition-content{display:grid;justify-items:center;gap:12px;text-align:center;padding:24px}
-#modeTransition svg{width:52px;height:52px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-#modeTransition strong{font-size:21px;font-weight:650}
-#modeTransition small{font-size:13px;color:#796a56}
 @media(prefers-reduced-motion:reduce){#modeTransition{display:none!important}}
 .shelf-tool-divider{width:1px;height:26px;background:#d8c4a5;flex:none}
 #shelfDock:is([data-mode="selection"],[data-mode="filter"],[data-mode="sort"]) #shelfTools{opacity:0;transform:translateY(8px);pointer-events:none}
@@ -673,7 +669,7 @@ body>main.shelf-options-open{padding-bottom:max(var(--shelf-bottom),calc(250px +
   #settingsDialog .settings-section::details-content{transition:none!important}
 }
 </style></head><body>
-<div id="modeTransition" hidden role="status" aria-live="polite"><div class="mode-transition-content"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h15m-4-4 4 4-4 4M20 17H5m4-4-4 4 4 4"/></svg><strong id="modeTransitionTitle"></strong><small id="modeTransitionHint"></small></div></div>
+<div id="modeTransition" hidden aria-hidden="true"></div>
 <header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testBuildVersion" hidden></span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div id="shelfMetaRow" class="shelf-action-row"><div class="search-meta" id="searchMeta" aria-live="polite"></div></div></div><section id="shelfActions" aria-label="Bücher verwalten" hidden>
   <div id="shelfDock" aria-label="Werkzeuge">
@@ -1183,19 +1179,14 @@ function clearModeTransition(){
   modeSwitchPending=false;
   $('quickAppMode').disabled=false;
 }
-function modeTransitionText(mode,arriving){
-  $('modeTransitionTitle').textContent=mode==='test'?'Testmodus':'Produktion';
-  $('modeTransitionHint').textContent=arriving?'Mein Bücherregal':'Umgebung wird gewechselt …';
-}
 function showModeArrival(){
   let marker;
   try{const raw=sessionStorage.getItem(MODE_TRANSITION_KEY);sessionStorage.removeItem(MODE_TRANSITION_KEY);marker=JSON.parse(raw||'null')}catch{}
   if(!marker||marker.mode!==(APP_IS_TEST?'test':'production')||Date.now()-marker.at>15000||Date.now()<marker.at||!isTestModeUnlocked()||!motionAllowed())return;
   const overlay=$('modeTransition');
-  modeTransitionText(marker.mode,true);overlay.hidden=false;
-  const direction=APP_IS_TEST?-1:1;
+  overlay.hidden=false;
   modeSwitchPending=true;$('quickAppMode').disabled=true;
-  modeTransitionAnimation=overlay.animate([{transform:'translateX(0)'},{transform:'translateX('+(direction*100)+'%)'}],{duration:320,easing:'cubic-bezier(.32,0,.24,1)',fill:'both'});
+  modeTransitionAnimation=overlay.animate([{opacity:1},{opacity:0}],{duration:240,easing:'cubic-bezier(.22,.8,.25,1)',fill:'both'});
   modeTransitionAnimation.finished.catch(()=>{}).finally(clearModeTransition);
 }
 async function switchAppMode(mode,animated=false){
@@ -1204,10 +1195,10 @@ async function switchAppMode(mode,animated=false){
   const target=new URL(mode==='test'?'./test/':'./?mode=production',APP_BASE);
   if(animated&&isTestModeUnlocked()&&motionAllowed()){
     modeSwitchPending=true;$('quickAppMode').disabled=true;
-    const overlay=$('modeTransition'),direction=mode==='test'?1:-1;
-    modeTransitionText(mode,false);overlay.hidden=false;
-    modeTransitionAnimation=overlay.animate([{transform:'translateX('+(direction*100)+'%)'},{transform:'translateX(0)'}],{duration:320,easing:'cubic-bezier(.32,0,.24,1)',fill:'both'});
-    await Promise.race([modeTransitionAnimation.finished.catch(()=>{}),new Promise(resolve=>setTimeout(resolve,450))]);
+    const overlay=$('modeTransition');
+    overlay.hidden=false;
+    modeTransitionAnimation=overlay.animate([{opacity:0},{opacity:1}],{duration:140,easing:'ease-in-out',fill:'both'});
+    await Promise.race([modeTransitionAnimation.finished.catch(()=>{}),new Promise(resolve=>setTimeout(resolve,220))]);
     if(!isTestModeUnlocked()){clearModeTransition();renderTestModeSettings();return}
     try{sessionStorage.setItem(MODE_TRANSITION_KEY,JSON.stringify({mode,at:Date.now()}))}catch{}
   }
