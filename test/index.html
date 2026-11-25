@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.6.0-test.191"><meta name="storybook-build-commit" content="68e1130409b85a4c530efb6a7a4593b1fb607fc7"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.6.0-test.192"><meta name="storybook-build-commit" content="10ba65c7337b16f042a130a2fce61dbad0fb9aee"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -129,7 +129,19 @@ header h1{margin:0}.header-actions{display:flex;align-items:center;gap:9px}#sett
 #githubTokenCreationLink svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 #githubTokenCreationLink:active{background:#ead9c2;transform:scale(.98)}
 #githubTokenCreationLink:focus-visible{outline:2px solid #8b6038;outline-offset:2px}
-#settingsDialog #githubTokenCreation .github-token-hint{margin:0}
+#githubTokenCreation{gap:0}
+#githubTokenCreation .token-creation-row{display:flex;align-items:center;gap:8px}
+#githubTokenCreationLink{flex:1;min-width:0}
+#githubTokenCreationInfo{display:grid;place-items:center;flex:none;width:46px;height:46px;border:1px solid #d0b493;border-radius:50%;background:#fff8ed;color:#77543a;transition:background-color .18s ease,transform .18s ease}
+#githubTokenCreationInfo svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#githubTokenCreationInfo[aria-expanded="true"]{background:#ead9c2}
+#githubTokenCreationInfo:active{transform:scale(.96)}
+#githubTokenCreationInfo:focus-visible{outline:2px solid #8b6038;outline-offset:2px}
+#githubTokenCreationHelp{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .24s ease,opacity .18s ease}
+#githubTokenCreationHelp[data-open="true"]{grid-template-rows:1fr;opacity:1}
+#githubTokenCreationHelp>div{overflow:hidden;min-height:0}
+#settingsDialog #githubTokenCreation .github-token-hint{margin:10px 0 0}
+@media(prefers-reduced-motion:reduce){#githubTokenCreationHelp,#githubTokenCreationInfo{transition:none}#githubTokenCreationInfo:active{transform:none}}
 @media(prefers-reduced-motion:reduce){#githubTokenCreationLink{transition:none}#githubTokenCreationLink:active{transform:none}}
 
 #offlineSettings .offline-total{display:grid;gap:5px;padding:14px;background:#f0e2cb;border:1px solid #dec9ae;border-radius:12px;color:#503824}
@@ -741,8 +753,13 @@ body>main.shelf-options-open{padding-bottom:max(var(--shelf-bottom),calc(250px +
           <button id="githubRemove" class="github-remove" type="button">Gespeicherten Zugang entfernen</button>
         </div>
         <div id="githubTokenCreation" hidden>
-          <a id="githubTokenCreationLink" href="https://github.com/settings/personal-access-tokens/new?target_name=samkur2606&amp;contents=read&amp;name=Mein%20Buecherregal" target="_blank" rel="noopener noreferrer" aria-describedby="githubTokenCreationHint"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13 5h6v6m0-6-9 9m8-1v6H5V6h6"/></svg><span>Neuen GitHub-Token erstellen</span></a>
-          <p class="github-token-hint" id="githubTokenCreationHint">Öffnet GitHub in einem neuen Tab. Wähle unter „Only select repositories“ ausschließlich <strong>storybook-books</strong> und prüfe „Contents: Read-only“. Vergib einen individuellen Namen und ein Ablaufdatum. Der Token erlaubt das Lesen des privaten Repositorys; bereits heruntergeladene Kopien bleiben auch nach einem Widerruf erhalten.</p>
+          <div class="token-creation-row">
+            <a id="githubTokenCreationLink" href="https://github.com/settings/personal-access-tokens/new?target_name=samkur2606&amp;contents=read&amp;name=STORYBOOK%20-%20&amp;expires_in=none&amp;description=Read-only%20access%20to%20the%20Storybook%20library." target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13 5h6v6m0-6-9 9m8-1v6H5V6h6"/></svg><span>Neuen GitHub-Token erstellen</span></a>
+            <button id="githubTokenCreationInfo" type="button" aria-label="Informationen zur Token-Erstellung" aria-expanded="false" aria-controls="githubTokenCreationHelp"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg></button>
+          </div>
+          <div id="githubTokenCreationHelp" aria-hidden="true" inert><div>
+            <p class="github-token-hint">Ergänze den Namen nach <strong>STORYBOOK -</strong>. Wähle unter „Only select repositories“ ausschließlich <strong>storybook-books</strong> (nicht „All repositories“). Prüfe „Contents: Read-only“ und „No expiration“. Der Token bleibt bis zum Widerruf gültig. Bereits heruntergeladene Bücher bleiben danach verfügbar.</p>
+          </div></div>
         </div>
       </div>
     </details>
@@ -888,6 +905,16 @@ $('appInfo').addEventListener('toggle',()=>{if(!$('appInfo').open)resetAppLinkFe
 const expectedTestCodeHash=globalThis.storybookTestModeCodeHash;
 const hasTestCodeHash=/^[0-9a-f]{64}$/.test(expectedTestCodeHash);
 
+function setTokenCreationHelp(open){
+  const button=$('githubTokenCreationInfo'),panel=$('githubTokenCreationHelp');
+  button.setAttribute('aria-expanded',String(open));
+  panel.dataset.open=String(open);
+  panel.setAttribute('aria-hidden',String(!open));
+  panel.inert=!open;
+}
+$('githubTokenCreationInfo').addEventListener('click',()=>setTokenCreationHelp($('githubTokenCreationInfo').getAttribute('aria-expanded')!=='true'));
+$('githubSettings').addEventListener('toggle',()=>{if(!$('githubSettings').open)setTokenCreationHelp(false)});
+$('settingsDialog').addEventListener('close',()=>setTokenCreationHelp(false));
 function renderTestModeSettings(){
   const unlocked=isTestModeUnlocked();
   const environment=$('appEnvironment');
@@ -895,6 +922,7 @@ function renderTestModeSettings(){
   if(!unlocked)environment.open=false;
   $('openTestUnlock').hidden=unlocked;
   $('githubTokenCreation').hidden=!(APP_IS_TEST&&unlocked);
+  if($('githubTokenCreation').hidden)setTokenCreationHelp(false);
 }
 renderTestModeSettings();
 $('githubTokenCreationLink').addEventListener('click',event=>{
