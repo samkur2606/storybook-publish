@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.6.0-test.200"><meta name="storybook-build-commit" content="2dc485bd7349d909c3b2ff44e8bcf92cbddefaec"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.6.0-test.201"><meta name="storybook-build-commit" content="966e070517dfa31bf604c0789b3b0dbf4f7b53c1"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -580,6 +580,15 @@ html.reader-active,body.reader-active{
 #shelfDock[data-mode="sort"]{height:208px}
 #shelfTools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;justify-items:center;height:54px;padding-inline:8px;gap:0;transition:opacity .14s,transform .2s}
 #shelfDock[data-quick-mode="true"] #shelfTools{grid-template-columns:repeat(5,minmax(0,1fr))}
+/* The divider occupies the boundary of the third grid slot, not a separate slot. */
+#shelfTools::after{content:"";grid-column:3;grid-row:1;justify-self:end;align-self:center;width:1px;height:22px;background:#d8c4a5;opacity:.8;transform:translateX(.5px);pointer-events:none}
+#shelfTools>button{grid-row:1}
+#shelfTools>#shelfSort{grid-column:1}
+#shelfTools>#shelfFilter{grid-column:2}
+#shelfTools>#shelfToggle{grid-column:3}
+#shelfTools>#quickAppMode{grid-column:4}
+#shelfTools>#settingsBtn{grid-column:4}
+#shelfDock[data-quick-mode="true"] #shelfTools>#settingsBtn{grid-column:5}
 #shelfTools button,#shelfOptionsClose,#shelfSelection #shelfClose{display:grid;place-items:center;flex:none;width:48px;height:48px;min-height:44px;padding:0;border:0;background:transparent;border-radius:24px;color:#624529;box-shadow:none}
 #shelfTools button svg,#shelfOptionsClose svg,#shelfClose svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 #shelfTools button:disabled{opacity:.4}
