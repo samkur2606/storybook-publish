@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.6.0-test.195"><meta name="storybook-build-commit" content="79392309563a6c769d005c7af3861be3fdfa6fdf"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.6.0-test.196"><meta name="storybook-build-commit" content="277d4ae63f2ee9034a9d2cc1246943a84c4f8f54"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -585,9 +585,9 @@ html.reader-active,body.reader-active{
 #shelfTools .shelf-active-tool{background:#ecdbc1}
 #shelfDock[data-quick-mode="true"]:not([data-mode="selection"]):not([data-mode="filter"]):not([data-mode="sort"]){width:250px}
 #shelfTools #quickAppMode[hidden]{display:none}
-#shelfTools #quickAppMode{width:48px}
-#shelfTools #quickAppMode[data-target="test"]{color:#80562c}
-#shelfTools #quickAppMode[data-target="production"]{background:#ecdbc1}
+#shelfTools #quickAppMode{width:48px;transition:background-color .15s ease,transform .15s ease}
+#shelfTools #quickAppMode:active:not(:disabled){background:#ecdbc1}
+@media(prefers-reduced-motion:reduce){#shelfTools #quickAppMode{transition:none}}
 #shelfTools #quickAppMode:focus-visible{outline:2px solid #b17c3f;outline-offset:-3px}
 @media(max-width:280px){#shelfTools button,#shelfTools #quickAppMode{width:44px}}
 #modeTransition{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;background:#f8f2e7;color:#624529;overflow:hidden;pointer-events:auto}
