@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.6.0-test.198"><meta name="storybook-build-commit" content="c311532f3612ac8476c8079aa1da312cf1e82e64"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f2e7"><meta name="storybook-build-version" content="1.6.0-test.199"><meta name="storybook-build-commit" content="2d971d64637cf56466daa5ea70461511418229c2"><title>Mein Bücherregal</title><link rel="apple-touch-icon" sizes="192x192" href="./icons/book-192.png?v=cream-4"><link rel="icon" type="image/png" sizes="192x192" href="./icons/book-192.png?v=cream-4"><script>
 /* Preserve the installed production entry while honoring the last selected mode. */
 const APP_MODE_KEY='storybook.app.mode.v1';
 const TEST_MODE_UNLOCK_KEY='storybook.app.test-unlocked.v1';
@@ -590,18 +590,11 @@ html.reader-active,body.reader-active{
 @media(prefers-reduced-motion:reduce){#shelfTools #quickAppMode{transition:none}}
 #shelfTools #quickAppMode:focus-visible{outline:2px solid #b17c3f;outline-offset:-3px}
 @media(max-width:280px){#shelfTools button,#shelfTools #quickAppMode{width:44px}}
-#modeTransition{position:fixed;inset:0;z-index:2147483647;background:#f8f2e7;pointer-events:auto}
-#modeTransition[hidden]{display:none}
-/* Native cross-document snapshots keep both shelves together without a staging screen. */
-@view-transition{navigation:auto}
-::view-transition-group(root){animation-duration:420ms;animation-timing-function:cubic-bezier(.32,0,.24,1)}
-::view-transition-old(root),::view-transition-new(root){animation-duration:420ms;animation-timing-function:cubic-bezier(.32,0,.24,1);animation-fill-mode:both;mix-blend-mode:normal}
-html[data-mode-card="true"]::view-transition-old(root){animation-name:modeCardBack;z-index:1}
-html[data-mode-card="true"]::view-transition-new(root){animation-name:modeCardFront;z-index:2}
-@keyframes modeCardBack{from{transform:none;opacity:1}to{transform:scale(.94);opacity:.65}}
-@keyframes modeCardFront{from{transform:translateX(var(--mode-card-direction,100%)) scale(.97);border-radius:18px;box-shadow:0 0 24px #50382430}to{transform:none;border-radius:0;box-shadow:none}}
-@media(prefers-reduced-motion:reduce){@view-transition{navigation:none}::view-transition-group(root),::view-transition-old(root),::view-transition-new(root){animation:none!important}}
-@media(prefers-reduced-motion:reduce){#modeTransition{display:none!important}}
+/* Animate the actual view rather than depending on cross-document snapshots. */
+html.mode-switching{overflow:hidden}
+html.mode-switching body{pointer-events:none}
+html.mode-switching #settingsDialog{pointer-events:none}
+
 .shelf-tool-divider{width:1px;height:26px;background:#d8c4a5;flex:none}
 #shelfDock:is([data-mode="selection"],[data-mode="filter"],[data-mode="sort"]) #shelfTools{opacity:0;transform:translateY(8px);pointer-events:none}
 #shelfSelection,#shelfOptions{position:absolute;inset:7px 9px;width:auto;max-width:none;transform:translateY(10px);background:transparent;border:0;border-radius:0;box-shadow:none;padding:0;opacity:0;pointer-events:none;transition:opacity .15s,transform .25s;display:grid;align-content:start;gap:4px}
@@ -678,7 +671,7 @@ body>main.shelf-options-open{padding-bottom:max(var(--shelf-bottom),calc(250px +
   #settingsDialog .settings-section::details-content{transition:none!important}
 }
 </style></head><body>
-<div id="modeTransition" hidden aria-hidden="true"></div>
+
 <header><div class="header-title"><h1><img class="brand-icon" src="./icons/book.svg?v=cream-3" alt="" aria-hidden="true">Mein Bücherregal</h1><div id="testModeBadges" hidden><span class="test-badge">Testmodus</span><span class="test-badge" id="testBuildVersion" hidden></span><span class="test-badge" id="testCatalogBranch" hidden></span></div></div></header>
 <main class="library-loading"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Bücher suchen …" autocomplete="off" spellcheck="false" aria-label="Bücher nach Titel suchen"><button class="clear-search" id="clearSearch" aria-label="Suche löschen" title="Suche löschen" hidden>×</button></div><div id="shelfMetaRow" class="shelf-action-row"><div class="search-meta" id="searchMeta" aria-live="polite"></div></div></div><section id="shelfActions" aria-label="Bücher verwalten" hidden>
   <div id="shelfDock" aria-label="Werkzeuge">
@@ -1182,73 +1175,60 @@ $('confirmHideTestMode').onclick=async()=>{
   $('openTestUnlock').focus();
 };
 let modeSwitchPending=false,modeTransitionAnimation=null;
-let nativeModeTransition=false;
-function setModeCard(mode){
-  document.documentElement.dataset.modeCard='true';
-  document.documentElement.style.setProperty('--mode-card-direction',mode==='test'?'100%':'-100%');
-}
-function resetModeCard(){
-  delete document.documentElement.dataset.modeCard;
-  document.documentElement.style.removeProperty('--mode-card-direction');
-}
-addEventListener('pageswap',event=>{
-  if(!event.viewTransition)return;
-  if(!nativeModeTransition){event.viewTransition.skipTransition();return}
-  event.viewTransition.finished.catch(()=>{}).finally(resetModeCard);
-});
-addEventListener('pagereveal',event=>{
-  if(!event.viewTransition)return;
-  let marker;
-  try{marker=JSON.parse(sessionStorage.getItem(MODE_TRANSITION_KEY)||'null')}catch{}
-  if(!marker||!marker.native||marker.mode!==(APP_IS_TEST?'test':'production')||Math.abs(Date.now()-marker.at)>15000||!isTestModeUnlocked()||!motionAllowed()){
-    event.viewTransition.skipTransition();return;
-  }
-  setModeCard(marker.mode);
-  event.viewTransition.finished.catch(()=>{}).finally(resetModeCard);
-});
+const MODE_CARD_OUT=260,MODE_CARD_IN=360,MODE_CARD_EASING='cubic-bezier(.32,0,.24,1)';
 function clearModeTransition(){
-  modeTransitionAnimation?.cancel();modeTransitionAnimation=null;
-  nativeModeTransition=false;resetModeCard();
-  $('modeTransition').hidden=true;
+  const animation=modeTransitionAnimation;
+  modeTransitionAnimation=null;animation?.cancel();
+  document.documentElement.classList.remove('mode-switching');
   modeSwitchPending=false;
-  $('quickAppMode').disabled=false;
+  $('quickAppMode').disabled=shelfBusy||importingBooks;
+  $('modeProduction').disabled=false;$('modeTest').disabled=false;
+}
+function lockModeTransition(){
+  modeSwitchPending=true;
+  document.documentElement.classList.add('mode-switching');
+  $('quickAppMode').disabled=true;
+  $('modeProduction').disabled=true;$('modeTest').disabled=true;
+}
+function animateModeCard(surface,frames,duration){
+  // Individual translate/scale are composited and coexist with Settings' transform.
+  return surface.animate(frames,{duration,easing:MODE_CARD_EASING,fill:'both'});
 }
 function showModeArrival(){
   let marker;
   try{const raw=sessionStorage.getItem(MODE_TRANSITION_KEY);sessionStorage.removeItem(MODE_TRANSITION_KEY);marker=JSON.parse(raw||'null')}catch{}
-  if(!marker||marker.mode!==(APP_IS_TEST?'test':'production')||Date.now()-marker.at>15000||Date.now()<marker.at||!isTestModeUnlocked()||!motionAllowed())return;
-  if(marker.native)return;
-  const overlay=$('modeTransition');
-  overlay.hidden=false;
-  modeSwitchPending=true;$('quickAppMode').disabled=true;
-  modeTransitionAnimation=overlay.animate([{opacity:1},{opacity:0}],{duration:240,easing:'cubic-bezier(.22,.8,.25,1)',fill:'both'});
-  modeTransitionAnimation.finished.catch(()=>{}).finally(clearModeTransition);
+  if(!marker||marker.mode!==(APP_IS_TEST?'test':'production')||Math.abs(Date.now()-marker.at)>15000||!isTestModeUnlocked()||!motionAllowed())return;
+  lockModeTransition();
+  const direction=APP_IS_TEST?1:-1;
+  try{
+    modeTransitionAnimation=animateModeCard(document.documentElement,[{translate:(direction*24)+'vw 0',scale:'.96',opacity:.85},{translate:'0 0',scale:'1',opacity:1}],MODE_CARD_IN);
+    const animation=modeTransitionAnimation;
+    animation.finished.catch(()=>{}).finally(()=>{if(modeTransitionAnimation===animation)clearModeTransition()});
+  }catch{clearModeTransition()}
 }
-async function switchAppMode(mode,animated=false){
+async function switchAppMode(mode,animated=true){
   if(modeSwitchPending||(mode==='test'&&!isTestModeUnlocked()))return;
   if(mode===(APP_IS_TEST?'test':'production'))return;
+  if(shelfBusy||importingBooks)return;
   const target=new URL(mode==='test'?'./test/':'./?mode=production',APP_BASE);
+  lockModeTransition();
   if(animated&&isTestModeUnlocked()&&motionAllowed()){
-    modeSwitchPending=true;$('quickAppMode').disabled=true;
-    nativeModeTransition='onpageswap' in window&&'onpagereveal' in window&&typeof CSSViewTransitionRule!=='undefined';
-    if(nativeModeTransition){
-      setModeCard(mode);
-      try{sessionStorage.setItem(MODE_TRANSITION_KEY,JSON.stringify({mode,at:Date.now(),native:true}))}catch{}
-    }else{
-    const overlay=$('modeTransition');
-    overlay.hidden=false;
-    modeTransitionAnimation=overlay.animate([{opacity:0},{opacity:1}],{duration:140,easing:'ease-in-out',fill:'both'});
-    await Promise.race([modeTransitionAnimation.finished.catch(()=>{}),new Promise(resolve=>setTimeout(resolve,220))]);
+    const direction=mode==='test'?1:-1;
+    // A modal dialog is a top-layer surface; animate it directly when it initiated the switch.
+    const surface=$('settingsDialog').open?$('settingsDialog'):document.documentElement;
+    try{
+      modeTransitionAnimation=animateModeCard(surface,[{translate:'0 0',scale:'1',opacity:1},{translate:(-direction*18)+'vw 0',scale:'.94',opacity:.85}],MODE_CARD_OUT);
+      await Promise.race([modeTransitionAnimation.finished.catch(()=>{}),new Promise(resolve=>setTimeout(resolve,MODE_CARD_OUT+100))]);
+    }catch{}
     if(!isTestModeUnlocked()){clearModeTransition();renderTestModeSettings();return}
     try{sessionStorage.setItem(MODE_TRANSITION_KEY,JSON.stringify({mode,at:Date.now()}))}catch{}
-    }
   }
   try{localStorage.setItem(APP_MODE_KEY,mode);location.assign(target.href)}
   catch{try{sessionStorage.removeItem(MODE_TRANSITION_KEY)}catch{}clearModeTransition();$('shelfFeedback').textContent='Moduswechsel nicht möglich.'}
 }
 $('quickAppMode').onclick=()=>{
   if(!isTestModeUnlocked()||shelfBusy||importingBooks||shelfSelecting||shelfPanel||active)return;
-  switchAppMode(APP_IS_TEST?'production':'test',true);
+  switchAppMode(APP_IS_TEST?'production':'test');
 };
 addEventListener('pageshow',event=>{
   if(event.persisted){clearModeTransition();renderTestModeSettings()}
