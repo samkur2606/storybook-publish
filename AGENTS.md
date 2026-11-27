@@ -8,3 +8,8 @@ This public repository hosts the published PWA. Maintain the application in its 
 - When GitHub MCP is unavailable or lacks the requested operation, use the authenticated GitHub CLI (`gh`) for the authorized task. Prefer the matching `gh` subcommand and use `gh api` when needed. Target the intended repository explicitly. Switching tools needs no separate approval.
 - Honor permission denials, branch protections and sandbox controls with either tool. If a write has an uncertain outcome, check GitHub before retrying. If the CLI cannot complete the task, report the specific blocker.
 - Perform GitHub writes only when authorized by the project owner. Use local `git` for working-tree operations.
+
+## Global AI instructions (Work and Codex)
+
+- Before starting an agentic task, retrieve the project owner's current Global AI Instructions from the privately configured Notion source once per task or session, and apply them alongside repository-specific instructions. Reuse the loaded rules unless they change. Do not publish private Notion page identifiers or credentials in this public repository.
+- If the private source is not configured or retrieval fails, briefly report the limitation and use conservative resource defaults. Never bypass access controls or omit mandatory verification. This requirement applies to agentic Work and Codex tasks, not regular chats.
